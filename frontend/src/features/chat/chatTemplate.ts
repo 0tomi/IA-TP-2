@@ -1,4 +1,1045 @@
 export const chatTemplate = {
-  styleText: ":root {\n  --bg: oklch(98.4% 0.01 330);\n  --surface: oklch(100% 0 0 / 0.84);\n  --surface-strong: oklch(99% 0.014 330 / 0.92);\n  --fg: oklch(21% 0.02 310);\n  --muted: oklch(52% 0.02 315);\n  --border: oklch(89% 0.02 320);\n  --accent: oklch(67% 0.18 344);\n  --accent-2: oklch(70% 0.12 285);\n  --accent-soft: oklch(67% 0.18 344 / 0.12);\n  --success: oklch(69% 0.17 152);\n  --shadow-card: 0 1px 3px oklch(0% 0 0 / 0.04), 0 10px 26px oklch(338 0.04 0 / 0.08);\n  --shadow-float: 0 14px 38px oklch(328 0.06 0 / 0.12);\n  --shadow-glow-strong: 0 0 0 1.5px oklch(67% 0.18 344 / 0.34), 0 10px 34px oklch(67% 0.18 344 / 0.24);\n  --font-display: 'Trebuchet MS', 'Segoe UI', sans-serif;\n  --font-body: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;\n  --font-mono: 'Consolas', 'Courier New', monospace;\n  --radius-sm: 4px;\n  --radius-md: 12px;\n  --radius-lg: 20px;\n  --radius-xl: 28px;\n}\n\n:root[data-theme='dark'] {\n  --bg: oklch(18% 0.03 295);\n  --surface: oklch(24% 0.03 300 / 0.9);\n  --surface-strong: oklch(28% 0.04 300 / 0.96);\n  --fg: oklch(95% 0.01 320);\n  --muted: oklch(78% 0.02 315);\n  --border: oklch(36% 0.04 300);\n  --accent: oklch(74% 0.2 332);\n  --accent-2: oklch(72% 0.15 290);\n  --accent-soft: oklch(74% 0.2 332 / 0.18);\n  --success: oklch(77% 0.17 156);\n  --shadow-card: 0 1px 2px oklch(0% 0 0 / 0.34), 0 14px 34px oklch(0% 0 0 / 0.32);\n  --shadow-float: 0 18px 46px oklch(0% 0 0 / 0.42);\n  --shadow-glow-strong: 0 0 0 1.5px oklch(74% 0.2 332 / 0.4), 0 14px 36px oklch(74% 0.2 332 / 0.22);\n}\n\n*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }\n\nhtml {\n  background: var(--bg);\n  color: var(--fg);\n  font-family: var(--font-body);\n  font-size: 15px;\n  line-height: 1.6;\n  -webkit-font-smoothing: antialiased;\n}\n\nbody {\n  min-height: 100dvh;\n  overflow: hidden;\n  background:\n    radial-gradient(circle at top left, oklch(67% 0.18 344 / 0.12), transparent 26%),\n    radial-gradient(circle at bottom right, oklch(70% 0.12 285 / 0.14), transparent 28%),\n    var(--bg);\n  color: var(--fg);\n}\n\nbody::before {\n  content: '';\n  position: fixed;\n  inset: 0;\n  background-image: url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\");\n  opacity: 0.03;\n  pointer-events: none;\n}\n\nbody::after {\n  content: '';\n  position: fixed;\n  inset: 0;\n  background-image:\n    linear-gradient(var(--border) 1px, transparent 1px),\n    linear-gradient(90deg, var(--border) 1px, transparent 1px);\n  background-size: 60px 60px;\n  opacity: 0.14;\n  pointer-events: none;\n}\n\nbody.chat-page-react #root {\n  height: 100dvh;\n  display: flex;\n  flex-direction: column;\n  overflow: hidden;\n  position: relative;\n}\n\n::selection {\n  background: var(--accent-soft);\n  color: var(--fg);\n}\n\n::-webkit-scrollbar { width: 7px; }\n::-webkit-scrollbar-track { background: transparent; }\n::-webkit-scrollbar-thumb {\n  background: oklch(52% 0.02 315 / 0.3);\n  border-radius: 999px;\n}\n\n.header {\n  position: relative;\n  z-index: 12;\n  flex-shrink: 0;\n  display: grid;\n  grid-template-columns: 1fr auto 1fr;\n  align-items: center;\n  gap: 14px;\n  padding: 16px 24px;\n  border-bottom: 1px solid var(--border);\n  background: color-mix(in oklab, var(--bg) 76%, transparent);\n  backdrop-filter: blur(22px) saturate(180%);\n}\n\n.header::after {\n  content: '';\n  position: absolute;\n  left: 24px;\n  right: 24px;\n  bottom: 0;\n  height: 1px;\n  background: linear-gradient(90deg, transparent, var(--accent-soft), transparent);\n}\n\n.header-wordmark {\n  display: flex;\n  align-items: center;\n  gap: 10px;\n}\n\n.header-wordmark .dot {\n  width: 10px;\n  height: 10px;\n  border-radius: 50%;\n  background: linear-gradient(135deg, var(--accent), var(--accent-2));\n  box-shadow: 0 0 0 0 oklch(67% 0.18 344 / 0.4);\n  animation: pulse-dot 2.4s ease-in-out infinite;\n}\n\n.header-wordmark .text {\n  display: flex;\n  flex-direction: column;\n  gap: 1px;\n}\n\n.header-wordmark strong {\n  font-family: var(--font-mono);\n  font-size: 13px;\n  letter-spacing: 0.02em;\n}\n\n.header-wordmark span {\n  color: var(--muted);\n  font-size: 11px;\n  letter-spacing: 0.04em;\n  text-transform: uppercase;\n}\n\n.header-center {\n  display: flex;\n  justify-content: center;\n}\n\n.header-nav-btn {\n  min-height: 40px;\n  padding: 0 18px;\n  border-radius: 999px;\n  border: 1px solid color-mix(in oklab, var(--accent) 24%, var(--border));\n  background: color-mix(in oklab, var(--surface-strong) 92%, var(--accent) 8%);\n  color: var(--fg);\n  font-family: var(--font-mono);\n  font-size: 12px;\n  letter-spacing: 0.04em;\n  text-transform: uppercase;\n  display: inline-flex;\n  align-items: center;\n  gap: 8px;\n  cursor: pointer;\n  box-shadow: var(--shadow-card);\n  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;\n}\n\n.header-nav-btn:hover {\n  transform: translateY(-1px);\n  box-shadow: var(--shadow-float);\n}\n\n.header-meta {\n  display: flex;\n  justify-content: flex-end;\n  align-items: center;\n  gap: 10px;\n}\n\n.header-badge {\n  display: inline-flex;\n  align-items: center;\n  gap: 8px;\n  padding: 7px 12px;\n  border-radius: 999px;\n  border: 1px solid color-mix(in oklab, var(--accent) 16%, var(--border));\n  background: color-mix(in oklab, var(--surface) 92%, transparent);\n  color: var(--muted);\n  font-family: var(--font-mono);\n  font-size: 11px;\n  letter-spacing: 0.04em;\n  text-transform: uppercase;\n}\n\n.header-badge .status-dot {\n  width: 8px;\n  height: 8px;\n  border-radius: 50%;\n  background: linear-gradient(135deg, var(--accent), var(--accent-2));\n}\n\n.header-actions {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n\n.icon-btn {\n  min-width: 38px;\n  height: 38px;\n  padding: 0 12px;\n  border-radius: 14px;\n  border: 1px solid transparent;\n  background: transparent;\n  color: var(--muted);\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  gap: 8px;\n  cursor: pointer;\n  transition: all 0.2s ease;\n}\n\n.icon-btn:hover {\n  color: var(--fg);\n  border-color: var(--border);\n  background: color-mix(in oklab, var(--surface) 92%, transparent);\n}\n\n.icon-btn svg {\n  width: 16px;\n  height: 16px;\n}\n\n.theme-btn-label {\n  font-family: var(--font-mono);\n  font-size: 11px;\n  letter-spacing: 0.04em;\n  text-transform: uppercase;\n}\n\n.chat-shell {\n  flex: 1;\n  min-height: 0;\n  display: flex;\n  flex-direction: column;\n  position: relative;\n}\n\n.chat-area {\n  flex: 1;\n  min-height: 0;\n  overflow-y: auto;\n  padding: 30px 24px 20px;\n  scroll-behavior: smooth;\n  position: relative;\n}\n\n.msg-center-wrap {\n  width: 100%;\n  max-width: 760px;\n  margin: 0 auto;\n  display: flex;\n  flex-direction: column;\n  gap: 10px;\n}\n\n.msg-row,\n.typing-row {\n  display: flex;\n  align-items: flex-end;\n  gap: 12px;\n  animation: msg-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1);\n}\n\n.msg-row.user { flex-direction: row-reverse; }\n\n@keyframes msg-enter {\n  from { opacity: 0; transform: translateY(14px) scale(0.985); }\n  to { opacity: 1; transform: translateY(0) scale(1); }\n}\n\n.msg-avatar {\n  width: 34px;\n  height: 34px;\n  border-radius: 50%;\n  flex-shrink: 0;\n  overflow: hidden;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  font-family: var(--font-mono);\n  font-size: 11px;\n  font-weight: 700;\n}\n\n.msg-avatar img {\n  width: 100%;\n  height: 100%;\n  object-fit: cover;\n}\n\n.msg-row.bot .msg-avatar {\n  background: color-mix(in oklab, var(--accent) 12%, transparent);\n  border: 1px solid color-mix(in oklab, var(--accent) 30%, transparent);\n  box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 8%, transparent);\n}\n\n.msg-row.user .msg-avatar {\n  background: color-mix(in oklab, var(--fg) 10%, transparent);\n  border: 1px solid var(--border);\n}\n\n.msg-content {\n  max-width: min(540px, 82%);\n}\n\n.msg-card,\n.typing-indicator {\n  position: relative;\n  padding: 14px 18px;\n  border-radius: var(--radius-lg);\n  box-shadow: var(--shadow-card);\n  backdrop-filter: blur(10px);\n}\n\n.msg-row.bot .msg-card,\n.typing-indicator {\n  background: var(--surface);\n  border: 1px solid var(--border);\n  border-bottom-left-radius: var(--radius-sm);\n}\n\n.msg-row.user .msg-card {\n  background: linear-gradient(135deg, color-mix(in oklab, var(--accent) 76%, var(--accent-2)), var(--accent));\n  color: white;\n  border-bottom-right-radius: var(--radius-sm);\n}\n\n.msg-row.bot .msg-card::before,\n.typing-indicator::before {\n  content: '';\n  position: absolute;\n  left: 0;\n  top: 0;\n  bottom: 0;\n  width: 3px;\n  border-radius: 3px 0 0 3px;\n  background: linear-gradient(180deg, var(--accent), var(--accent-2));\n}\n\n.msg-notch {\n  position: absolute;\n  width: 14px;\n  height: 14px;\n  bottom: 14px;\n  transform: rotate(45deg);\n  border-radius: 3px;\n}\n\n.msg-row.bot .msg-notch {\n  left: -7px;\n  background: var(--surface);\n  border-left: 1px solid var(--border);\n  border-bottom: 1px solid var(--border);\n}\n\n.msg-row.user .msg-notch {\n  right: -7px;\n  background: color-mix(in oklab, var(--accent) 76%, var(--accent-2));\n}\n\n.msg-card code {\n  padding: 1px 6px;\n  border-radius: 6px;\n  font-family: var(--font-mono);\n  font-size: 12px;\n}\n\n.msg-row.bot .msg-card code {\n  background: color-mix(in oklab, var(--accent) 12%, transparent);\n  color: var(--accent);\n}\n\n.msg-row.user .msg-card code {\n  background: oklch(100% 0 0 / 0.14);\n}\n\n.msg-footer {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  margin-top: 6px;\n  padding: 0 4px;\n}\n\n.msg-row.user .msg-footer { justify-content: flex-end; }\n\n.msg-time,\n.msg-status,\n.shortcut-hint,\n.char-count {\n  font-family: var(--font-mono);\n  font-size: 10px;\n  color: var(--muted);\n  letter-spacing: 0.04em;\n}\n\n.msg-status.sent { color: color-mix(in oklab, var(--accent) 70%, white); }\n.msg-status svg { width: 12px; height: 12px; }\n\n.typing-dot {\n  width: 7px;\n  height: 7px;\n  border-radius: 50%;\n  background: var(--muted);\n  animation: typing-bounce 1.4s ease-in-out infinite;\n}\n\n.typing-dot:nth-child(2) { animation-delay: 0.2s; }\n.typing-dot:nth-child(3) { animation-delay: 0.4s; }\n\n@keyframes typing-bounce {\n  0%, 60%, 100% { transform: translateY(0); opacity: 0.55; }\n  30% { transform: translateY(-6px); opacity: 1; }\n}\n\n.welcome {\n  min-height: calc(100% - 12px);\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: center;\n  text-align: center;\n  gap: 18px;\n  padding: 30px 24px;\n}\n\n.welcome-icon {\n  width: 94px;\n  height: 94px;\n  border-radius: 26px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  background: color-mix(in oklab, var(--accent) 10%, transparent);\n  border: 1px solid color-mix(in oklab, var(--accent) 26%, transparent);\n  box-shadow: var(--shadow-float);\n}\n\n.welcome-icon img {\n  width: 72px;\n  height: 72px;\n  object-fit: contain;\n}\n\n.welcome h2 {\n  font-family: var(--font-display);\n  font-size: clamp(28px, 4vw, 36px);\n  letter-spacing: -0.04em;\n}\n\n.welcome p {\n  max-width: 520px;\n  color: var(--muted);\n  font-size: 15px;\n}\n\n.suggestion-chips {\n  display: flex;\n  flex-wrap: wrap;\n  justify-content: center;\n  gap: 10px;\n}\n\n.chip {\n  min-height: 38px;\n  padding: 0 16px;\n  border-radius: 999px;\n  border: 1px solid var(--border);\n  background: var(--surface-strong);\n  color: var(--fg);\n  cursor: pointer;\n  box-shadow: var(--shadow-card);\n  transition: transform 0.2s ease, border-color 0.2s ease;\n}\n\n.chip:hover {\n  transform: translateY(-1px);\n  border-color: color-mix(in oklab, var(--accent) 36%, var(--border));\n}\n\n.input-area {\n  flex-shrink: 0;\n  padding: 12px 24px 18px;\n  background: linear-gradient(to top, color-mix(in oklab, var(--bg) 92%, transparent) 70%, transparent 100%);\n  backdrop-filter: blur(18px);\n}\n\n.input-wrapper {\n  max-width: 760px;\n  margin: 0 auto;\n  display: flex;\n  flex-direction: column;\n  gap: 10px;\n}\n\n.input-card {\n  display: flex;\n  align-items: flex-end;\n  gap: 10px;\n  padding: 12px 12px 12px 18px;\n  border-radius: var(--radius-xl);\n  border: 1.5px solid var(--border);\n  background: var(--surface-strong);\n  box-shadow: var(--shadow-card);\n  transition: border-color 0.2s ease, box-shadow 0.2s ease;\n}\n\n.input-card:focus-within {\n  border-color: color-mix(in oklab, var(--accent) 44%, var(--border));\n  box-shadow: var(--shadow-glow-strong);\n}\n\n.msg-input {\n  flex: 1;\n  min-height: 26px;\n  max-height: 140px;\n  border: none;\n  outline: none;\n  resize: none;\n  background: transparent;\n  color: var(--fg);\n  font: inherit;\n  overflow-y: auto;\n}\n\n.msg-input::placeholder { color: var(--muted); }\n\n.send-btn {\n  width: 42px;\n  height: 42px;\n  border: none;\n  border-radius: 16px;\n  background: linear-gradient(135deg, var(--accent), var(--accent-2));\n  color: white;\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  cursor: pointer;\n  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;\n}\n\n.send-btn:hover {\n  transform: scale(1.04);\n  box-shadow: 0 12px 24px color-mix(in oklab, var(--accent) 28%, transparent);\n}\n\n.send-btn:disabled {\n  opacity: 0.45;\n  cursor: not-allowed;\n  transform: none;\n  box-shadow: none;\n}\n\n.send-btn svg { width: 18px; height: 18px; }\n\n.input-meta {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 12px;\n  min-height: 16px;\n  padding: 0 6px;\n}\n\n.char-count { opacity: 0; transition: opacity 0.2s ease; }\n.char-count.visible { opacity: 1; }\n.char-count.warning { color: oklch(74% 0.17 34); }\n\n.shortcut-hint kbd {\n  border: 1px solid var(--border);\n  border-radius: 6px;\n  padding: 1px 5px;\n  background: var(--surface);\n}\n\n.code-block {\n  margin-top: 12px;\n  border-radius: var(--radius-md);\n  overflow: hidden;\n  border: 1px solid var(--border);\n}\n\n.code-block-header {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  padding: 8px 12px;\n  background: color-mix(in oklab, var(--surface) 94%, transparent);\n  border-bottom: 1px solid var(--border);\n}\n\n.code-block pre {\n  padding: 14px;\n  overflow-x: auto;\n  background: var(--surface);\n  color: var(--fg);\n  font-family: var(--font-mono);\n  font-size: 12.5px;\n  line-height: 1.7;\n}\n\n.copy-btn {\n  border: none;\n  background: transparent;\n  color: var(--muted);\n  cursor: pointer;\n}\n\n.copy-btn.copied { color: var(--success); }\n\n.msg-card p { margin: 0; }\n.msg-card p + p { margin-top: 8px; }\n.msg-card ul { margin: 6px 0; padding-left: 20px; }\n.msg-card blockquote {\n  margin: 10px 0;\n  padding-left: 12px;\n  border-left: 3px solid color-mix(in oklab, var(--accent) 50%, transparent);\n  color: var(--muted);\n}\n\n.ambient-dots,\n.corner-decor,\n.shape-orbit,\n.shape-ribbon,\n.mesh-line,\n.signal-cluster {\n  position: fixed;\n  pointer-events: none;\n}\n\n.ambient-dots { inset: 0; overflow: hidden; }\n\n.ambient-dot {\n  position: absolute;\n  border-radius: 50%;\n  background: color-mix(in oklab, var(--accent) 24%, transparent);\n  animation: float-dots linear infinite;\n}\n\n@keyframes float-dots {\n  0% { transform: translateY(100vh); opacity: 0; }\n  10% { opacity: 1; }\n  90% { opacity: 1; }\n  100% { transform: translateY(-120px); opacity: 0; }\n}\n\n.corner-decor,\n.shape-orbit,\n.shape-ribbon,\n.mesh-line {\n  opacity: 0.7;\n}\n\n.corner-decor { width: 120px; height: 120px; }\n.corner-decor.top-left { top: 0; left: 0; background: radial-gradient(circle at 0 0, var(--accent-soft), transparent 60%); }\n.corner-decor.top-right { top: 0; right: 0; background: radial-gradient(circle at 100% 0, color-mix(in oklab, var(--accent-2) 18%, transparent), transparent 60%); }\n.corner-decor.bottom-left { bottom: 0; left: 0; background: radial-gradient(circle at 0 100%, color-mix(in oklab, var(--accent) 10%, transparent), transparent 60%); }\n.corner-decor.bottom-right { bottom: 0; right: 0; background: radial-gradient(circle at 100% 100%, color-mix(in oklab, var(--accent-2) 14%, transparent), transparent 60%); }\n\n.shape-orbit {\n  border-radius: 50%;\n  border: 1px solid color-mix(in oklab, var(--accent) 22%, transparent);\n}\n\n.shape-orbit.left { width: 220px; height: 220px; left: -80px; top: 24%; }\n.shape-orbit.right { width: 280px; height: 280px; right: -120px; bottom: 16%; }\n.shape-ribbon.top { width: 240px; height: 240px; top: 110px; right: -130px; border: 1px solid color-mix(in oklab, var(--accent-2) 22%, transparent); border-radius: 28px; transform: rotate(45deg); }\n.shape-ribbon.bottom { width: 240px; height: 240px; bottom: 90px; left: -150px; border: 1px solid color-mix(in oklab, var(--accent) 18%, transparent); border-radius: 42px; transform: rotate(45deg); }\n.mesh-line.one { top: 148px; left: 12%; width: 220px; height: 1px; transform: rotate(-14deg); background: linear-gradient(90deg, transparent, var(--accent-soft), transparent); }\n.mesh-line.two { top: 62%; right: 8%; width: 280px; height: 1px; transform: rotate(18deg); background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--accent-2) 20%, transparent), transparent); }\n.mesh-line.three { bottom: 146px; left: 24%; width: 180px; height: 1px; transform: rotate(-22deg); background: linear-gradient(90deg, transparent, var(--accent-soft), transparent); }\n\n.signal-cluster {\n  width: 220px;\n  height: 220px;\n  top: 112px;\n  right: 64px;\n  opacity: 0.72;\n}\n\n.signal-cluster.left {\n  top: 128px;\n  left: 58px;\n  right: auto;\n}\n\n.signal-ring,\n.signal-sweep,\n.signal-node,\n.signal-core,\n.signal-bar {\n  position: absolute;\n}\n\n.signal-ring { inset: 0; border-radius: 50%; border: 1px solid color-mix(in oklab, var(--accent) 18%, transparent); }\n.signal-ring.ring-1 { inset: 28px; }\n.signal-ring.ring-2 { inset: 54px; border-style: dashed; }\n.signal-ring.ring-3 { inset: 82px; }\n.signal-sweep { inset: 22px; border-radius: 50%; background: conic-gradient(from 0deg, transparent 0deg 290deg, color-mix(in oklab, var(--accent) 18%, transparent) 326deg, transparent 360deg); mask: radial-gradient(circle, transparent 58%, black 59%); -webkit-mask: radial-gradient(circle, transparent 58%, black 59%); }\n.signal-node { top: 26px; right: 52px; width: 12px; height: 12px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent-2)); }\n.signal-core { top: 50%; left: 50%; width: 16px; height: 16px; transform: translate(-50%, -50%); border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent-2)); }\n.signal-bar { top: 50%; right: -8px; width: 84px; height: 1px; background: linear-gradient(90deg, color-mix(in oklab, var(--accent) 32%, transparent), transparent); }\n.signal-cluster.left .signal-bar { right: auto; left: -8px; background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--accent-2) 28%, transparent)); }\n\n.msg-count-badge,\n.scroll-bottom-btn {\n  position: fixed;\n  z-index: 14;\n  border-radius: 999px;\n  border: 1px solid var(--border);\n  background: var(--surface-strong);\n  box-shadow: var(--shadow-card);\n  font-family: var(--font-mono);\n}\n\n.msg-count-badge {\n  right: 24px;\n  bottom: 112px;\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  padding: 7px 12px;\n  color: var(--muted);\n  font-size: 11px;\n  opacity: 0;\n  transform: translateY(8px);\n  transition: all 0.25s ease;\n}\n\n.msg-count-badge.visible {\n  opacity: 1;\n  transform: translateY(0);\n}\n\n.msg-count-badge .dot {\n  width: 6px;\n  height: 6px;\n  border-radius: 50%;\n  background: linear-gradient(135deg, var(--accent), var(--accent-2));\n}\n\n.scroll-bottom-btn {\n  left: 50%;\n  bottom: 112px;\n  transform: translateX(-50%) translateY(14px);\n  display: inline-flex;\n  align-items: center;\n  gap: 6px;\n  padding: 8px 14px;\n  color: var(--muted);\n  font-size: 11px;\n  opacity: 0;\n  pointer-events: none;\n  transition: all 0.25s ease;\n  cursor: pointer;\n}\n\n.scroll-bottom-btn.visible {\n  opacity: 1;\n  pointer-events: auto;\n  transform: translateX(-50%) translateY(0);\n}\n\n.scroll-bottom-btn svg { width: 12px; height: 12px; }\n\n@keyframes pulse-dot {\n  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 36%, transparent); }\n  50% { box-shadow: 0 0 0 7px color-mix(in oklab, var(--accent) 0%, transparent); }\n}\n\n@media (max-width: 860px) {\n  .header {\n    grid-template-columns: 1fr;\n    justify-items: center;\n    text-align: center;\n  }\n\n  .header-wordmark,\n  .header-meta {\n    justify-content: center;\n  }\n\n  .chat-area {\n    padding: 24px 16px 16px;\n  }\n\n  .input-area {\n    padding: 12px 16px 16px;\n  }\n}\n\n@media (max-width: 640px) {\n  .header-badge {\n    display: none;\n  }\n\n  .header-actions {\n    flex-wrap: wrap;\n    justify-content: center;\n  }\n\n  .theme-btn-label {\n    display: none;\n  }\n\n  .icon-btn.export-btn {\n    display: none;\n  }\n\n  .welcome {\n    min-height: auto;\n    padding-top: 48px;\n  }\n\n  .msg-content {\n    max-width: 88%;\n  }\n}\n+",
-  bodyHtml: "<div class=\"corner-decor top-left\"></div>\n<div class=\"corner-decor top-right\"></div>\n<div class=\"corner-decor bottom-left\"></div>\n<div class=\"corner-decor bottom-right\"></div>\n<div class=\"shape-orbit left\"></div>\n<div class=\"shape-orbit right\"></div>\n<div class=\"shape-ribbon top\"></div>\n<div class=\"shape-ribbon bottom\"></div>\n<div class=\"mesh-line one\"></div>\n<div class=\"mesh-line two\"></div>\n<div class=\"mesh-line three\"></div>\n<div class=\"signal-cluster left\">\n  <div class=\"signal-ring ring-1\"></div>\n  <div class=\"signal-ring ring-2\"></div>\n  <div class=\"signal-ring ring-3\"></div>\n  <div class=\"signal-sweep\"></div>\n  <div class=\"signal-core\"></div>\n  <div class=\"signal-node\"></div>\n  <div class=\"signal-bar\"></div>\n</div>\n<div class=\"signal-cluster\">\n  <div class=\"signal-ring ring-1\"></div>\n  <div class=\"signal-ring ring-2\"></div>\n  <div class=\"signal-ring ring-3\"></div>\n  <div class=\"signal-sweep\"></div>\n  <div class=\"signal-core\"></div>\n  <div class=\"signal-node\"></div>\n  <div class=\"signal-bar\"></div>\n</div>\n<div class=\"ambient-dots\" id=\"ambientDots\"></div>\n\n<header class=\"header\">\n  <div class=\"header-wordmark\">\n    <div class=\"dot\"></div>\n    <div class=\"text\">\n      <strong>FCYT UADER</strong>\n      <span>Agenda inteligente personal</span>\n    </div>\n  </div>\n  <div class=\"header-center\">\n    <button class=\"header-nav-btn\" type=\"button\" onclick=\"openCalendarPage()\">\n      <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n        <rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\"></rect>\n        <path d=\"M16 2v4M8 2v4M3 10h18\"></path>\n      </svg>\n      Calendario\n    </button>\n  </div>\n  <div class=\"header-meta\">\n    <div class=\"header-badge\">\n      <div class=\"status-dot\"></div>\n      Inteligencia Artificial\n    </div>\n    <div class=\"header-actions\">\n      <button class=\"icon-btn\" type=\"button\" title=\"Cambiar tema\" onclick=\"toggleChatTheme()\">\n        <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n          <path d=\"M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z\"></path>\n        </svg>\n        <span class=\"theme-btn-label\" id=\"themeLabel\">Modo claro</span>\n      </button>\n      <button class=\"icon-btn\" type=\"button\" title=\"Nuevo chat\" onclick=\"clearChat()\">\n        <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n          <path d=\"M12 5v14\"></path>\n          <path d=\"M5 12h14\"></path>\n        </svg>\n      </button>\n      <button class=\"icon-btn export-btn\" type=\"button\" title=\"Exportar chat\" onclick=\"exportChat()\">\n        <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n          <path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\"></path>\n          <polyline points=\"7 10 12 15 17 10\"></polyline>\n          <line x1=\"12\" y1=\"15\" x2=\"12\" y2=\"3\"></line>\n        </svg>\n      </button>\n    </div>\n  </div>\n</header>\n\n<section class=\"chat-shell\">\n  <main class=\"chat-area\" id=\"chatArea\">\n    <div class=\"msg-center-wrap\">\n      <div class=\"welcome\" id=\"welcome\">\n        <div class=\"welcome-icon\">\n          <img src=\"__BOT_MASCOT_URL__\" alt=\"Mascota del asistente\">\n        </div>\n        <h2>Tu agenda inteligente ya esta lista</h2>\n        <p>Organiza reuniones, recordatorios y bloques de foco desde el chat. El calendario vive integrado y siempre puedes saltar entre ambas vistas sin perder la atmosfera de la app.</p>\n        <div class=\"suggestion-chips\">\n          <button class=\"chip\" onclick=\"sendSuggestion('Organiza mi manana con bloques de foco y una reunion de 30 minutos')\">Planificar manana</button>\n          <button class=\"chip\" onclick=\"sendSuggestion('Agrega un recordatorio para llamar a secretaria a las 17:00')\">Crear recordatorio</button>\n          <button class=\"chip\" onclick=\"sendSuggestion('Que tengo disponible para estudiar despues del mediodia')\">Buscar huecos</button>\n          <button class=\"chip\" onclick=\"sendSuggestion('Armame una agenda liviana para hoy')\">Agenda de hoy</button>\n        </div>\n      </div>\n    </div>\n  </main>\n\n  <button class=\"scroll-bottom-btn\" id=\"scrollBottomBtn\" onclick=\"scrollToBottom()\">\n    <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n      <polyline points=\"6 9 12 15 18 9\"></polyline>\n    </svg>\n    Bajar al ultimo mensaje\n  </button>\n\n  <div class=\"msg-count-badge\" id=\"msgCountBadge\">\n    <div class=\"dot\"></div>\n    <span id=\"msgCountText\">0 mensajes</span>\n  </div>\n\n  <div class=\"input-area\">\n    <div class=\"input-wrapper\">\n      <div class=\"input-card\">\n        <textarea class=\"msg-input\" id=\"msgInput\" placeholder=\"Escribe un pedido para tu agenda personal...\" rows=\"1\" maxlength=\"4000\"></textarea>\n        <button class=\"send-btn\" id=\"sendBtn\" onclick=\"sendMessage()\" title=\"Enviar\">\n          <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n            <line x1=\"12\" y1=\"19\" x2=\"12\" y2=\"5\"></line>\n            <polyline points=\"5 12 12 5 19 12\"></polyline>\n          </svg>\n        </button>\n      </div>\n      <div class=\"input-meta\">\n        <span class=\"shortcut-hint\"><kbd>Enter</kbd> enviar · <kbd>Shift+Enter</kbd> salto de linea</span>\n        <span class=\"char-count\" id=\"charCount\">0 / 4000</span>\n      </div>\n    </div>\n  </div>\n</section>"
+  styleText: `:root {
+  --bg: oklch(99% 0.002 240);
+  --surface: oklch(100% 0 0 / 0.88);
+  --surface-strong: oklch(100% 0 0 / 0.95);
+  --fg: oklch(18% 0.012 250);
+  --muted: oklch(54% 0.012 250);
+  --border: oklch(92% 0.005 250);
+  --accent: oklch(58% 0.18 255);
+  --accent-2: oklch(72% 0.08 220);
+  --accent-soft: oklch(58% 0.18 255 / 0.12);
+  --success: oklch(69% 0.17 152);
+  --shadow-card: 0 1px 3px oklch(0% 0 0 / 0.04), 0 8px 24px oklch(0% 0 0 / 0.06);
+  --shadow-float: 0 14px 36px oklch(210 0.05 0 / 0.12);
+  --shadow-glow-strong: 0 0 0 1.5px oklch(58% 0.18 255 / 0.28), 0 10px 34px oklch(58% 0.18 255 / 0.2);
+  --font-display: 'Trebuchet MS', 'Segoe UI', sans-serif;
+  --font-body: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --font-mono: 'Consolas', 'Courier New', monospace;
+  --radius-sm: 4px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --header-bg: color-mix(in oklab, var(--bg) 82%, transparent);
+  --input-fade: color-mix(in oklab, var(--bg) 94%, transparent);
+}
+
+:root[data-theme='dark'] {
+  --bg: oklch(18% 0.03 295);
+  --surface: oklch(24% 0.03 300 / 0.9);
+  --surface-strong: oklch(28% 0.04 300 / 0.96);
+  --fg: oklch(95% 0.01 320);
+  --muted: oklch(78% 0.02 315);
+  --border: oklch(36% 0.04 300);
+  --accent: oklch(74% 0.2 332);
+  --accent-2: oklch(72% 0.15 290);
+  --accent-soft: oklch(74% 0.2 332 / 0.18);
+  --success: oklch(77% 0.17 156);
+  --shadow-card: 0 1px 2px oklch(0% 0 0 / 0.34), 0 14px 34px oklch(0% 0 0 / 0.32);
+  --shadow-float: 0 18px 46px oklch(0% 0 0 / 0.42);
+  --shadow-glow-strong: 0 0 0 1.5px oklch(74% 0.2 332 / 0.4), 0 14px 36px oklch(74% 0.2 332 / 0.22);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100dvh;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at top left, oklch(58% 0.18 255 / 0.1), transparent 26%),
+    radial-gradient(circle at bottom right, oklch(72% 0.08 220 / 0.14), transparent 28%),
+    var(--bg);
+  color: var(--fg);
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.025;
+  pointer-events: none;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 60px 60px;
+  opacity: 0.14;
+  pointer-events: none;
+}
+
+body.chat-page-react #root {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--fg);
+}
+
+::-webkit-scrollbar { width: 7px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: oklch(54% 0.012 250 / 0.28);
+  border-radius: 999px;
+}
+
+.header {
+  position: relative;
+  z-index: 12;
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--header-bg);
+  backdrop-filter: blur(22px) saturate(180%);
+}
+
+.header::after {
+  content: '';
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-soft), transparent);
+}
+
+.header-wordmark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-wordmark .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  box-shadow: 0 0 0 0 oklch(58% 0.18 255 / 0.4);
+  animation: pulse-dot 2.4s ease-in-out infinite;
+}
+
+.header-wordmark .text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.header-wordmark strong {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+
+.header-wordmark span {
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.header-center {
+  display: flex;
+  justify-content: center;
+}
+
+.header-nav-btn {
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid oklch(58% 0.18 255 / 0.16);
+  background: var(--surface-strong);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.header-nav-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-float);
+}
+
+.header-meta {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid oklch(58% 0.18 255 / 0.1);
+  background: var(--surface);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.header-badge .status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.icon-btn {
+  min-width: 38px;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.icon-btn:hover {
+  color: var(--fg);
+  border-color: var(--border);
+  background: var(--surface);
+}
+
+.icon-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.theme-btn-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.chat-shell {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.chat-area {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 30px 24px 20px;
+  scroll-behavior: smooth;
+  position: relative;
+}
+
+.msg-center-wrap {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+}
+
+.msg-center-wrap::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, oklch(58% 0.18 255 / 0.08) 15%, oklch(58% 0.18 255 / 0.05) 85%, transparent);
+  transform: translateX(-50%);
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.msg-row,
+.typing-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  animation: msg-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.msg-row.user { flex-direction: row-reverse; }
+
+@keyframes msg-enter {
+  from { opacity: 0; transform: translateY(14px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.msg-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.msg-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.msg-row.bot .msg-avatar {
+  background: oklch(58% 0.18 255 / 0.1);
+  border: 1px solid oklch(58% 0.18 255 / 0.25);
+  box-shadow: 0 0 0 4px oklch(58% 0.18 255 / 0.05);
+}
+
+.msg-row.user .msg-avatar {
+  background: oklch(18% 0.012 250 / 0.08);
+  border: 1px solid var(--border);
+}
+
+.msg-content {
+  max-width: min(540px, 82%);
+}
+
+.msg-card,
+.typing-indicator {
+  position: relative;
+  padding: 14px 18px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(10px);
+}
+
+.msg-row.bot .msg-card,
+.typing-indicator {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-bottom-left-radius: var(--radius-sm);
+}
+
+.msg-row.user .msg-card {
+  background: linear-gradient(135deg, var(--accent), color-mix(in oklab, var(--accent-2) 75%, white));
+  color: white;
+  border-bottom-right-radius: var(--radius-sm);
+}
+
+.msg-row.bot .msg-card::before,
+.typing-indicator::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  border-radius: 3px 0 0 3px;
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+}
+
+.msg-notch {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  bottom: 14px;
+  transform: rotate(45deg);
+  border-radius: 3px;
+}
+
+.msg-row.bot .msg-notch {
+  left: -7px;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.msg-row.user .msg-notch {
+  right: -7px;
+  background: color-mix(in oklab, var(--accent) 80%, var(--accent-2));
+}
+
+.msg-card code {
+  padding: 1px 6px;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.msg-row.bot .msg-card code {
+  background: oklch(58% 0.18 255 / 0.12);
+  color: var(--accent);
+}
+
+.msg-row.user .msg-card code {
+  background: oklch(100% 0 0 / 0.14);
+}
+
+.msg-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 0 4px;
+}
+
+.msg-row.user .msg-footer { justify-content: flex-end; }
+
+.msg-time,
+.msg-status,
+.shortcut-hint,
+.char-count {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+.msg-status.sent { color: color-mix(in oklab, var(--accent) 78%, white); }
+.msg-status svg { width: 12px; height: 12px; }
+
+.typing-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--muted);
+  animation: typing-bounce 1.4s ease-in-out infinite;
+}
+
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.55; }
+  30% { transform: translateY(-6px); opacity: 1; }
+}
+
+.welcome {
+  min-height: calc(100% - 12px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 18px;
+  padding: 30px 24px;
+  position: relative;
+}
+
+.welcome::before {
+  content: '';
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, oklch(58% 0.18 255 / 0.06) 0%, transparent 70%);
+  pointer-events: none;
+  animation: welcome-pulse 4s ease-in-out infinite;
+}
+
+.welcome::after {
+  content: '';
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  border: 1px dashed oklch(58% 0.18 255 / 0.09);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+@keyframes welcome-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.15); opacity: 0.3; }
+}
+
+.welcome-icon {
+  width: 94px;
+  height: 94px;
+  border-radius: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: oklch(58% 0.18 255 / 0.08);
+  border: 1px solid oklch(58% 0.18 255 / 0.22);
+  box-shadow: var(--shadow-float);
+  z-index: 1;
+}
+
+.welcome-icon img {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+}
+
+.welcome h2 {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 36px);
+  letter-spacing: -0.04em;
+  z-index: 1;
+}
+
+.welcome p {
+  max-width: 520px;
+  color: var(--muted);
+  font-size: 15px;
+  z-index: 1;
+}
+
+.suggestion-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  z-index: 1;
+}
+
+.chip {
+  min-height: 38px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-strong);
+  color: var(--fg);
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.chip:hover {
+  transform: translateY(-1px);
+  border-color: oklch(58% 0.18 255 / 0.35);
+}
+
+.input-area {
+  flex-shrink: 0;
+  padding: 12px 24px 18px;
+  background: linear-gradient(to top, var(--input-fade) 70%, transparent 100%);
+  backdrop-filter: blur(18px);
+}
+
+.input-wrapper {
+  max-width: 760px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.input-card {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 12px 12px 12px 18px;
+  border-radius: var(--radius-xl);
+  border: 1.5px solid var(--border);
+  background: var(--surface-strong);
+  box-shadow: var(--shadow-card);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-card:focus-within {
+  border-color: oklch(58% 0.18 255 / 0.44);
+  box-shadow: var(--shadow-glow-strong);
+}
+
+.msg-input {
+  flex: 1;
+  min-height: 42px;
+  max-height: 140px;
+  border: none;
+  outline: none;
+  resize: none;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  line-height: 1.4;
+  padding: 8px 0;
+  overflow-y: auto;
+}
+
+.msg-input::placeholder { color: var(--muted); }
+
+.send-btn {
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--accent), color-mix(in oklab, var(--accent-2) 74%, white));
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.send-btn:hover {
+  transform: scale(1.04);
+  box-shadow: 0 12px 24px oklch(58% 0.18 255 / 0.24);
+}
+
+.send-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.send-btn svg { width: 18px; height: 18px; }
+
+.input-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 16px;
+  padding: 0 6px;
+}
+
+.char-count { opacity: 0; transition: opacity 0.2s ease; }
+.char-count.visible { opacity: 1; }
+.char-count.warning { color: oklch(74% 0.17 34); }
+
+.shortcut-hint kbd {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1px 5px;
+  background: var(--surface);
+}
+
+.code-block {
+  margin-top: 12px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.code-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.code-block pre {
+  padding: 14px;
+  overflow-x: auto;
+  background: var(--surface);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.7;
+}
+
+.copy-btn {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.copy-btn.copied { color: var(--success); }
+
+.msg-card p { margin: 0; }
+.msg-card p + p { margin-top: 8px; }
+.msg-card ul { margin: 6px 0; padding-left: 20px; }
+.msg-card blockquote {
+  margin: 10px 0;
+  padding-left: 12px;
+  border-left: 3px solid oklch(58% 0.18 255 / 0.5);
+  color: var(--muted);
+}
+
+.ambient-dots,
+.corner-decor,
+.shape-orbit,
+.shape-ribbon,
+.mesh-line,
+.signal-cluster {
+  position: fixed;
+  pointer-events: none;
+}
+
+.ambient-dots { inset: 0; overflow: hidden; }
+
+.ambient-dot {
+  position: absolute;
+  border-radius: 50%;
+  background: oklch(58% 0.18 255 / 0.2);
+  animation: float-dots linear infinite;
+}
+
+@keyframes float-dots {
+  0% { transform: translateY(100vh); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-120px); opacity: 0; }
+}
+
+.corner-decor,
+.shape-orbit,
+.shape-ribbon,
+.mesh-line {
+  opacity: 0.7;
+}
+
+.corner-decor { width: 120px; height: 120px; }
+.corner-decor.top-left { top: 0; left: 0; background: radial-gradient(circle at 0 0, var(--accent-soft), transparent 60%); }
+.corner-decor.top-right { top: 0; right: 0; background: radial-gradient(circle at 100% 0, oklch(72% 0.08 220 / 0.18), transparent 60%); }
+.corner-decor.bottom-left { bottom: 0; left: 0; background: radial-gradient(circle at 0 100%, oklch(58% 0.18 255 / 0.08), transparent 60%); }
+.corner-decor.bottom-right { bottom: 0; right: 0; background: radial-gradient(circle at 100% 100%, oklch(72% 0.08 220 / 0.14), transparent 60%); }
+
+.shape-orbit {
+  border-radius: 50%;
+  border: 1px solid oklch(58% 0.18 255 / 0.22);
+}
+
+.shape-orbit.left { width: 220px; height: 220px; left: -80px; top: 24%; }
+.shape-orbit.right { width: 280px; height: 280px; right: -120px; bottom: 16%; }
+.shape-ribbon.top { width: 240px; height: 240px; top: 110px; right: -130px; border: 1px solid oklch(72% 0.08 220 / 0.22); border-radius: 28px; transform: rotate(45deg); }
+.shape-ribbon.bottom { width: 240px; height: 240px; bottom: 90px; left: -150px; border: 1px solid oklch(58% 0.18 255 / 0.18); border-radius: 42px; transform: rotate(45deg); }
+.mesh-line.one { top: 148px; left: 12%; width: 220px; height: 1px; transform: rotate(-14deg); background: linear-gradient(90deg, transparent, var(--accent-soft), transparent); }
+.mesh-line.two { top: 62%; right: 8%; width: 280px; height: 1px; transform: rotate(18deg); background: linear-gradient(90deg, transparent, oklch(72% 0.08 220 / 0.18), transparent); }
+.mesh-line.three { bottom: 146px; left: 24%; width: 180px; height: 1px; transform: rotate(-22deg); background: linear-gradient(90deg, transparent, var(--accent-soft), transparent); }
+
+.signal-cluster {
+  width: 220px;
+  height: 220px;
+  top: 112px;
+  right: 64px;
+  opacity: 0.72;
+}
+
+.signal-cluster.left {
+  top: 128px;
+  left: 58px;
+  right: auto;
+}
+
+.signal-ring,
+.signal-sweep,
+.signal-node,
+.signal-core,
+.signal-bar {
+  position: absolute;
+}
+
+.signal-ring { inset: 0; border-radius: 50%; border: 1px solid oklch(58% 0.18 255 / 0.18); }
+.signal-ring.ring-1 { inset: 28px; animation: signalPulse 5.5s ease-in-out infinite; }
+.signal-ring.ring-2 { inset: 54px; border-style: dashed; animation: signalRotate 16s linear infinite; }
+.signal-ring.ring-3 { inset: 82px; animation: signalPulse 4.2s ease-in-out infinite reverse; }
+.signal-sweep { inset: 22px; border-radius: 50%; background: conic-gradient(from 0deg, transparent 0deg 290deg, oklch(58% 0.18 255 / 0.18) 326deg, transparent 360deg); mask: radial-gradient(circle, transparent 58%, black 59%); -webkit-mask: radial-gradient(circle, transparent 58%, black 59%); animation: signalRotate 8s linear infinite; }
+.signal-node { top: 26px; right: 52px; width: 12px; height: 12px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), color-mix(in oklab, var(--accent-2) 72%, white)); animation: signalOrbit 8s linear infinite, signalBlink 3.6s ease-in-out infinite; transform-origin: 58px 84px; }
+.signal-core { top: 50%; left: 50%; width: 16px; height: 16px; transform: translate(-50%, -50%); border-radius: 50%; background: linear-gradient(135deg, var(--accent), color-mix(in oklab, var(--accent-2) 72%, white)); animation: signalBlink 3.2s ease-in-out infinite; }
+.signal-bar { top: 50%; right: -8px; width: 84px; height: 1px; background: linear-gradient(90deg, oklch(58% 0.18 255 / 0.26), transparent); }
+.signal-cluster.left .signal-bar { right: auto; left: -8px; background: linear-gradient(90deg, transparent, oklch(72% 0.08 220 / 0.22)); }
+
+@keyframes signalRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes signalPulse {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.035); }
+}
+
+@keyframes signalBlink {
+  0%, 100% { opacity: 0.75; }
+  50% { opacity: 1; }
+}
+
+@keyframes signalOrbit {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.msg-count-badge,
+.scroll-bottom-btn {
+  position: fixed;
+  z-index: 14;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-strong);
+  box-shadow: var(--shadow-card);
+  font-family: var(--font-mono);
+}
+
+.msg-count-badge {
+  right: 24px;
+  bottom: 112px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  color: var(--muted);
+  font-size: 11px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 0.25s ease;
+}
+
+.msg-count-badge.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.msg-count-badge .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+}
+
+.scroll-bottom-btn {
+  left: 50%;
+  bottom: 112px;
+  transform: translateX(-50%) translateY(14px);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  color: var(--muted);
+  font-size: 11px;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.scroll-bottom-btn.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.scroll-bottom-btn svg { width: 12px; height: 12px; }
+
+@keyframes pulse-dot {
+  0%, 100% { box-shadow: 0 0 0 0 oklch(58% 0.18 255 / 0.36); }
+  50% { box-shadow: 0 0 0 7px oklch(58% 0.18 255 / 0); }
+}
+
+@media (max-width: 860px) {
+  .header {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .header-wordmark,
+  .header-meta {
+    justify-content: center;
+  }
+
+  .chat-area {
+    padding: 24px 16px 16px;
+  }
+
+  .input-area {
+    padding: 12px 16px 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .header-badge {
+    display: none;
+  }
+
+  .header-actions {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .theme-btn-label {
+    display: none;
+  }
+
+  .icon-btn.export-btn {
+    display: none;
+  }
+
+  .welcome {
+    min-height: auto;
+    padding-top: 48px;
+  }
+
+  .msg-content {
+    max-width: 88%;
+  }
+}`,
+  bodyHtml: `<div class="corner-decor top-left"></div>
+<div class="corner-decor top-right"></div>
+<div class="corner-decor bottom-left"></div>
+<div class="corner-decor bottom-right"></div>
+<div class="shape-orbit left"></div>
+<div class="shape-orbit right"></div>
+<div class="shape-ribbon top"></div>
+<div class="shape-ribbon bottom"></div>
+<div class="mesh-line one"></div>
+<div class="mesh-line two"></div>
+<div class="mesh-line three"></div>
+<div class="signal-cluster left">
+  <div class="signal-ring ring-1"></div>
+  <div class="signal-ring ring-2"></div>
+  <div class="signal-ring ring-3"></div>
+  <div class="signal-sweep"></div>
+  <div class="signal-core"></div>
+  <div class="signal-node"></div>
+  <div class="signal-bar"></div>
+</div>
+<div class="signal-cluster">
+  <div class="signal-ring ring-1"></div>
+  <div class="signal-ring ring-2"></div>
+  <div class="signal-ring ring-3"></div>
+  <div class="signal-sweep"></div>
+  <div class="signal-core"></div>
+  <div class="signal-node"></div>
+  <div class="signal-bar"></div>
+</div>
+<div class="ambient-dots" id="ambientDots"></div>
+
+<header class="header">
+  <div class="header-wordmark">
+    <div class="dot"></div>
+    <div class="text">
+      <strong>FCYT UADER</strong>
+      <span>Agenda inteligente personal</span>
+    </div>
+  </div>
+  <div class="header-center">
+    <button class="header-nav-btn" type="button" onclick="openCalendarPage()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+        <path d="M16 2v4M8 2v4M3 10h18"></path>
+      </svg>
+      Calendario
+    </button>
+  </div>
+  <div class="header-meta">
+    <div class="header-badge">
+      <div class="status-dot"></div>
+      Inteligencia Artificial
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" type="button" title="Cambiar tema" onclick="toggleChatTheme()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path>
+        </svg>
+        <span class="theme-btn-label" id="themeLabel">Modo claro</span>
+      </button>
+      <button class="icon-btn" type="button" title="Nuevo chat" onclick="clearChat()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 5v14"></path>
+          <path d="M5 12h14"></path>
+        </svg>
+      </button>
+      <button class="icon-btn export-btn" type="button" title="Exportar chat" onclick="exportChat()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<section class="chat-shell">
+  <main class="chat-area" id="chatArea">
+    <div class="msg-center-wrap">
+      <div class="welcome" id="welcome">
+        <div class="welcome-icon">
+          <img src="__BOT_MASCOT_URL__" alt="Mascota del asistente">
+        </div>
+        <h2>Tu agenda inteligente ya esta lista</h2>
+        <p>Organiza reuniones, recordatorios y bloques de foco desde el chat. El calendario vive integrado y siempre puedes saltar entre ambas vistas sin perder la atmosfera de la app.</p>
+        <div class="suggestion-chips">
+          <button class="chip" onclick="sendSuggestion('Organiza mi manana con bloques de foco y una reunion de 30 minutos')">Planificar manana</button>
+          <button class="chip" onclick="sendSuggestion('Agrega un recordatorio para llamar a secretaria a las 17:00')">Crear recordatorio</button>
+          <button class="chip" onclick="sendSuggestion('Que tengo disponible para estudiar despues del mediodia')">Buscar huecos</button>
+          <button class="chip" onclick="sendSuggestion('Armame una agenda liviana para hoy')">Agenda de hoy</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <button class="scroll-bottom-btn" id="scrollBottomBtn" onclick="scrollToBottom()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 12 15 18 9"></polyline>
+    </svg>
+    Bajar al ultimo mensaje
+  </button>
+
+  <div class="msg-count-badge" id="msgCountBadge">
+    <div class="dot"></div>
+    <span id="msgCountText">0 mensajes</span>
+  </div>
+
+  <div class="input-area">
+    <div class="input-wrapper">
+      <div class="input-card">
+        <textarea class="msg-input" id="msgInput" placeholder="Escribe un pedido para tu agenda personal..." rows="1" maxlength="4000"></textarea>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="Enviar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="19" x2="12" y2="5"></line>
+            <polyline points="5 12 12 5 19 12"></polyline>
+          </svg>
+        </button>
+      </div>
+      <div class="input-meta">
+        <span class="shortcut-hint"><kbd>Enter</kbd> enviar · <kbd>Shift+Enter</kbd> salto de linea</span>
+        <span class="char-count" id="charCount">0 / 4000</span>
+      </div>
+    </div>
+  </div>
+</section>`,
 } as const;
