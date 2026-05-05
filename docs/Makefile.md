@@ -10,69 +10,72 @@ La ventaja en un monorepo es tener **un único punto de entrada** desde la raíz
 
 ## Estado actual
 
-El Makefile actual solo cubre el **backend**. Los demás componentes se agregan a medida que se implementan.
+El Makefile cubre **backend** (FastAPI + Poetry) y **frontend** (Vite + React + TypeScript + npm).
 
 ```
-make install   → instala dependencias del backend (poetry install)
-make dev       → levanta uvicorn en modo desarrollo con hot-reload
-make test      → corre pytest con output verbose
-make lint      → valida código con Ruff (sin modificar archivos)
-make lint-fix  → aplica correcciones automáticas de Ruff
-make help      → muestra todos los comandos disponibles
+make install          → instala dependencias de backend y frontend
+make install-backend  → solo backend  (poetry install)
+make install-frontend → solo frontend (npm install)
+
+make dev              → levanta backend y frontend en paralelo
+make dev-backend      → solo backend  → http://localhost:8000
+make dev-frontend     → solo frontend → http://localhost:5173
+
+make build            → compila el frontend para producción (tsc + vite build)
+
+make test             → corre pytest con output verbose
+make lint             → valida código del backend con Ruff (sin modificar)
+make lint-fix         → aplica correcciones automáticas de Ruff
+make help             → muestra todos los comandos disponibles
 ```
 
 ---
 
-## Cómo funciona el Makefile actual
+## Cómo funciona el Makefile
 
 ```makefile
-BACKEND_DIR := backend
+BACKEND_DIR  := backend
+FRONTEND_DIR := frontend
 ```
-Variable local. Permite cambiar la ruta del backend en un solo lugar si alguna vez se mueve la carpeta.
+Variables locales. Si alguna vez se mueve una carpeta, se actualiza en un solo lugar.
 
 ```makefile
-.PHONY: help install dev test lint lint-fix
+.PHONY: help install dev test lint lint-fix ...
 ```
 Le dice a `make` que estos targets **no son archivos**. Sin esto, si existiera un archivo llamado `test` en la raíz, `make test` no haría nada porque creería que el archivo ya está "actualizado".
 
 ```makefile
-install:
+install: install-backend install-frontend
+```
+Un target puede depender de otros targets. `make install` ejecuta `install-backend` y luego `install-frontend` en ese orden.
+
+```makefile
+install-backend:
 	cd $(BACKEND_DIR) && poetry install
 ```
 Cada línea indentada debajo de un target se ejecuta en una **subshell separada**. Por eso el `cd` y el comando van unidos con `&&` — si fueran dos líneas distintas, el `cd` de la primera no afectaría a la segunda.
 
----
-
-## Cómo agregar el Frontend
-
-Cuando el frontend esté listo (asumiendo Vite + Node):
-
 ```makefile
-FRONTEND_DIR := frontend
-
-install:
-	cd $(BACKEND_DIR) && poetry install
-	cd $(FRONTEND_DIR) && npm install
-
-dev-frontend:
+dev:
+	cd $(BACKEND_DIR) && poetry run uvicorn app.main:app --reload &
 	cd $(FRONTEND_DIR) && npm run dev
-
-lint-frontend:
-	cd $(FRONTEND_DIR) && npm run lint
 ```
+El `&` al final de la primera línea manda el proceso al background. El frontend queda en foreground y recibe el `Ctrl+C`. El backend muere solo cuando se cierra la terminal o se mata manualmente con `kill`.
 
 ---
 
 ## Cómo agregar Rasa (Chatbot)
 
-Rasa usa un entorno virtual propio. Lo más simple es un `venv` dentro de `Chatbot/`:
+Rasa usa un entorno virtual propio. Lo más simple es un `venv` dentro de `Chatbot/` con un `requirements.txt`.
+
+Agregar al Makefile:
 
 ```makefile
 CHATBOT_DIR := Chatbot
 
-install:
-	cd $(BACKEND_DIR) && poetry install
-	cd $(FRONTEND_DIR) && npm install
+install: install-backend install-frontend install-chatbot
+
+install-chatbot:
 	cd $(CHATBOT_DIR) && pip install -r requirements.txt
 
 dev-chatbot:
@@ -82,32 +85,27 @@ dev-actions:
 	cd $(CHATBOT_DIR) && rasa run actions
 ```
 
-> Rasa necesita dos procesos corriendo en paralelo: el servidor principal (`rasa run`) y el servidor de acciones (`rasa run actions`). Son independientes.
+> Rasa necesita dos procesos corriendo en paralelo: el servidor principal (`rasa run`) y el servidor de acciones (`rasa run actions`). Son independientes entre sí.
 
----
-
-## Levantar todo a la vez
-
-Una vez que los tres componentes estén listos, se puede agregar un target `dev` unificado.
-
-### Opción A — `&` simple (sin dependencias extra)
+Actualizar `dev` para incluirlo:
 
 ```makefile
 dev:
 	cd $(BACKEND_DIR) && poetry run uvicorn app.main:app --reload &
-	cd $(FRONTEND_DIR) && npm run dev &
 	cd $(CHATBOT_DIR) && rasa run --enable-api &
-	cd $(CHATBOT_DIR) && rasa run actions
+	cd $(CHATBOT_DIR) && rasa run actions &
+	cd $(FRONTEND_DIR) && npm run dev
 ```
 
-**Pros:** cero instalación adicional.  
-**Contras:** los logs de los 4 procesos se mezclan en la misma terminal. Para detenerlos hay que hacer `Ctrl+C` varias veces o matar los procesos manualmente.
+---
 
-### Opción B — `overmind` (recomendada para desarrollo)
+## Alternativa con `overmind` (logs separados por proceso)
 
-`overmind` es una herramienta que lee un `Procfile` y levanta cada proceso en una pestaña separada con logs por colores. Se instala con `brew install overmind`.
+Con `&` todos los procesos comparten la misma terminal y los logs se mezclan. `overmind` resuelve eso: cada proceso tiene su propio panel con color distinto, y `Ctrl+C` mata todo limpiamente.
 
-**Procfile** (en la raíz):
+Instalación: `brew install overmind`
+
+**Procfile** (en la raíz del repo):
 ```
 backend:  cd backend && poetry run uvicorn app.main:app --reload
 frontend: cd frontend && npm run dev
@@ -121,15 +119,15 @@ dev:
 	overmind start
 ```
 
-Con esto, `make dev` levanta todo. `Ctrl+C` mata todo limpiamente. Los logs se pueden ver por separado con `overmind connect <nombre>`.
+Ver logs de un proceso específico: `overmind connect backend`
 
 ---
 
-## Resumen de la evolución esperada del Makefile
+## Resumen de la evolución del Makefile
 
-| Etapa | Targets disponibles |
-|---|---|
-| Ahora (solo backend) | `install`, `dev`, `test`, `lint`, `lint-fix` |
-| + Frontend | `install`, `dev-frontend`, `lint-frontend` |
-| + Chatbot | `install`, `dev-chatbot`, `dev-actions` |
-| Todo integrado | `dev` (levanta los 3 a la vez) |
+| Etapa | Estado | Targets clave |
+|---|---|---|
+| Backend | Hecho | `install-backend`, `dev-backend`, `test`, `lint` |
+| Frontend | Hecho | `install-frontend`, `dev-frontend`, `build` |
+| Chatbot (Rasa) | Pendiente | `install-chatbot`, `dev-chatbot`, `dev-actions` |
+| Todo integrado | Pendiente | `dev` (levanta los 3 a la vez) |
