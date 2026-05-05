@@ -40,10 +40,14 @@ export function AgendasPage() {
   };
 
   return (
-    <div style={styles.page}>
+    <>
+      <style>{`
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      `}</style>
+      <div style={styles.page}>
       <header style={styles.header}>
-        <button style={styles.backBtn} onClick={() => navigate("/chat")}>
-          ← Volver al chat
+        <button style={styles.backBtn} onClick={() => navigate("/calendar")}>
+          ← Volver al calendario
         </button>
         <h1 style={styles.title}>Agendas</h1>
       </header>
@@ -102,6 +106,7 @@ export function AgendasPage() {
         </section>
       </main>
     </div>
+    </>
   );
 }
 

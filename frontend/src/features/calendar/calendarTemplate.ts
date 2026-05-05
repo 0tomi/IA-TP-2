@@ -634,7 +634,13 @@ body.calendar-page-react #root {
   color: var(--accent);
 }
 
-.day-modal {
+.event-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.day-modal,
+.create-event-modal {
   position: fixed;
   inset: 0;
   z-index: 30;
@@ -648,13 +654,17 @@ body.calendar-page-react #root {
   transition: opacity 0.25s ease, visibility 0.25s ease;
 }
 
-.day-modal.is-open {
+.create-event-modal { z-index: 40; }
+
+.day-modal.is-open,
+.create-event-modal.is-open {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
 }
 
-.day-modal-backdrop {
+.day-modal-backdrop,
+.create-event-backdrop {
   position: absolute;
   inset: 0;
   background: oklch(14% 0.03 295 / 0.34);
@@ -673,7 +683,8 @@ body.calendar-page-react #root {
   transition: transform 0.3s ease;
 }
 
-.day-modal.is-open .day-modal-card {
+.day-modal.is-open .day-modal-card,
+.create-event-modal.is-open .day-modal-card {
   transform: translateY(0) scale(1);
 }
 
@@ -770,6 +781,43 @@ body.calendar-page-react #root {
   font-size: 13px;
 }
 
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.form-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.form-input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 15px;
+  padding: 12px 16px;
+  outline: none;
+  transition: border-color 0.2s ease;
+  width: 100%;
+}
+
+.form-input:focus {
+  border-color: oklch(58% 0.18 255 / 0.5);
+}
+
+.form-time-row {
+  display: flex;
+  gap: 12px;
+}
+
 .corner-decor,
 .shape-orbit,
 .shape-ribbon,
@@ -862,7 +910,8 @@ body.calendar-page-react #root {
     padding-right: 2px;
   }
 
-  .day-modal {
+  .day-modal,
+  .create-event-modal {
     padding: 12px;
   }
 
@@ -889,6 +938,10 @@ body.calendar-page-react #root {
   .header-badge,
   .theme-btn-label {
     display: none;
+  }
+
+  .form-time-row {
+    flex-direction: column;
   }
 }`,
   bodyHtml: `<div class="corner-decor top-left"></div>
@@ -934,6 +987,13 @@ body.calendar-page-react #root {
       Inteligencia Artificial
     </div>
     <div class="header-actions">
+      <button class="icon-btn" type="button" title="Agendas" onclick="openAgendasPage()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+        </svg>
+        <span class="theme-btn-label">Agendas</span>
+      </button>
       <button class="icon-btn" type="button" title="Cambiar tema" onclick="toggleCalendarTheme()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path>
@@ -949,17 +1009,17 @@ body.calendar-page-react #root {
     <div class="calendar-top">
       <div class="calendar-title">
         <small>panel central</small>
-        <h1>Mayo 2026</h1>
+        <h1 id="calendarMonthTitle">Cargando...</h1>
         <p>Vista mensual conectada al asistente para planificar compromisos, foco personal y recordatorios.</p>
       </div>
       <div class="calendar-actions" aria-label="Navegacion del calendario">
-        <button class="icon-btn" type="button" aria-label="Mes anterior">
+        <button class="icon-btn" id="prevMonthBtn" type="button" aria-label="Mes anterior">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
         </button>
-        <button class="icon-btn" type="button" aria-label="Hoy">
+        <button class="icon-btn" id="todayBtn" type="button" aria-label="Hoy">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
         </button>
-        <button class="icon-btn" type="button" aria-label="Mes siguiente">
+        <button class="icon-btn" id="nextMonthBtn" type="button" aria-label="Mes siguiente">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
         </button>
       </div>
@@ -968,20 +1028,20 @@ body.calendar-page-react #root {
     <div class="calendar-meta">
       <div class="mini-stat">
         <span>eventos</span>
-        <strong>12 cargados</strong>
+        <strong id="statEventCount">— cargando</strong>
       </div>
       <div class="mini-stat">
-        <span>foco personal</span>
-        <strong>5 dias despejados</strong>
+        <span>dias con eventos</span>
+        <strong id="statDaysWithEvents">—</strong>
       </div>
       <div class="mini-stat">
-        <span>proxima cita</span>
-        <strong>lun 04 · review</strong>
+        <span>mes</span>
+        <strong id="statMonthLabel">—</strong>
       </div>
     </div>
 
     <div class="calendar-grid-wrap">
-      <div class="calendar-grid">
+      <div class="calendar-grid" id="calendarGrid">
         <div class="weekday">lun</div>
         <div class="weekday">mar</div>
         <div class="weekday">mie</div>
@@ -989,43 +1049,6 @@ body.calendar-page-react #root {
         <div class="weekday">vie</div>
         <div class="weekday">sab</div>
         <div class="weekday">dom</div>
-
-        <article class="day muted"></article>
-        <article class="day muted"></article>
-        <article class="day muted"></article>
-        <article class="day muted"></article>
-
-        <article class="day" data-day="1"><div class="day-head"><div class="day-num">01</div><div class="event-count">1</div></div><div class="day-label">Kickoff del sprint</div><div class="markers"><span class="marker strong"></span></div></article>
-        <article class="day" data-day="2"><div class="day-head"><div class="day-num">02</div></div><div class="day-label">Sin reuniones</div><div class="markers"><span class="marker"></span></div></article>
-        <article class="day" data-day="3"><div class="day-head"><div class="day-num">03</div></div><div class="day-label">Buffer y notas</div><div class="markers"><span class="marker"></span></div></article>
-        <article class="day today featured selected" data-day="4"><div class="day-head"><div class="day-num">04</div><div class="event-count">2</div></div><div class="day-label">Review UI y handoff</div><div class="markers"><span class="marker strong"></span><span class="marker strong"></span></div></article>
-        <article class="day" data-day="5"><div class="day-head"><div class="day-num">05</div></div><div class="day-label">Trabajo profundo</div><div class="markers"><span class="marker"></span></div></article>
-        <article class="day" data-day="6"><div class="day-head"><div class="day-num">06</div></div><div class="day-label">Ajustes visuales</div><div class="markers"><span class="marker"></span></div></article>
-        <article class="day" data-day="7"><div class="day-head"><div class="day-num">07</div><div class="event-count">1</div></div><div class="day-label">Mesa editorial</div><div class="markers"><span class="marker strong"></span></div></article>
-        <article class="day" data-day="8"><div class="day-head"><div class="day-num">08</div></div><div class="day-label">Dia abierto</div><div class="markers"><span class="marker"></span></div></article>
-        <article class="day" data-day="9"><div class="day-head"><div class="day-num">09</div></div><div class="day-label">Sin carga</div><div class="markers"><span class="marker"></span></div></article>
-        <article class="day" data-day="10"><div class="day-head"><div class="day-num">10</div></div><div class="day-label">Documentacion</div><div class="markers"><span class="marker"></span></div></article>
-        <article class="day" data-day="11"><div class="day-head"><div class="day-num">11</div></div><div class="day-label">Foco sin reuniones</div><div class="markers"><span class="marker"></span></div></article>
-        <article class="day" data-day="12"><div class="day-head"><div class="day-num">12</div><div class="event-count">2</div></div><div class="day-label">QA visual y patrones</div><div class="markers"><span class="marker strong"></span><span class="marker"></span></div></article>
-        <article class="day" data-day="13"><div class="day-head"><div class="day-num">13</div></div><div class="day-label">Refactor liviano</div><div class="markers"><span class="marker"></span></div></article>
-        <article class="day" data-day="14"><div class="day-head"><div class="day-num">14</div></div><div class="day-label">Correcciones</div><div class="markers"><span class="marker"></span></div></article>
-        <article class="day" data-day="15"><div class="day-head"><div class="day-num">15</div></div><div class="day-label">Entrega parcial</div><div class="markers"><span class="marker strong"></span></div></article>
-        <article class="day" data-day="16"><div class="day-head"><div class="day-num">16</div></div><div class="day-label">Descanso del equipo</div><div class="markers"><span class="marker"></span></div></article>
-        <article class="day" data-day="17"><div class="day-head"><div class="day-num">17</div></div><div class="day-label">Planificacion ligera</div><div class="markers"><span class="marker"></span></div></article>
-        <article class="day" data-day="18"><div class="day-head"><div class="day-num">18</div><div class="event-count">1</div></div><div class="day-label">Demo interna</div><div class="markers"><span class="marker strong"></span></div></article>
-        <article class="day" data-day="19"><div class="day-head"><div class="day-num">19</div></div><div class="day-label">Pulido visual</div><div class="markers"><span class="marker"></span></div></article>
-        <article class="day" data-day="20"><div class="day-head"><div class="day-num">20</div></div><div class="day-label">Backlog y cleanup</div><div class="markers"><span class="marker"></span></div></article>
-        <article class="day" data-day="21"><div class="day-head"><div class="day-num">21</div><div class="event-count">1</div></div><div class="day-label">Bloque silencioso</div><div class="markers"><span class="marker strong"></span></div></article>
-        <article class="day" data-day="22"><div class="day-head"><div class="day-num">22</div></div><div class="day-label">Sin agenda</div><div class="markers"><span class="marker"></span></div></article>
-        <article class="day" data-day="23"><div class="day-head"><div class="day-num">23</div></div><div class="day-label">Notas y archivos</div><div class="markers"><span class="marker"></span></div></article>
-        <article class="day" data-day="24"><div class="day-head"><div class="day-num">24</div></div><div class="day-label">Revision interna</div><div class="markers"><span class="marker"></span></div></article>
-        <article class="day" data-day="25"><div class="day-head"><div class="day-num">25</div></div><div class="day-label">Foco libre</div><div class="markers"><span class="marker"></span></div></article>
-        <article class="day" data-day="26"><div class="day-head"><div class="day-num">26</div></div><div class="day-label">QA final</div><div class="markers"><span class="marker"></span></div></article>
-        <article class="day featured" data-day="27"><div class="day-head"><div class="day-num">27</div><div class="event-count">2</div></div><div class="day-label">Release candidate</div><div class="markers"><span class="marker strong"></span><span class="marker strong"></span></div></article>
-        <article class="day" data-day="28"><div class="day-head"><div class="day-num">28</div></div><div class="day-label">Ajustes chicos</div><div class="markers"><span class="marker"></span></div></article>
-        <article class="day" data-day="29"><div class="day-head"><div class="day-num">29</div></div><div class="day-label">Cierre del mes</div><div class="markers"><span class="marker"></span></div></article>
-        <article class="day" data-day="30"><div class="day-head"><div class="day-num">30</div></div><div class="day-label">Sin eventos</div><div class="markers"><span class="marker"></span></div></article>
-        <article class="day" data-day="31"><div class="day-head"><div class="day-num">31</div></div><div class="day-label">Reset y nuevo ciclo</div><div class="markers"><span class="marker"></span></div></article>
       </div>
     </div>
 
@@ -1033,13 +1056,13 @@ body.calendar-page-react #root {
       <div class="footer-main">
         <div class="legend">
           <div class="legend-item"><span class="legend-dot strong"></span>dia con evento</div>
-          <div class="legend-item"><span class="legend-dot"></span>dia liviano</div>
+          <div class="legend-item"><span class="legend-dot"></span>dia libre</div>
           <div class="legend-item"><span class="legend-dot strong"></span>hoy destacado</div>
         </div>
         <div class="event-tray">
           <div class="event-tray-head">
             <span>dia activo</span>
-            <strong id="activeDayLabel">04 mayo</strong>
+            <strong id="activeDayLabel">—</strong>
           </div>
           <div class="event-pills" id="eventPills"></div>
           <div class="event-actions">
@@ -1048,18 +1071,19 @@ body.calendar-page-react #root {
           </div>
         </div>
       </div>
-      <div class="note">Selecciona un dia para editar eventos y mantener tu agenda personal al dia.</div>
+      <div class="note">Selecciona un dia para ver y editar sus eventos.</div>
     </div>
   </section>
 </main>
+
 <div class="day-modal" id="dayModal" aria-hidden="true">
   <div class="day-modal-backdrop" id="dayModalBackdrop"></div>
   <section class="day-modal-card" role="dialog" aria-modal="true" aria-labelledby="modalDayTitle">
     <div class="day-modal-header">
       <div>
         <span class="day-modal-kicker">detalle del dia</span>
-        <h2 class="day-modal-title" id="modalDayTitle">04</h2>
-        <p class="day-modal-subtitle" id="modalDaySubtitle">Mayo 2026</p>
+        <h2 class="day-modal-title" id="modalDayTitle">—</h2>
+        <p class="day-modal-subtitle" id="modalDaySubtitle">—</p>
       </div>
       <button class="icon-btn day-modal-close" id="closeModalBtn" type="button" aria-label="Cerrar detalle">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
@@ -1067,10 +1091,50 @@ body.calendar-page-react #root {
     </div>
     <div class="day-modal-body" id="modalEventList"></div>
     <div class="day-modal-actions">
-      <div class="day-modal-note">Selecciona un evento para enfocarte y usa los botones para sumarlo o quitarlo de tu agenda.</div>
+      <div class="day-modal-note">Selecciona un evento o usa los botones para gestionarlo.</div>
       <div class="event-actions">
         <button class="event-btn primary" id="modalAddEventBtn" type="button">agregar evento</button>
         <button class="event-btn" id="modalRemoveEventBtn" type="button">quitar evento</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="create-event-modal" id="createEventModal" aria-hidden="true">
+  <div class="create-event-backdrop" id="createEventBackdrop"></div>
+  <section class="day-modal-card" role="dialog" aria-modal="true" aria-labelledby="createEventHeading">
+    <div class="day-modal-header">
+      <div>
+        <span class="day-modal-kicker">nuevo evento</span>
+        <h2 class="day-modal-title" id="createEventHeading" style="font-size:clamp(28px,4vw,48px);letter-spacing:-0.04em">Crear evento</h2>
+        <p class="day-modal-subtitle" id="createEventSubtitle">—</p>
+      </div>
+      <button class="icon-btn" id="closeCreateEventBtn" type="button" aria-label="Cancelar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="day-modal-body">
+      <div class="form-group">
+        <label class="form-label" for="newEventTitle">Título</label>
+        <input class="form-input" id="newEventTitle" type="text" placeholder="Ej: Reunión de equipo" maxlength="120" />
+      </div>
+      <div class="form-time-row">
+        <div class="form-group">
+          <label class="form-label" for="newEventStart">Hora inicio</label>
+          <input class="form-input" id="newEventStart" type="time" value="09:00" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="newEventEnd">Hora fin</label>
+          <input class="form-input" id="newEventEnd" type="time" value="10:00" />
+        </div>
+      </div>
+      <p id="createEventError" style="color:oklch(65% 0.2 20);font-size:13px;margin:0;display:none"></p>
+    </div>
+    <div class="day-modal-actions">
+      <div class="day-modal-note">El evento se guardará en tu agenda principal.</div>
+      <div class="event-actions">
+        <button class="event-btn" id="cancelCreateEventBtn" type="button">Cancelar</button>
+        <button class="event-btn primary" id="submitCreateEventBtn" type="button">Guardar evento</button>
       </div>
     </div>
   </section>

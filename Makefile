@@ -31,7 +31,7 @@ help:
 install: install-backend install-frontend
 
 install-backend:
-	cd $(BACKEND_DIR) && poetry install
+	cd $(BACKEND_DIR) && poetry lock && poetry install
 	cd $(BACKEND_DIR) && poetry run python seed.py
 
 install-frontend:

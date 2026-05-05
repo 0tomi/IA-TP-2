@@ -13,9 +13,15 @@ type CalendarEvent = {
 declare global {
   interface Window {
     openChatPage?: () => void;
+    openAgendasPage?: () => void;
     toggleCalendarTheme?: () => void;
   }
 }
+
+const MONTH_NAMES = [
+  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
+];
 
 export function CalendarPage() {
   const navigate = useNavigate();
@@ -23,97 +29,126 @@ export function CalendarPage() {
   const bodyHtml = useMemo(() => calendarTemplate.bodyHtml, []);
 
   useEffect(() => {
-    const eventTemplates: CalendarEvent[] = [
-      { time: "09:00", label: "Standup" },
-      { time: "11:30", label: "Review" },
-      { time: "14:00", label: "Focus block" },
-      { time: "16:30", label: "Sync" },
-      { time: "18:00", label: "Cierre" }
-    ];
-
-    const dayNodes = Array.from(document.querySelectorAll<HTMLElement>(".day[data-day]"));
-    const eventPills = document.getElementById("eventPills");
-    const activeDayLabel = document.getElementById("activeDayLabel");
-    const addEventBtn = document.getElementById("addEventBtn") as HTMLButtonElement | null;
-    const removeEventBtn = document.getElementById("removeEventBtn") as HTMLButtonElement | null;
-    const dayModal = document.getElementById("dayModal");
-    const dayModalBackdrop = document.getElementById("dayModalBackdrop");
-    const closeModalBtn = document.getElementById("closeModalBtn") as HTMLButtonElement | null;
-    const modalDayTitle = document.getElementById("modalDayTitle");
-    const modalDaySubtitle = document.getElementById("modalDaySubtitle");
-    const modalEventList = document.getElementById("modalEventList");
-    const modalAddEventBtn = document.getElementById("modalAddEventBtn") as HTMLButtonElement | null;
+    // ── DOM refs ──────────────────────────────────────────────────────────────
+    const eventPills        = document.getElementById("eventPills");
+    const activeDayLabel    = document.getElementById("activeDayLabel");
+    const addEventBtn       = document.getElementById("addEventBtn") as HTMLButtonElement | null;
+    const removeEventBtn    = document.getElementById("removeEventBtn") as HTMLButtonElement | null;
+    const dayModal          = document.getElementById("dayModal");
+    const dayModalBackdrop  = document.getElementById("dayModalBackdrop");
+    const closeModalBtn     = document.getElementById("closeModalBtn") as HTMLButtonElement | null;
+    const modalDayTitle     = document.getElementById("modalDayTitle");
+    const modalDaySubtitle  = document.getElementById("modalDaySubtitle");
+    const modalEventList    = document.getElementById("modalEventList");
+    const modalAddEventBtn  = document.getElementById("modalAddEventBtn") as HTMLButtonElement | null;
     const modalRemoveEventBtn = document.getElementById("modalRemoveEventBtn") as HTMLButtonElement | null;
-    const themeLabel = document.getElementById("calendarThemeLabel");
+    const themeLabel        = document.getElementById("calendarThemeLabel");
+    const monthTitle        = document.getElementById("calendarMonthTitle");
+    const prevMonthBtn      = document.getElementById("prevMonthBtn") as HTMLButtonElement | null;
+    const nextMonthBtn      = document.getElementById("nextMonthBtn") as HTMLButtonElement | null;
+    const todayBtn          = document.getElementById("todayBtn") as HTMLButtonElement | null;
+    const calendarGrid      = document.getElementById("calendarGrid");
+    const statEventCount    = document.getElementById("statEventCount");
+    const statDaysWithEvents = document.getElementById("statDaysWithEvents");
+    const statMonthLabel    = document.getElementById("statMonthLabel");
+
+    // Create event modal
+    const createEventModal    = document.getElementById("createEventModal");
+    const createEventBackdrop = document.getElementById("createEventBackdrop");
+    const closeCreateEventBtn = document.getElementById("closeCreateEventBtn") as HTMLButtonElement | null;
+    const cancelCreateEventBtn = document.getElementById("cancelCreateEventBtn") as HTMLButtonElement | null;
+    const submitCreateEventBtn = document.getElementById("submitCreateEventBtn") as HTMLButtonElement | null;
+    const newEventTitle       = document.getElementById("newEventTitle") as HTMLInputElement | null;
+    const newEventStart       = document.getElementById("newEventStart") as HTMLInputElement | null;
+    const newEventEnd         = document.getElementById("newEventEnd") as HTMLInputElement | null;
+    const createEventSubtitle = document.getElementById("createEventSubtitle");
+    const createEventError    = document.getElementById("createEventError");
 
     if (
-      !eventPills ||
-      !activeDayLabel ||
-      !addEventBtn ||
-      !removeEventBtn ||
-      !dayModal ||
-      !dayModalBackdrop ||
-      !closeModalBtn ||
-      !modalDayTitle ||
-      !modalDaySubtitle ||
-      !modalEventList ||
-      !modalAddEventBtn ||
-      !modalRemoveEventBtn ||
-      !themeLabel
-    ) {
-      return;
-    }
+      !eventPills || !activeDayLabel || !addEventBtn || !removeEventBtn ||
+      !dayModal || !dayModalBackdrop || !closeModalBtn || !modalDayTitle ||
+      !modalDaySubtitle || !modalEventList || !modalAddEventBtn || !modalRemoveEventBtn ||
+      !themeLabel || !monthTitle || !prevMonthBtn || !nextMonthBtn || !todayBtn ||
+      !calendarGrid || !createEventModal || !createEventBackdrop || !closeCreateEventBtn ||
+      !cancelCreateEventBtn || !submitCreateEventBtn || !newEventTitle || !newEventStart ||
+      !newEventEnd || !createEventSubtitle || !createEventError
+    ) return;
 
+    // ── State ─────────────────────────────────────────────────────────────────
     let cancelled = false;
-    let selectedDay = 4;
+    const now = new Date();
+    let currentMonth = now.getMonth() + 1;
+    let currentYear  = now.getFullYear();
+    let selectedDay  = now.getDate();
     let selectedEventIndex = 0;
-    let nextTemplateIndex = 0;
-    const themeStorageKey = "agenda-theme";
     const eventsByDay: Record<number, CalendarEvent[]> = {};
+    const themeStorageKey = "agenda-theme";
 
+    // ── Theme ─────────────────────────────────────────────────────────────────
     const applyTheme = (theme: "light" | "dark") => {
       document.documentElement.dataset.theme = theme;
       themeLabel.textContent = theme === "dark" ? "Modo oscuro" : "Modo claro";
     };
 
-    const getSavedTheme = (): "light" | "dark" => {
-      const saved = window.localStorage.getItem(themeStorageKey);
-      return saved === "dark" ? "dark" : "light";
-    };
+    const getSavedTheme = (): "light" | "dark" =>
+      window.localStorage.getItem(themeStorageKey) === "dark" ? "dark" : "light";
 
     const toggleTheme = () => {
-      const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-      window.localStorage.setItem(themeStorageKey, nextTheme);
-      applyTheme(nextTheme as "light" | "dark");
-    };
-
-    const openChatPage = () => {
-      navigate("/chat");
+      const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+      window.localStorage.setItem(themeStorageKey, next);
+      applyTheme(next as "light" | "dark");
     };
 
     applyTheme(getSavedTheme());
 
+    // ── Helpers ───────────────────────────────────────────────────────────────
     const ensureEvents = (day: number) => {
       if (!eventsByDay[day]) eventsByDay[day] = [];
       return eventsByDay[day];
     };
 
-    const formatDay = (day: number) => `${String(day).padStart(2, "0")} mayo`;
+    const formatDay = (day: number) =>
+      `${String(day).padStart(2, "0")} ${MONTH_NAMES[currentMonth - 1].toLowerCase()}`;
 
-    const openModal = () => {
-      dayModal.classList.add("is-open");
-      dayModal.setAttribute("aria-hidden", "false");
+    // ── Grid generation ───────────────────────────────────────────────────────
+    const generateGrid = (month: number, year: number) => {
+      // Remove all day articles (keep the 7 weekday headers)
+      const children = Array.from(calendarGrid.children);
+      children.slice(7).forEach((c) => c.remove());
+
+      const firstDayJs = new Date(year, month - 1, 1).getDay(); // 0=Sun
+      const daysInMonth = new Date(year, month, 0).getDate();
+      const offset = (firstDayJs + 6) % 7; // 0=Mon
+
+      for (let i = 0; i < offset; i++) {
+        const muted = document.createElement("article");
+        muted.className = "day muted";
+        calendarGrid.appendChild(muted);
+      }
+
+      const today = new Date();
+      for (let d = 1; d <= daysInMonth; d++) {
+        const article = document.createElement("article");
+        article.className = "day";
+        article.dataset.day = String(d);
+        const isToday =
+          today.getDate() === d &&
+          today.getMonth() + 1 === month &&
+          today.getFullYear() === year;
+        if (isToday) article.classList.add("today");
+        article.innerHTML = `
+          <div class="day-head"><div class="day-num">${String(d).padStart(2, "0")}</div></div>
+          <div class="day-label">Sin eventos</div>
+          <div class="markers"><span class="marker"></span></div>
+        `;
+        calendarGrid.appendChild(article);
+      }
     };
 
-    const closeModal = () => {
-      dayModal.classList.remove("is-open");
-      dayModal.setAttribute("aria-hidden", "true");
-    };
-
+    // ── Day card sync ─────────────────────────────────────────────────────────
     const syncDayCard = (day: number) => {
       const card = document.querySelector<HTMLElement>(`.day[data-day="${day}"]`);
       if (!card) return;
-
       const events = ensureEvents(day);
       const count = card.querySelector(".event-count");
       const markers = card.querySelector(".markers");
@@ -129,11 +164,11 @@ export function CalendarPage() {
           card.querySelector(".day-head")?.appendChild(badge);
         }
         card.classList.add("featured");
-        if (label) label.textContent = events.map((event) => event.label).slice(0, 2).join(" · ");
+        if (label) label.textContent = events.map((e) => e.label).slice(0, 2).join(" · ");
         if (markers) {
           markers.innerHTML = events
             .slice(0, 3)
-            .map((_, index) => `<span class="marker ${index === 0 ? "strong" : ""}"></span>`)
+            .map((_, i) => `<span class="marker ${i === 0 ? "strong" : ""}"></span>`)
             .join("");
         }
       } else {
@@ -144,17 +179,35 @@ export function CalendarPage() {
       }
     };
 
+    // ── Stats update ──────────────────────────────────────────────────────────
+    const updateStats = () => {
+      const totalEvents = Object.values(eventsByDay).reduce((acc, evs) => acc + evs.length, 0);
+      const daysWithEvents = Object.values(eventsByDay).filter((evs) => evs.length > 0).length;
+      if (statEventCount) statEventCount.textContent = `${totalEvents} evento${totalEvents !== 1 ? "s" : ""}`;
+      if (statDaysWithEvents) statDaysWithEvents.textContent = `${daysWithEvents} dia${daysWithEvents !== 1 ? "s" : ""}`;
+      if (statMonthLabel) statMonthLabel.textContent = `${MONTH_NAMES[currentMonth - 1]} ${currentYear}`;
+    };
+
+    // ── Modal (day detail) ────────────────────────────────────────────────────
+    const openModal = () => {
+      dayModal.classList.add("is-open");
+      dayModal.setAttribute("aria-hidden", "false");
+    };
+
+    const closeModal = () => {
+      dayModal.classList.remove("is-open");
+      dayModal.setAttribute("aria-hidden", "true");
+    };
+
     const renderModal = () => {
       modalDayTitle.textContent = String(selectedDay).padStart(2, "0");
-      const eventCount = ensureEvents(selectedDay).length;
-      modalDaySubtitle.textContent = `Mayo 2026 · ${eventCount} evento${eventCount === 1 ? "" : "s"}`;
-
       const events = ensureEvents(selectedDay);
+      modalDaySubtitle.textContent = `${MONTH_NAMES[currentMonth - 1]} ${currentYear} · ${events.length} evento${events.length !== 1 ? "s" : ""}`;
       modalRemoveEventBtn.disabled = !events.length;
 
       if (!events.length) {
         modalEventList.innerHTML =
-          '<div class="modal-empty">No hay eventos en este dia. Puedes agregar uno nuevo y aparecera con su hora en esta vista.</div>';
+          '<div class="modal-empty">No hay eventos este dia. Usá "agregar evento" para crear uno.</div>';
         return;
       }
 
@@ -162,24 +215,25 @@ export function CalendarPage() {
 
       modalEventList.innerHTML = events
         .map(
-          (event, index) => `
-          <button class="modal-event ${index === selectedEventIndex ? "is-active" : ""}" type="button" data-modal-event-index="${index}">
-            <div class="modal-event-time">${event.time}</div>
-            <div class="modal-event-label">${event.label}</div>
+          (ev, i) => `
+          <button class="modal-event ${i === selectedEventIndex ? "is-active" : ""}" type="button" data-modal-event-index="${i}">
+            <div class="modal-event-time">${ev.time}</div>
+            <div class="modal-event-label">${ev.label}</div>
           </button>
         `
         )
         .join("");
 
-      modalEventList.querySelectorAll<HTMLElement>(".modal-event").forEach((button) => {
-        button.addEventListener("click", () => {
-          selectedEventIndex = Number(button.dataset.modalEventIndex);
+      modalEventList.querySelectorAll<HTMLElement>(".modal-event").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          selectedEventIndex = Number(btn.dataset.modalEventIndex);
           renderTray();
           renderModal();
         });
       });
     };
 
+    // ── Tray ──────────────────────────────────────────────────────────────────
     const renderTray = () => {
       activeDayLabel.textContent = formatDay(selectedDay);
       const events = ensureEvents(selectedDay);
@@ -195,18 +249,18 @@ export function CalendarPage() {
 
       eventPills.innerHTML = events
         .map(
-          (event, index) => `
-          <button class="event-pill ${index === selectedEventIndex ? "is-active" : ""}" type="button" data-event-index="${index}">
-            <span class="event-pill-time">${event.time}</span>
-            <span class="event-pill-label">${event.label}</span>
+          (ev, i) => `
+          <button class="event-pill ${i === selectedEventIndex ? "is-active" : ""}" type="button" data-event-index="${i}">
+            <span class="event-pill-time">${ev.time}</span>
+            <span class="event-pill-label">${ev.label}</span>
           </button>
         `
         )
         .join("");
 
-      eventPills.querySelectorAll<HTMLElement>(".event-pill").forEach((button) => {
-        button.addEventListener("click", () => {
-          selectedEventIndex = Number(button.dataset.eventIndex);
+      eventPills.querySelectorAll<HTMLElement>(".event-pill").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          selectedEventIndex = Number(btn.dataset.eventIndex);
           renderTray();
           renderModal();
           openModal();
@@ -214,87 +268,132 @@ export function CalendarPage() {
       });
     };
 
+    // ── Day selection ─────────────────────────────────────────────────────────
+    const getDayNodes = () =>
+      Array.from(document.querySelectorAll<HTMLElement>(".day[data-day]"));
+
     const selectDay = (day: number) => {
       selectedDay = day;
       selectedEventIndex = 0;
-      dayNodes.forEach((node) => node.classList.toggle("selected", Number(node.dataset.day) === day));
+      getDayNodes().forEach((n) =>
+        n.classList.toggle("selected", Number(n.dataset.day) === day)
+      );
       renderTray();
       renderModal();
       openModal();
     };
 
-    const addEvent = async () => {
-      const template = eventTemplates[nextTemplateIndex % eventTemplates.length];
-      nextTemplateIndex += 1;
+    const attachDayListeners = () => {
+      getDayNodes().forEach((n) =>
+        n.addEventListener("click", () => selectDay(Number(n.dataset.day)))
+      );
+    };
 
-      const [hh, mm] = template.time.split(":").map(Number);
-      const start = new Date(2026, 4, selectedDay, hh, mm);
-      const end = new Date(start.getTime() + 60 * 60 * 1000);
+    // ── Create event modal ────────────────────────────────────────────────────
+    const openCreateModal = () => {
+      createEventSubtitle.textContent = formatDay(selectedDay);
+      if (newEventTitle) newEventTitle.value = "";
+      if (newEventStart) newEventStart.value = "09:00";
+      if (newEventEnd) newEventEnd.value = "10:00";
+      createEventError.style.display = "none";
+      createEventModal.classList.add("is-open");
+      createEventModal.setAttribute("aria-hidden", "false");
+      newEventTitle?.focus();
+    };
+
+    const closeCreateModal = () => {
+      createEventModal.classList.remove("is-open");
+      createEventModal.setAttribute("aria-hidden", "true");
+    };
+
+    const handleCreateEvent = async () => {
+      const title = newEventTitle.value.trim();
+      const startTime = newEventStart.value;
+      const endTime = newEventEnd.value;
+
+      if (!title) {
+        createEventError.textContent = "El título no puede estar vacío.";
+        createEventError.style.display = "block";
+        newEventTitle.focus();
+        return;
+      }
+      if (!startTime || !endTime) {
+        createEventError.textContent = "Completá la hora de inicio y fin.";
+        createEventError.style.display = "block";
+        return;
+      }
+      if (endTime <= startTime) {
+        createEventError.textContent = "La hora de fin debe ser posterior al inicio.";
+        createEventError.style.display = "block";
+        return;
+      }
+
+      const [sh, sm] = startTime.split(":").map(Number);
+      const [eh, em] = endTime.split(":").map(Number);
+      const start = new Date(currentYear, currentMonth - 1, selectedDay, sh, sm);
+      const end = new Date(currentYear, currentMonth - 1, selectedDay, eh, em);
+
+      submitCreateEventBtn.disabled = true;
+      createEventError.style.display = "none";
 
       try {
         const created = await api.createEvent({
-          title: template.label,
+          title,
           start_datetime: start.toISOString().slice(0, 19),
           end_datetime: end.toISOString().slice(0, 19),
           agenda_id: 1,
           event_type_id: 1,
         });
-        const events = ensureEvents(selectedDay);
-        events.push({ time: template.time, label: created.title, id: created.id });
-        selectedEventIndex = events.length - 1;
+        ensureEvents(selectedDay).push({
+          time: startTime,
+          label: created.title,
+          id: created.id,
+        });
       } catch {
-        const events = ensureEvents(selectedDay);
-        events.push({ ...template });
-        selectedEventIndex = events.length - 1;
+        ensureEvents(selectedDay).push({ time: startTime, label: title });
       }
 
+      selectedEventIndex = ensureEvents(selectedDay).length - 1;
       syncDayCard(selectedDay);
+      updateStats();
       renderTray();
       renderModal();
+      closeCreateModal();
+      submitCreateEventBtn.disabled = false;
     };
 
+    // ── Remove event ──────────────────────────────────────────────────────────
     const removeEvent = async () => {
       const events = ensureEvents(selectedDay);
       if (!events.length) return;
-      const event = events[selectedEventIndex];
-
-      if (event.id !== undefined) {
-        try {
-          await api.deleteEvent(event.id);
-        } catch {
-          // si falla el delete remoto, igual removemos localmente
-        }
+      const ev = events[selectedEventIndex];
+      if (ev.id !== undefined) {
+        try { await api.deleteEvent(ev.id); } catch { /* no-op */ }
       }
-
       events.splice(selectedEventIndex, 1);
       selectedEventIndex = Math.max(0, selectedEventIndex - 1);
       syncDayCard(selectedDay);
+      updateStats();
       renderTray();
       renderModal();
     };
 
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") closeModal();
-    };
+    // ── Month loading ─────────────────────────────────────────────────────────
+    const loadMonth = async (month: number, year: number) => {
+      // Clear events
+      for (const k of Object.keys(eventsByDay)) delete eventsByDay[Number(k)];
 
-    addEventBtn.addEventListener("click", () => { void addEvent(); });
-    removeEventBtn.addEventListener("click", () => { void removeEvent(); });
-    modalAddEventBtn.addEventListener("click", () => { void addEvent(); });
-    modalRemoveEventBtn.addEventListener("click", () => { void removeEvent(); });
-    dayModalBackdrop.addEventListener("click", closeModal);
-    closeModalBtn.addEventListener("click", closeModal);
-    document.addEventListener("keydown", onKeyDown);
+      monthTitle.textContent = `${MONTH_NAMES[month - 1]} ${year}`;
+      generateGrid(month, year);
+      attachDayListeners();
 
-    dayNodes.forEach((node) => {
-      node.addEventListener("click", () => selectDay(Number(node.dataset.day)));
-    });
+      // Mark selected day
+      const selNode = document.querySelector<HTMLElement>(`.day[data-day="${selectedDay}"]`);
+      if (selNode) selNode.classList.add("selected");
 
-    window.openChatPage = openChatPage;
-    window.toggleCalendarTheme = toggleTheme;
-
-    const init = async () => {
       try {
-        const rawEvents = await api.getEvents(5, 2026);
+        const rawEvents = await api.getEvents(month, year);
+        if (cancelled) return;
         for (const ev of rawEvents) {
           const day = new Date(ev.start_datetime).getDate();
           const time = new Date(ev.start_datetime).toLocaleTimeString("es-AR", {
@@ -304,29 +403,86 @@ export function CalendarPage() {
           });
           (eventsByDay[day] ??= []).push({ time, label: ev.title, id: ev.id });
         }
-      } catch {
-        // backend no disponible: calendario arranca vacío
-      }
+      } catch { /* backend no disponible */ }
 
       if (cancelled) return;
-
-      dayNodes.forEach((node) => syncDayCard(Number(node.dataset.day)));
+      getDayNodes().forEach((n) => syncDayCard(Number(n.dataset.day)));
+      updateStats();
       renderTray();
       renderModal();
     };
 
-    void init();
+    // ── Navigation ────────────────────────────────────────────────────────────
+    const goToPrevMonth = () => {
+      currentMonth--;
+      if (currentMonth < 1) { currentMonth = 12; currentYear--; }
+      selectedDay = 1;
+      void loadMonth(currentMonth, currentYear);
+    };
+
+    const goToNextMonth = () => {
+      currentMonth++;
+      if (currentMonth > 12) { currentMonth = 1; currentYear++; }
+      selectedDay = 1;
+      void loadMonth(currentMonth, currentYear);
+    };
+
+    const goToToday = () => {
+      const t = new Date();
+      currentMonth = t.getMonth() + 1;
+      currentYear = t.getFullYear();
+      selectedDay = t.getDate();
+      void loadMonth(currentMonth, currentYear);
+    };
+
+    // ── Keyboard ──────────────────────────────────────────────────────────────
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        closeModal();
+        closeCreateModal();
+      }
+    };
+
+    // ── Wire up listeners ─────────────────────────────────────────────────────
+    prevMonthBtn.addEventListener("click", goToPrevMonth);
+    nextMonthBtn.addEventListener("click", goToNextMonth);
+    todayBtn.addEventListener("click", goToToday);
+
+    addEventBtn.addEventListener("click", openCreateModal);
+    removeEventBtn.addEventListener("click", () => { void removeEvent(); });
+    modalAddEventBtn.addEventListener("click", openCreateModal);
+    modalRemoveEventBtn.addEventListener("click", () => { void removeEvent(); });
+
+    dayModalBackdrop.addEventListener("click", closeModal);
+    closeModalBtn.addEventListener("click", closeModal);
+
+    createEventBackdrop.addEventListener("click", closeCreateModal);
+    closeCreateEventBtn.addEventListener("click", closeCreateModal);
+    cancelCreateEventBtn.addEventListener("click", closeCreateModal);
+    submitCreateEventBtn.addEventListener("click", () => { void handleCreateEvent(); });
+    newEventTitle.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") void handleCreateEvent();
+    });
+
+    document.addEventListener("keydown", onKeyDown);
+
+    window.openChatPage = () => navigate("/chat");
+    window.openAgendasPage = () => navigate("/agendas");
+    window.toggleCalendarTheme = toggleTheme;
+
+    // ── Initial load ──────────────────────────────────────────────────────────
+    void loadMonth(currentMonth, currentYear);
 
     return () => {
       cancelled = true;
-      addEventBtn.removeEventListener("click", () => { void addEvent(); });
-      removeEventBtn.removeEventListener("click", () => { void removeEvent(); });
-      modalAddEventBtn.removeEventListener("click", () => { void addEvent(); });
-      modalRemoveEventBtn.removeEventListener("click", () => { void removeEvent(); });
+      prevMonthBtn.removeEventListener("click", goToPrevMonth);
+      nextMonthBtn.removeEventListener("click", goToNextMonth);
+      todayBtn.removeEventListener("click", goToToday);
       dayModalBackdrop.removeEventListener("click", closeModal);
       closeModalBtn.removeEventListener("click", closeModal);
       document.removeEventListener("keydown", onKeyDown);
       delete window.openChatPage;
+      delete window.openAgendasPage;
       delete window.toggleCalendarTheme;
     };
   }, [bodyHtml, navigate]);
