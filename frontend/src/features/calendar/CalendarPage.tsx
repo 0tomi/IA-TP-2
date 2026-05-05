@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { InjectedPage } from "../../shared/components/InjectedPage";
 import { calendarTemplate } from "./calendarTemplate";
 
@@ -7,7 +8,15 @@ type CalendarEvent = {
   label: string;
 };
 
+declare global {
+  interface Window {
+    openChatPage?: () => void;
+    toggleCalendarTheme?: () => void;
+  }
+}
+
 export function CalendarPage() {
+  const navigate = useNavigate();
   const styleText = useMemo(() => calendarTemplate.styleText, []);
   const bodyHtml = useMemo(() => calendarTemplate.bodyHtml, []);
 
@@ -44,6 +53,7 @@ export function CalendarPage() {
     const modalEventList = document.getElementById("modalEventList");
     const modalAddEventBtn = document.getElementById("modalAddEventBtn") as HTMLButtonElement | null;
     const modalRemoveEventBtn = document.getElementById("modalRemoveEventBtn") as HTMLButtonElement | null;
+    const themeLabel = document.getElementById("calendarThemeLabel");
 
     if (
       !eventPills ||
@@ -57,7 +67,8 @@ export function CalendarPage() {
       !modalDaySubtitle ||
       !modalEventList ||
       !modalAddEventBtn ||
-      !modalRemoveEventBtn
+      !modalRemoveEventBtn ||
+      !themeLabel
     ) {
       return;
     }
@@ -65,6 +76,29 @@ export function CalendarPage() {
     let selectedDay = 4;
     let selectedEventIndex = 0;
     let nextTemplateIndex = 0;
+    const themeStorageKey = "agenda-theme";
+
+    const applyTheme = (theme: "light" | "dark") => {
+      document.documentElement.dataset.theme = theme;
+      themeLabel.textContent = theme === "dark" ? "Modo oscuro" : "Modo claro";
+    };
+
+    const getSavedTheme = (): "light" | "dark" => {
+      const saved = window.localStorage.getItem(themeStorageKey);
+      return saved === "dark" ? "dark" : "light";
+    };
+
+    const toggleTheme = () => {
+      const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+      window.localStorage.setItem(themeStorageKey, nextTheme);
+      applyTheme(nextTheme as "light" | "dark");
+    };
+
+    const openChatPage = () => {
+      navigate("/chat");
+    };
+
+    applyTheme(getSavedTheme());
 
     const ensureEvents = (day: number) => {
       if (!eventsByDay[day]) eventsByDay[day] = [];
@@ -233,6 +267,9 @@ export function CalendarPage() {
       node.addEventListener("click", () => selectDay(Number(node.dataset.day)));
     });
 
+    window.openChatPage = openChatPage;
+    window.toggleCalendarTheme = toggleTheme;
+
     dayNodes.forEach((node) => syncDayCard(Number(node.dataset.day)));
     renderTray();
     renderModal();
@@ -245,8 +282,10 @@ export function CalendarPage() {
       dayModalBackdrop.removeEventListener("click", closeModal);
       closeModalBtn.removeEventListener("click", closeModal);
       document.removeEventListener("keydown", onKeyDown);
+      delete window.openChatPage;
+      delete window.toggleCalendarTheme;
     };
-  }, [bodyHtml]);
+  }, [bodyHtml, navigate]);
 
   return <InjectedPage styleText={styleText} bodyHtml={bodyHtml} bodyClassName="calendar-page-react" />;
 }
