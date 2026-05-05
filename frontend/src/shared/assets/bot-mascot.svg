@@ -1,0 +1,115 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bodyFill" x1="28" y1="20" x2="97" y2="106" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FCFEFF"/>
+      <stop offset="0.48" stop-color="#F0F8FF"/>
+      <stop offset="1" stop-color="#D7EAFF"/>
+    </linearGradient>
+    <linearGradient id="accentFill" x1="38" y1="18" x2="92" y2="92" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7DCAFF"/>
+      <stop offset="1" stop-color="#2D7EFF"/>
+    </linearGradient>
+    <linearGradient id="faceGlow" x1="44" y1="36" x2="84" y2="88" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="cheekFill" x1="42" y1="70" x2="86" y2="78" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7CC8FF" stop-opacity="0.24"/>
+      <stop offset="1" stop-color="#6CB8FF" stop-opacity="0.12"/>
+    </linearGradient>
+    <filter id="softGlow" x="14" y="10" width="100" height="108" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+    <filter id="innerGlow" x="24" y="18" width="80" height="90" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="4"/>
+    </filter>
+  </defs>
+
+  <style>
+    .mascot-float {
+      animation: mascotFloat 3.8s ease-in-out infinite;
+      transform-origin: 64px 60px;
+    }
+
+    .eye-blink {
+      animation: mascotBlink 5.2s ease-in-out infinite;
+      transform-origin: center;
+      transform-box: fill-box;
+    }
+
+    .accent-bob {
+      animation: accentBob 3.2s ease-in-out infinite;
+      transform-origin: 64px 24px;
+    }
+
+    .sparkle-shift {
+      animation: sparkleShift 4.8s ease-in-out infinite;
+      transform-origin: center;
+    }
+
+    @keyframes mascotFloat {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-3px); }
+    }
+
+    @keyframes mascotBlink {
+      0%, 44%, 48%, 100% { transform: scaleY(1); }
+      46% { transform: scaleY(0.08); }
+    }
+
+    @keyframes accentBob {
+      0%, 100% { transform: translateY(0px) scale(1); opacity: 1; }
+      50% { transform: translateY(-1px) scale(1.04); opacity: 0.92; }
+    }
+
+    @keyframes sparkleShift {
+      0%, 100% { transform: scale(1) translateY(0px); opacity: 0.9; }
+      50% { transform: scale(1.08) translateY(-1px); opacity: 1; }
+    }
+  </style>
+
+  <g opacity="0.18" filter="url(#softGlow)" class="mascot-float">
+    <ellipse cx="64" cy="70" rx="32" ry="36" fill="#59AEFF"/>
+  </g>
+
+  <g class="mascot-float">
+    <g class="accent-bob">
+      <path d="M47 24L56 36H41L47 24Z" fill="url(#accentFill)"/>
+      <path d="M81 24L87 36H72L81 24Z" fill="url(#accentFill)"/>
+      <path d="M57 17C59.7279 14.3333 62.0612 13 64 13C65.9388 13 68.2721 14.3333 71 17" stroke="#74C5FF" stroke-width="3" stroke-linecap="round"/>
+    </g>
+
+    <path d="M64 22C84.4345 22 100 38.3713 100 58.5C100 83.4075 82.7368 102 64 102C45.2632 102 28 83.4075 28 58.5C28 38.3713 43.5655 22 64 22Z" fill="url(#bodyFill)"/>
+    <path d="M64 22C84.4345 22 100 38.3713 100 58.5C100 83.4075 82.7368 102 64 102C45.2632 102 28 83.4075 28 58.5C28 38.3713 43.5655 22 64 22Z" stroke="#7FBFFF" stroke-width="3"/>
+    <path d="M64 30C78.5977 30 90 40.5589 90 54.5C90 69.4834 79.2722 80 64 80C48.7278 80 38 69.4834 38 54.5C38 40.5589 49.4023 30 64 30Z" fill="url(#faceGlow)" opacity="0.48"/>
+    <path d="M40 42C43.5 35.5 51.5 31 61 31" stroke="#FFFFFF" stroke-opacity="0.7" stroke-width="3" stroke-linecap="round"/>
+
+    <g opacity="0.28" filter="url(#innerGlow)">
+      <ellipse cx="64" cy="58" rx="21" ry="23" fill="#84C8FF"/>
+    </g>
+
+    <g class="eye-blink">
+      <ellipse cx="50" cy="58" rx="8.8" ry="9.6" fill="#16202C"/>
+      <ellipse cx="78" cy="58" rx="8.8" ry="9.6" fill="#16202C"/>
+      <circle cx="52.5" cy="54.5" r="2.7" fill="white"/>
+      <circle cx="80.5" cy="54.5" r="2.7" fill="white"/>
+      <circle cx="48.8" cy="60.6" r="1.2" fill="#85CFFF" opacity="0.6"/>
+      <circle cx="76.8" cy="60.6" r="1.2" fill="#85CFFF" opacity="0.6"/>
+    </g>
+
+    <path d="M54 74.5C57.8265 78.7313 61.1599 80.5 64 80.5C66.8401 80.5 70.1735 78.7313 74 74.5" stroke="#2B7FFF" stroke-width="4" stroke-linecap="round"/>
+    <path d="M59.5 75.5C61 76.6 62.5 77.1 64 77.1C65.5 77.1 67 76.6 68.5 75.5" stroke="#7FC4FF" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+
+    <path d="M34 67C29.3333 68.8333 27 72.1667 27 77" stroke="#7FBFFF" stroke-width="3.5" stroke-linecap="round"/>
+    <path d="M94 67C98.6667 68.8333 101 72.1667 101 77" stroke="#7FBFFF" stroke-width="3.5" stroke-linecap="round"/>
+
+    <ellipse cx="49" cy="72.5" rx="6.2" ry="3.6" fill="url(#cheekFill)"/>
+    <ellipse cx="79" cy="72.5" rx="6.2" ry="3.6" fill="url(#cheekFill)"/>
+
+    <g class="sparkle-shift" opacity="0.82">
+      <path d="M89 42L91 46L95 48L91 50L89 54L87 50L83 48L87 46L89 42Z" fill="#CDE9FF"/>
+      <circle cx="37.5" cy="45.5" r="1.8" fill="#B4DEFF"/>
+      <circle cx="92.5" cy="66.5" r="1.4" fill="#B4DEFF"/>
+    </g>
+  </g>
+</svg>
