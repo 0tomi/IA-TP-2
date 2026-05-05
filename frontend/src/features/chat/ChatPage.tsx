@@ -114,7 +114,7 @@ Puedo ayudarte a probar la UI, el flujo de mensajes y el scroll automatico.`
       });
 
     const parseMarkdown = (text: string) => {
-      let out = text
+      const out = text
         .replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang: string, code: string) => {
           const escaped = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
           return `<div class="code-block">

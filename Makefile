@@ -3,7 +3,7 @@ FRONTEND_DIR := frontend
 
 .PHONY: help install install-backend install-frontend \
         dev dev-backend dev-frontend \
-        build test lint lint-fix
+        build test lint lint-fix lint-frontend
 
 help:
 	@echo "Comandos disponibles:"
@@ -61,3 +61,6 @@ lint:
 
 lint-fix:
 	cd $(BACKEND_DIR) && poetry run ruff check . --fix
+
+lint-frontend:
+	cd $(FRONTEND_DIR) && npm run lint
