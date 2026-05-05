@@ -2,8 +2,8 @@ BACKEND_DIR  := backend
 FRONTEND_DIR := frontend
 
 .PHONY: help install install-backend install-frontend \
-        dev dev-backend dev-frontend \
-        build test lint lint-fix lint-frontend
+         dev dev-backend dev-frontend \
+         build test lint lint-fix lint-frontend seed-dev
 
 help:
 	@echo "Comandos disponibles:"
@@ -23,6 +23,8 @@ help:
 	@echo "    make test             Corre los tests del backend"
 	@echo "    make lint             Valida el código del backend con Ruff"
 	@echo "    make lint-fix         Corrige errores automáticos con Ruff"
+	@echo "    make lint-frontend   Valida el código del frontend con ESLint"
+	@echo "    make seed-dev        Pobla la DB con 50+ eventos de desarrollo"
 
 # ── Instalación ───────────────────────────────────────────────────────────────
 
@@ -30,9 +32,14 @@ install: install-backend install-frontend
 
 install-backend:
 	cd $(BACKEND_DIR) && poetry install
+	cd $(BACKEND_DIR) && poetry run python seed.py
 
 install-frontend:
 	cd $(FRONTEND_DIR) && npm install
+	@if [ ! -f $(FRONTEND_DIR)/.env ]; then \
+		cp $(FRONTEND_DIR)/.env.example $(FRONTEND_DIR)/.env; \
+		echo "Creado $(FRONTEND_DIR)/.env desde .env.example"; \
+	fi
 
 # ── Desarrollo ────────────────────────────────────────────────────────────────
 
@@ -64,3 +71,8 @@ lint-fix:
 
 lint-frontend:
 	cd $(FRONTEND_DIR) && npm run lint
+
+# ── Seed ──────────────────────────────────────────────────────────────────────
+
+seed-dev:
+	cd $(BACKEND_DIR) && poetry run python seed-dev.py

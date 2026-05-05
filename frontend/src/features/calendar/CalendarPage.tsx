@@ -1,11 +1,13 @@
 import { useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { InjectedPage } from "../../shared/components/InjectedPage";
+import { api } from "../../shared/services/api";
 import { calendarTemplate } from "./calendarTemplate";
 
 type CalendarEvent = {
   time: string;
   label: string;
+  id?: number;
 };
 
 declare global {
@@ -21,17 +23,6 @@ export function CalendarPage() {
   const bodyHtml = useMemo(() => calendarTemplate.bodyHtml, []);
 
   useEffect(() => {
-    const eventsByDay: Record<number, CalendarEvent[]> = {
-      1: [{ time: "09:30", label: "Kickoff" }],
-      4: [{ time: "10:00", label: "Review UI" }, { time: "17:00", label: "Handoff" }],
-      7: [{ time: "11:00", label: "Mesa editorial" }],
-      12: [{ time: "09:00", label: "QA visual" }, { time: "16:30", label: "Patrones" }],
-      15: [{ time: "18:00", label: "Entrega parcial" }],
-      18: [{ time: "10:30", label: "Demo interna" }],
-      21: [{ time: "12:00", label: "Bloque foco" }],
-      27: [{ time: "09:45", label: "Release" }, { time: "17:30", label: "Retro" }]
-    };
-
     const eventTemplates: CalendarEvent[] = [
       { time: "09:00", label: "Standup" },
       { time: "11:30", label: "Review" },
@@ -73,10 +64,12 @@ export function CalendarPage() {
       return;
     }
 
+    let cancelled = false;
     let selectedDay = 4;
     let selectedEventIndex = 0;
     let nextTemplateIndex = 0;
     const themeStorageKey = "agenda-theme";
+    const eventsByDay: Record<number, CalendarEvent[]> = {};
 
     const applyTheme = (theme: "light" | "dark") => {
       document.documentElement.dataset.theme = theme;
@@ -230,20 +223,49 @@ export function CalendarPage() {
       openModal();
     };
 
-    const addEvent = () => {
+    const addEvent = async () => {
       const template = eventTemplates[nextTemplateIndex % eventTemplates.length];
       nextTemplateIndex += 1;
-      const events = ensureEvents(selectedDay);
-      events.push({ ...template });
-      selectedEventIndex = events.length - 1;
+
+      const [hh, mm] = template.time.split(":").map(Number);
+      const start = new Date(2026, 4, selectedDay, hh, mm);
+      const end = new Date(start.getTime() + 60 * 60 * 1000);
+
+      try {
+        const created = await api.createEvent({
+          title: template.label,
+          start_datetime: start.toISOString().slice(0, 19),
+          end_datetime: end.toISOString().slice(0, 19),
+          agenda_id: 1,
+          event_type_id: 1,
+        });
+        const events = ensureEvents(selectedDay);
+        events.push({ time: template.time, label: created.title, id: created.id });
+        selectedEventIndex = events.length - 1;
+      } catch {
+        const events = ensureEvents(selectedDay);
+        events.push({ ...template });
+        selectedEventIndex = events.length - 1;
+      }
+
       syncDayCard(selectedDay);
       renderTray();
       renderModal();
     };
 
-    const removeEvent = () => {
+    const removeEvent = async () => {
       const events = ensureEvents(selectedDay);
       if (!events.length) return;
+      const event = events[selectedEventIndex];
+
+      if (event.id !== undefined) {
+        try {
+          await api.deleteEvent(event.id);
+        } catch {
+          // si falla el delete remoto, igual removemos localmente
+        }
+      }
+
       events.splice(selectedEventIndex, 1);
       selectedEventIndex = Math.max(0, selectedEventIndex - 1);
       syncDayCard(selectedDay);
@@ -255,10 +277,10 @@ export function CalendarPage() {
       if (event.key === "Escape") closeModal();
     };
 
-    addEventBtn.addEventListener("click", addEvent);
-    removeEventBtn.addEventListener("click", removeEvent);
-    modalAddEventBtn.addEventListener("click", addEvent);
-    modalRemoveEventBtn.addEventListener("click", removeEvent);
+    addEventBtn.addEventListener("click", () => { void addEvent(); });
+    removeEventBtn.addEventListener("click", () => { void removeEvent(); });
+    modalAddEventBtn.addEventListener("click", () => { void addEvent(); });
+    modalRemoveEventBtn.addEventListener("click", () => { void removeEvent(); });
     dayModalBackdrop.addEventListener("click", closeModal);
     closeModalBtn.addEventListener("click", closeModal);
     document.addEventListener("keydown", onKeyDown);
@@ -270,15 +292,37 @@ export function CalendarPage() {
     window.openChatPage = openChatPage;
     window.toggleCalendarTheme = toggleTheme;
 
-    dayNodes.forEach((node) => syncDayCard(Number(node.dataset.day)));
-    renderTray();
-    renderModal();
+    const init = async () => {
+      try {
+        const rawEvents = await api.getEvents(5, 2026);
+        for (const ev of rawEvents) {
+          const day = new Date(ev.start_datetime).getDate();
+          const time = new Date(ev.start_datetime).toLocaleTimeString("es-AR", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+          });
+          (eventsByDay[day] ??= []).push({ time, label: ev.title, id: ev.id });
+        }
+      } catch {
+        // backend no disponible: calendario arranca vacío
+      }
+
+      if (cancelled) return;
+
+      dayNodes.forEach((node) => syncDayCard(Number(node.dataset.day)));
+      renderTray();
+      renderModal();
+    };
+
+    void init();
 
     return () => {
-      addEventBtn.removeEventListener("click", addEvent);
-      removeEventBtn.removeEventListener("click", removeEvent);
-      modalAddEventBtn.removeEventListener("click", addEvent);
-      modalRemoveEventBtn.removeEventListener("click", removeEvent);
+      cancelled = true;
+      addEventBtn.removeEventListener("click", () => { void addEvent(); });
+      removeEventBtn.removeEventListener("click", () => { void removeEvent(); });
+      modalAddEventBtn.removeEventListener("click", () => { void addEvent(); });
+      modalRemoveEventBtn.removeEventListener("click", () => { void removeEvent(); });
       dayModalBackdrop.removeEventListener("click", closeModal);
       closeModalBtn.removeEventListener("click", closeModal);
       document.removeEventListener("keydown", onKeyDown);

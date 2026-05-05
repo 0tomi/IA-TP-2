@@ -73,6 +73,14 @@ make lint-frontend      # Valida el frontend con ESLint
 make test               # Corre los tests del backend con pytest
 ```
 
+### Base de datos
+
+```bash
+make seed-dev           # Pobla la DB con 55+ eventos de desarrollo realistas
+```
+
+> Limpia los eventos existentes y recrea el conjunto de datos de desarrollo. Útil para resetear el estado de la DB al probar el calendario.
+
 ### Build
 
 ```bash
