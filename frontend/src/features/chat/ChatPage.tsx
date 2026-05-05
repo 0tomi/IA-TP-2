@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import botMascotUrl from "../../shared/assets/bot-mascot.svg?url";
 import { InjectedPage } from "../../shared/components/InjectedPage";
 import { chatTemplate } from "./chatTemplate";
@@ -9,13 +10,16 @@ declare global {
     exportChat?: () => void;
     sendSuggestion?: (text: string) => void;
     sendMessage?: () => void;
-    scrollToBottom?: (force?: boolean) => void;
+    scrollToBottom?: (smooth?: boolean) => void;
     copyCode?: (button: HTMLElement) => void;
+    openCalendarPage?: () => void;
+    toggleChatTheme?: () => void;
     webkitAudioContext?: typeof AudioContext;
   }
 }
 
 export function ChatPage() {
+  const navigate = useNavigate();
   const styleText = useMemo(() => chatTemplate.styleText, []);
   const bodyHtml = useMemo(() => chatTemplate.bodyHtml.split("__BOT_MASCOT_URL__").join(botMascotUrl), []);
 
@@ -78,30 +82,54 @@ export function ChatPage() {
     const scrollBottomBtn = document.getElementById("scrollBottomBtn") as HTMLButtonElement | null;
     const msgCountBadge = document.getElementById("msgCountBadge") as HTMLDivElement | null;
     const msgCountText = document.getElementById("msgCountText") as HTMLSpanElement | null;
+    const themeLabel = document.getElementById("themeLabel") as HTMLSpanElement | null;
 
-    if (!chatArea || !welcome || !msgInput || !sendBtn || !charCount || !scrollBottomBtn || !msgCountBadge || !msgCountText) {
+    if (
+      !chatArea ||
+      !welcome ||
+      !msgInput ||
+      !sendBtn ||
+      !charCount ||
+      !scrollBottomBtn ||
+      !msgCountBadge ||
+      !msgCountText ||
+      !themeLabel
+    ) {
       return;
     }
 
     const mascotSrc = botMascotUrl;
     let messageCount = 0;
     let isStreaming = false;
+    const themeStorageKey = "agenda-theme";
+
+    const applyTheme = (theme: "light" | "dark") => {
+      document.documentElement.dataset.theme = theme;
+      themeLabel.textContent = theme === "dark" ? "Modo oscuro" : "Modo claro";
+    };
+
+    const getSavedTheme = (): "light" | "dark" => {
+      const saved = window.localStorage.getItem(themeStorageKey);
+      return saved === "dark" ? "dark" : "light";
+    };
+
+    applyTheme(getSavedTheme());
 
     const hardcodedResponses = [
       {
         trigger: /hola|buenas|hello|hi/i,
-        response: `Hola. Soy dev.chat y ahora mismo estoy funcionando con respuestas hardcodeadas para la demo.
+        response: `Hola. Soy tu agenda inteligente personal.
 
-Puedo ayudarte a probar la UI, el flujo de mensajes y el scroll automatico.`
+Puedo ayudarte a organizar el dia, revisar compromisos y pensar recordatorios o bloques de foco para tu calendario.`
       },
       {
-        trigger: /html|css|js|javascript|codigo|código/i,
-        response: `La logica quedo simplificada a proposito:
+        trigger: /reunion|reunión|evento|agenda|calendario|recordatorio/i,
+        response: `Puedo trabajar con una logica simple de agenda para esta demo:
 
-- detecta algunos keywords
-- devuelve una respuesta fija
-- agrega el mensaje al chat
-- hace scroll hasta el final en cada paso`
+- detectar pedidos sobre eventos y recordatorios
+- responder con sugerencias organizadas
+- mantener el chat anclado abajo
+- desplazar la conversacion con scroll automatico suave`
       }
     ];
 
@@ -144,20 +172,21 @@ Puedo ayudarte a probar la UI, el flujo de mensajes y el scroll automatico.`
     const formatUserText = (text: string) =>
       text.replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
 
-    const scrollToBottom = (force = false) => {
+    const scrollToBottom = (smooth = true) => {
       requestAnimationFrame(() => {
         const wrap = chatArea.querySelector(".msg-center-wrap");
         const lastMessage = wrap?.lastElementChild as HTMLElement | null;
-        const extraBottomOffset = 56;
+        const extraBottomOffset = 32;
+        const behavior: ScrollBehavior = smooth ? "smooth" : "auto";
 
         if (lastMessage) {
           const lastMessageBottom = lastMessage.offsetTop + lastMessage.offsetHeight;
           const targetTop = Math.max(0, lastMessageBottom - chatArea.clientHeight + extraBottomOffset);
-          chatArea.scrollTo({ top: targetTop, behavior: force ? "smooth" : "auto" });
+          chatArea.scrollTo({ top: targetTop, behavior });
           return;
         }
 
-        chatArea.scrollTo({ top: chatArea.scrollHeight + extraBottomOffset, behavior: force ? "smooth" : "auto" });
+        chatArea.scrollTo({ top: chatArea.scrollHeight + extraBottomOffset, behavior });
       });
     };
 
@@ -252,9 +281,9 @@ Puedo ayudarte a probar la UI, el flujo de mensajes y el scroll automatico.`
       for (const item of hardcodedResponses) {
         if (item.trigger.test(text)) return item.response;
       }
-      return `Todavia no tengo una respuesta especifica para ese mensaje.
+      return `Todavia no tengo una respuesta puntual para ese pedido.
 
-Proba con algo como "hola" o pregunta por "html", "css" o "js" para ver las respuestas hardcodeadas.`;
+Prueba con algo como "organiza mi manana", "agrega un recordatorio" o "que tengo en el calendario".`;
     };
 
     const sendMessage = () => {
@@ -299,7 +328,7 @@ Proba con algo como "hola" o pregunta por "html", "css" o "js" para ver las resp
       wrap.appendChild(welcome);
       welcome.style.display = "flex";
       messageCount = 0;
-      scrollToBottom();
+      scrollToBottom(false);
     };
 
     const exportChat = () => {
@@ -327,6 +356,16 @@ Proba con algo como "hola" o pregunta por "html", "css" o "js" para ver las resp
         button.classList.add("copied");
         window.setTimeout(() => button.classList.remove("copied"), 1500);
       });
+    };
+
+    const toggleTheme = () => {
+      const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+      window.localStorage.setItem(themeStorageKey, nextTheme);
+      applyTheme(nextTheme as "light" | "dark");
+    };
+
+    const openCalendarPage = () => {
+      navigate("/calendar");
     };
 
     const onInputResize = () => {
@@ -360,12 +399,15 @@ Proba con algo como "hola" o pregunta por "html", "css" o "js" para ver las resp
     window.sendMessage = sendMessage;
     window.scrollToBottom = scrollToBottom;
     window.copyCode = copyCode;
+    window.openCalendarPage = openCalendarPage;
+    window.toggleChatTheme = toggleTheme;
 
     msgInput.addEventListener("input", onInputResize);
     msgInput.addEventListener("input", onInputCount);
     msgInput.addEventListener("keydown", onKeyDown);
     chatArea.addEventListener("scroll", onScroll);
     msgInput.focus();
+    scrollToBottom(false);
 
     return () => {
       msgInput.removeEventListener("input", onInputResize);
@@ -378,11 +420,13 @@ Proba con algo como "hola" o pregunta por "html", "css" o "js" para ver las resp
       delete window.sendMessage;
       delete window.scrollToBottom;
       delete window.copyCode;
+      delete window.openCalendarPage;
+      delete window.toggleChatTheme;
       if (audioCtx && audioCtx.state !== "closed") {
         void audioCtx.close();
       }
     };
-  }, [bodyHtml]);
+  }, [bodyHtml, navigate]);
 
   return <InjectedPage styleText={styleText} bodyHtml={bodyHtml} bodyClassName="chat-page-react" />;
 }
