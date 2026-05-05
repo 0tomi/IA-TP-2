@@ -1,0 +1,147 @@
+version: "3.1"
+
+nlu:
+- intent: greet
+  examples: |
+    - hey
+    - hello
+    - hi
+    - hello there
+    - good morning
+    - good evening
+    - moin
+    - hey there
+    - let's go
+    - hey dude
+    - goodmorning
+    - goodevening
+    - good afternoon
+
+- intent: goodbye
+  examples: |
+    - cu
+    - good by
+    - cee you later
+    - good night
+    - bye
+    - goodbye
+    - have a nice day
+    - see you around
+    - bye bye
+    - see you later
+
+- intent: affirm
+  examples: |
+    - yes
+    - y
+    - indeed
+    - of course
+    - that sounds good
+    - correct
+
+- intent: deny
+  examples: |
+    - no
+    - n
+    - never
+    - I don't think so
+    - don't like that
+    - no way
+    - not really
+
+- intent: mood_great
+  examples: |
+    - perfect
+    - great
+    - amazing
+    - feeling like a king
+    - wonderful
+    - I am feeling very good
+    - I am great
+    - I am amazing
+    - I am going to save the world
+    - super stoked
+    - extremely good
+    - so so perfect
+    - so good
+    - so perfect
+
+- intent: mood_unhappy
+  examples: |
+    - my day was horrible
+    - I am sad
+    - I don't feel very well
+    - I am disappointed
+    - super sad
+    - I'm so sad
+    - sad
+    - very sad
+    - unhappy
+    - not good
+    - not very good
+    - extremly sad
+    - so saad
+    - so sad
+
+- intent: bot_challenge
+  examples: |
+    - are you a bot?
+    - are you a human?
+    - am I talking to a bot?
+    - am I talking to a human?
+
+- intent: crear_evento
+  examples: |
+    - anotame un [parcial](tipo_evento) para [mañana](fecha)
+    - agendame una [juntada](tipo_evento) el [viernes](fecha)
+    - necesito guardar una [reunión](tipo_evento) el [lunes que viene](fecha)
+    - acordate que tengo un [final](tipo_evento) [mañana a la tarde](fecha)
+    - che, meteme un [turno médico](tipo_evento) para el [jueves](fecha)
+    - registrar [cumpleaños](tipo_evento) para el [15 de octubre](fecha)
+    - quiero crear un [evento](tipo_evento) para [hoy a las 20hs](fecha)
+    - haceme acordar del [recuperatorio](tipo_evento) el [miércoles](fecha)
+    - agregá una [clase de consulta](tipo_evento) para el [martes al mediodía](fecha)
+    - anotá que tengo [entrenamiento](tipo_evento) [hoy a la noche](fecha)
+    - guardame el [partido de fútbol](tipo_evento) para el [domingo](fecha)
+    - porfa, creá un [trabajo práctico](tipo_evento) para el [25 de mayo](fecha)
+    - agendá una [cena](tipo_evento) [pasado mañana](fecha)
+    - programá una [sesión de estudio](tipo_evento) para el [sábado a la mañana](fecha)
+    - quiero dejar anotado un [examen](tipo_evento) para la [semana que viene](fecha)
+
+- intent: consultar_evento
+  examples: |
+    - ¿qué tengo el [lunes](fecha)?
+    - ¿cuándo es el [parcial](tipo_evento)?
+    - ver mis eventos de [mañana](fecha)
+    - che, ¿qué hay para [hoy](fecha)?
+    - decime a qué hora es la [reunión](tipo_evento)
+    - pasame mi calendario del [viernes](fecha)
+    - ¿qué cosas tengo agendadas para el [jueves](fecha)?
+    - listame las cosas de la [semana que viene](fecha)
+    - ¿cuándo cae el [final](tipo_evento)?
+    - mostrame la agenda de [hoy](fecha)
+    - fijate qué tengo para [pasado mañana](fecha)
+    - ¿a qué hora tengo el [turno médico](tipo_evento)?
+    - quiero saber mis horarios del [sábado](fecha)
+    - tirame los datos del [cumpleaños](tipo_evento)
+    - buscame cuándo es la [juntada](tipo_evento)
+
+- intent: chitchat
+  examples: |
+    - hola
+    - buenas
+    - qué onda
+    - cómo andás
+    - todo bien?
+    - qué tal
+    - buen día
+    - buenas tardes
+    - buenas noches
+    - qué hacés
+    - che, hola
+    - saludo
+    - adiós
+    - chau
+    - nos vemos
+    - hasta luego
+    - saludos
