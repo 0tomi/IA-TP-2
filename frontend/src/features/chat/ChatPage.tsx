@@ -115,23 +115,7 @@ export function ChatPage() {
 
     applyTheme(getSavedTheme());
 
-    const hardcodedResponses = [
-      {
-        trigger: /hola|buenas|hello|hi/i,
-        response: `Hola. Soy tu agenda inteligente personal.
 
-Puedo ayudarte a organizar el dia, revisar compromisos y pensar recordatorios o bloques de foco para tu calendario.`
-      },
-      {
-        trigger: /reunion|reunión|evento|agenda|calendario|recordatorio/i,
-        response: `Puedo trabajar con una logica simple de agenda para esta demo:
-
-- detectar pedidos sobre eventos y recordatorios
-- responder con sugerencias organizadas
-- mantener el chat anclado abajo
-- desplazar la conversacion con scroll automatico suave`
-      }
-    ];
 
     const now = () =>
       new Date().toLocaleTimeString("es-AR", {
@@ -277,16 +261,9 @@ Puedo ayudarte a organizar el dia, revisar compromisos y pensar recordatorios o 
       if (card) streamText(card, text);
     };
 
-    const generateResponse = (text: string) => {
-      for (const item of hardcodedResponses) {
-        if (item.trigger.test(text)) return item.response;
-      }
-      return `Todavia no tengo una respuesta puntual para ese pedido.
 
-Prueba con algo como "organiza mi manana", "agrega un recordatorio" o "que tengo en el calendario".`;
-    };
 
-    const sendMessage = () => {
+    const sendMessage = async () => {
       const text = msgInput.value.trim();
       if (!text || isStreaming) return;
 
@@ -300,17 +277,47 @@ Prueba con algo como "organiza mi manana", "agrega un recordatorio" o "que tengo
       isStreaming = true;
 
       const typingRow = addTypingIndicator();
-      const responseDelay = 600 + Math.random() * 800;
 
-      window.setTimeout(() => {
+      try {
+        const response = await fetch("http://127.0.0.1:5005/webhooks/rest/webhook", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            sender: "user",
+            message: text,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Error en la comunicación con Rasa");
+        }
+
+        const data = await response.json();
         typingRow.remove();
-        const response = generateResponse(text);
-        addBotMessage(response);
+
+        if (data && data.length > 0) {
+          data.forEach((msg: { text: string }) => {
+            if (msg.text) {
+              addBotMessage(msg.text);
+            }
+          });
+        } else {
+          addBotMessage("El bot no devolvió ninguna respuesta.");
+        }
+      } catch (error) {
+        typingRow.remove();
+        addBotMessage(
+          "Error de conexión con el bot. Asegurate de que Rasa esté corriendo con el comando: `poetry run rasa run --enable-api --cors '*'`"
+        );
+        console.error("Rasa Error:", error);
+      } finally {
         isStreaming = false;
         sendBtn.disabled = false;
         msgInput.focus();
         scrollToBottom(true);
-      }, responseDelay);
+      }
     };
 
     const sendSuggestion = (text: string) => {
