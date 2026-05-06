@@ -31,6 +31,39 @@ def get_or_create_event_type(name: str) -> int:
         logger.error(f"Error fetching/creating event type: {e}")
         return 1 # Fallback ID
 
+def get_or_create_agenda(name: str = None) -> tuple[int | None, str | list]:
+    try:
+        response = requests.get(f"{API_BASE_URL}/agendas", timeout=5)
+        response.raise_for_status()
+        agendas = response.json()
+        
+        if not agendas:
+            # Crear defecto
+            default_name = name or "Agenda Principal"
+            create_resp = requests.post(f"{API_BASE_URL}/agendas", json={"name": default_name}, timeout=5)
+            create_resp.raise_for_status()
+            return create_resp.json()["id"], default_name
+            
+        if name:
+            # Buscar por nombre
+            for agenda in agendas:
+                if agenda["name"].lower() == name.lower():
+                    return agenda["id"], agenda["name"]
+            # No encontrada, la creamos
+            create_resp = requests.post(f"{API_BASE_URL}/agendas", json={"name": name.capitalize()}, timeout=5)
+            create_resp.raise_for_status()
+            return create_resp.json()["id"], name.capitalize()
+            
+        if len(agendas) == 1:
+            return agendas[0]["id"], agendas[0]["name"]
+            
+        # Mas de 1 agenda y no especificó
+        return None, [a["name"] for a in agendas]
+        
+    except Exception as e:
+        logger.error(f"Error fetching/creating agenda: {e}")
+        return 1, "Agenda Fallback"
+
 def parse_date(date_str: str):
     # Intentamos parsear la fecha, asumiendo idioma español y preferencia por el futuro
     dt = dateparser.parse(date_str, languages=['es'], settings={'PREFER_DATES_FROM': 'future'})
@@ -69,6 +102,7 @@ class ActionValidarYCrearEvento(Action):
 
         tipo_evento = tracker.get_slot("tipo_evento")
         fecha_evento = tracker.get_slot("fecha_evento")
+        nombre_agenda = tracker.get_slot("nombre_agenda")
 
         if not tipo_evento:
             dispatcher.utter_message(text="¿Qué tipo de evento es? (ej. parcial, reunión, juntada)")
@@ -77,6 +111,16 @@ class ActionValidarYCrearEvento(Action):
         if not fecha_evento:
             dispatcher.utter_message(text="¿Para cuándo lo querés agendar?")
             return []
+
+        # Lógica de Agenda
+        agenda_id, result = get_or_create_agenda(nombre_agenda)
+        if agenda_id is None:
+            # result es la lista de nombres
+            names_str = ", ".join(result)
+            dispatcher.utter_message(text=f"Tenés varias agendas guardadas: {names_str}. ¿En cuál querés que anote el evento?")
+            return []
+
+        agenda_name = result
 
         # Parsear fecha
         start_dt = parse_date(fecha_evento)
@@ -89,7 +133,7 @@ class ActionValidarYCrearEvento(Action):
             "title": tipo_evento.capitalize(),
             "start_datetime": start_dt.isoformat(),
             "end_datetime": end_dt.isoformat(),
-            "agenda_id": 1, # Default agenda
+            "agenda_id": agenda_id,
             "event_type_id": event_type_id,
             "status": "pending"
         }
@@ -97,14 +141,14 @@ class ActionValidarYCrearEvento(Action):
         try:
             resp = requests.post(f"{API_BASE_URL}/events", json=payload, timeout=5)
             resp.raise_for_status()
-            dispatcher.utter_message(text=f"¡Listo! Agendado '{tipo_evento}' para el {start_dt.strftime('%d/%m a las %H:%M')}.")
+            dispatcher.utter_message(text=f"¡Listo! Agendado '{tipo_evento}' para el {start_dt.strftime('%d/%m a las %H:%M')} en la agenda '{agenda_name}'.")
         except requests.exceptions.ConnectionError:
             dispatcher.utter_message(text="¡Uy! Parece que el servidor de agenda está apagado y no pude guardar el evento.")
         except Exception as e:
             dispatcher.utter_message(text=f"Hubo un error al intentar crear el evento: {str(e)}")
 
         # Limpiar slots después de usar
-        return [SlotSet("tipo_evento", None), SlotSet("fecha_evento", None)]
+        return [SlotSet("tipo_evento", None), SlotSet("fecha_evento", None), SlotSet("nombre_agenda", None)]
 
 class ActionConsultarEvento(Action):
     def name(self) -> Text:

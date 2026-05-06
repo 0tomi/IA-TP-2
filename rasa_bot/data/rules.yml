@@ -21,3 +21,8 @@ rules:
   steps:
   - intent: consultar_evento
   - action: action_consultar_evento
+
+- rule: Continuar creando evento tras informar agenda
+  steps:
+  - intent: informar_agenda
+  - action: action_validar_y_crear_evento

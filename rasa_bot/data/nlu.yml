@@ -66,3 +66,12 @@ nlu:
     - nos vemos
     - hasta luego
     - saludos
+
+- intent: informar_agenda
+  examples: |
+    - en la agenda [personal](nombre_agenda)
+    - guardalo en [trabajo](nombre_agenda)
+    - en la de [estudios](nombre_agenda)
+    - [personal](nombre_agenda)
+    - [trabajo](nombre_agenda)
+    - mandala a la agenda [facultad](nombre_agenda)

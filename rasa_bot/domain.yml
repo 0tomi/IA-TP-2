@@ -4,10 +4,12 @@ intents:
   - crear_evento
   - consultar_evento
   - chitchat
+  - informar_agenda
 
 entities:
   - tipo_evento
   - fecha
+  - nombre_agenda
 
 slots:
   tipo_evento:
@@ -15,6 +17,11 @@ slots:
     mappings:
     - type: from_entity
       entity: tipo_evento
+  nombre_agenda:
+    type: text
+    mappings:
+    - type: from_entity
+      entity: nombre_agenda
   fecha_evento:
     type: text
     mappings:
