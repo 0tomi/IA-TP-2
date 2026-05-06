@@ -1,34 +1,38 @@
 version: "3.1"
 
 intents:
-  - greet
-  - goodbye
-  - affirm
-  - deny
-  - mood_great
-  - mood_unhappy
-  - bot_challenge
+  - crear_evento
+  - consultar_evento
+  - chitchat
 
-responses:
-  utter_greet:
-  - text: "Hey! How are you?"
+entities:
+  - tipo_evento
+  - fecha
 
-  utter_cheer_up:
-  - text: "Here is something to cheer you up:"
-    image: "https://i.imgur.com/nGF1K8f.jpg"
+slots:
+  tipo_evento:
+    type: text
+    mappings:
+    - type: from_entity
+      entity: tipo_evento
+  fecha_evento:
+    type: text
+    mappings:
+    - type: from_entity
+      entity: fecha
+  chitchat_count:
+    type: float
+    initial_value: 0
+    mappings:
+    - type: custom
 
-  utter_did_that_help:
-  - text: "Did that help you?"
+actions:
+  - action_validar_y_crear_evento
+  - action_consultar_evento
+  - action_handle_chitchat
 
-  utter_happy:
-  - text: "Great, carry on!"
 
-  utter_goodbye:
-  - text: "Bye"
-
-  utter_iamabot:
-  - text: "I am a bot, powered by Rasa."
 
 session_config:
-  session_expiration_time: 60
-  carry_over_slots_to_new_session: true
+  session_expiration_time: 10
+  carry_over_slots_to_new_session: false
