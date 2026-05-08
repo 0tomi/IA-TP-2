@@ -1,0 +1,77 @@
+version: "3.1"
+
+nlu:
+
+
+- intent: crear_evento
+  examples: |
+    - anotame un [parcial](tipo_evento) para [mañana](fecha)
+    - agendame una [juntada](tipo_evento) el [viernes](fecha)
+    - necesito guardar una [reunión](tipo_evento) el [lunes que viene](fecha)
+    - acordate que tengo un [final](tipo_evento) [mañana a la tarde](fecha)
+    - che, meteme un [turno médico](tipo_evento) para el [jueves](fecha)
+    - registrar [cumpleaños](tipo_evento) para el [15 de octubre](fecha)
+    - quiero crear un [evento](tipo_evento) para [hoy a las 20hs](fecha)
+    - haceme acordar del [recuperatorio](tipo_evento) el [miércoles](fecha)
+    - agregá una [clase de consulta](tipo_evento) para el [martes al mediodía](fecha)
+    - anotá que tengo [entrenamiento](tipo_evento) [hoy a la noche](fecha)
+    - guardame el [partido de fútbol](tipo_evento) para el [domingo](fecha)
+    - porfa, creá un [trabajo práctico](tipo_evento) para el [25 de mayo](fecha)
+    - agendá una [cena](tipo_evento) [pasado mañana](fecha)
+    - programá una [sesión de estudio](tipo_evento) para el [sábado a la mañana](fecha)
+    - quiero dejar anotado un [examen](tipo_evento) para la [semana que viene](fecha)
+
+- intent: consultar_evento
+  examples: |
+    - ¿qué tengo el [lunes](fecha)?
+    - ¿cuándo es el [parcial](tipo_evento)?
+    - ver mis eventos de [mañana](fecha)
+    - che, ¿qué hay para [hoy](fecha)?
+    - decime a qué hora es la [reunión](tipo_evento)
+    - pasame mi calendario del [viernes](fecha)
+    - ¿qué cosas tengo agendadas para el [jueves](fecha)?
+    - listame las cosas de la [semana que viene](fecha)
+    - ¿cuándo cae el [final](tipo_evento)?
+    - mostrame la agenda de [hoy](fecha)
+    - fijate qué tengo para [pasado mañana](fecha)
+    - ¿a qué hora tengo el [turno médico](tipo_evento)?
+    - quiero saber mis horarios del [sábado](fecha)
+    - tirame los datos del [cumpleaños](tipo_evento)
+    - buscame cuándo es la [juntada](tipo_evento)
+
+- intent: chitchat
+  examples: |
+    - hola
+    - buenas
+    - qué onda
+    - que onda
+    - que onda pa
+    - q onda
+    - cómo andás
+    - como andas
+    - todo bien?
+    - todo piola
+    - qué tal
+    - que tal
+    - buen día
+    - buenas tardes
+    - buenas noches
+    - qué hacés
+    - que haces
+    - che, hola
+    - saludo
+    - adiós
+    - adios
+    - chau
+    - nos vemos
+    - hasta luego
+    - saludos
+
+- intent: informar_agenda
+  examples: |
+    - en la agenda [personal](nombre_agenda)
+    - guardalo en [trabajo](nombre_agenda)
+    - en la de [estudios](nombre_agenda)
+    - [personal](nombre_agenda)
+    - [trabajo](nombre_agenda)
+    - mandala a la agenda [facultad](nombre_agenda)

@@ -1,0 +1,45 @@
+version: "3.1"
+
+intents:
+  - crear_evento
+  - consultar_evento
+  - chitchat
+  - informar_agenda
+
+entities:
+  - tipo_evento
+  - fecha
+  - nombre_agenda
+
+slots:
+  tipo_evento:
+    type: text
+    mappings:
+    - type: from_entity
+      entity: tipo_evento
+  nombre_agenda:
+    type: text
+    mappings:
+    - type: from_entity
+      entity: nombre_agenda
+  fecha_evento:
+    type: text
+    mappings:
+    - type: from_entity
+      entity: fecha
+  chitchat_count:
+    type: float
+    initial_value: 0
+    mappings:
+    - type: custom
+
+actions:
+  - action_validar_y_crear_evento
+  - action_consultar_evento
+  - action_handle_chitchat
+
+
+
+session_config:
+  session_expiration_time: 10
+  carry_over_slots_to_new_session: false

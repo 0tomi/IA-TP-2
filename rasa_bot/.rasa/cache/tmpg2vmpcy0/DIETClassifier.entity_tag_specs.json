@@ -1,0 +1,36 @@
+[
+  {
+    "tag_name": "entity",
+    "ids_to_tags": {
+      "1": "B-fecha",
+      "2": "I-fecha",
+      "3": "L-fecha",
+      "4": "U-fecha",
+      "5": "B-nombre_agenda",
+      "6": "I-nombre_agenda",
+      "7": "L-nombre_agenda",
+      "8": "U-nombre_agenda",
+      "9": "B-tipo_evento",
+      "10": "I-tipo_evento",
+      "11": "L-tipo_evento",
+      "12": "U-tipo_evento",
+      "0": "O"
+    },
+    "tags_to_ids": {
+      "B-fecha": 1,
+      "I-fecha": 2,
+      "L-fecha": 3,
+      "U-fecha": 4,
+      "B-nombre_agenda": 5,
+      "I-nombre_agenda": 6,
+      "L-nombre_agenda": 7,
+      "U-nombre_agenda": 8,
+      "B-tipo_evento": 9,
+      "I-tipo_evento": 10,
+      "L-tipo_evento": 11,
+      "U-tipo_evento": 12,
+      "O": 0
+    },
+    "num_tags": 13
+  }
+]

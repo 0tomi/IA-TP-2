@@ -1,13 +1,16 @@
 import { useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { InjectedPage } from "../../shared/components/InjectedPage";
-import { api } from "../../shared/services/api";
+import { api, type ApiEvent } from "../../shared/services/api";
 import { calendarTemplate } from "./calendarTemplate";
 
 type CalendarEvent = {
   time: string;
   label: string;
   id?: number;
+  status?: string | null;
+  tone: string;
+  category: string;
 };
 
 declare global {
@@ -48,9 +51,13 @@ export function CalendarPage() {
     const nextMonthBtn      = document.getElementById("nextMonthBtn") as HTMLButtonElement | null;
     const todayBtn          = document.getElementById("todayBtn") as HTMLButtonElement | null;
     const calendarGrid      = document.getElementById("calendarGrid");
+    const calendarGridWrap  = document.querySelector(".calendar-grid-wrap") as HTMLDivElement | null;
     const statEventCount    = document.getElementById("statEventCount");
     const statDaysWithEvents = document.getElementById("statDaysWithEvents");
     const statMonthLabel    = document.getElementById("statMonthLabel");
+    const statFocusLabel    = document.getElementById("statFocusLabel");
+    const monthStatus       = document.getElementById("monthStatus");
+    const toastStack        = document.getElementById("calendarToastStack");
 
     // Create event modal
     const createEventModal    = document.getElementById("createEventModal");
@@ -69,7 +76,7 @@ export function CalendarPage() {
       !dayModal || !dayModalBackdrop || !closeModalBtn || !modalDayTitle ||
       !modalDaySubtitle || !modalEventList || !modalAddEventBtn || !modalRemoveEventBtn ||
       !themeLabel || !monthTitle || !prevMonthBtn || !nextMonthBtn || !todayBtn ||
-      !calendarGrid || !createEventModal || !createEventBackdrop || !closeCreateEventBtn ||
+      !calendarGrid || !calendarGridWrap || !createEventModal || !createEventBackdrop || !closeCreateEventBtn ||
       !cancelCreateEventBtn || !submitCreateEventBtn || !newEventTitle || !newEventStart ||
       !newEventEnd || !createEventSubtitle || !createEventError
     ) return;
@@ -83,6 +90,20 @@ export function CalendarPage() {
     let selectedEventIndex = 0;
     const eventsByDay: Record<number, CalendarEvent[]> = {};
     const themeStorageKey = "agenda-theme";
+
+    const showToast = (message: string, tone: "success" | "error" | "info" = "info") => {
+      if (!toastStack) return;
+
+      const toast = document.createElement("div");
+      toast.className = `calendar-toast ${tone}`;
+      toast.innerHTML = `<span class="calendar-toast-dot"></span><span>${message}</span>`;
+      toastStack.appendChild(toast);
+
+      window.setTimeout(() => {
+        toast.classList.add("hide");
+        window.setTimeout(() => toast.remove(), 220);
+      }, 3000);
+    };
 
     // ── Theme ─────────────────────────────────────────────────────────────────
     const applyTheme = (theme: "light" | "dark") => {
@@ -110,6 +131,31 @@ export function CalendarPage() {
     const formatDay = (day: number) =>
       `${String(day).padStart(2, "0")} ${MONTH_NAMES[currentMonth - 1].toLowerCase()}`;
 
+    const escapeHtml = (value: string) =>
+      value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+
+    const toneByText = (value: string) => {
+      const normalized = value.toLowerCase();
+      if (normalized.includes("reunion") || normalized.includes("meeting")) return "#5a8cff";
+      if (normalized.includes("estudio") || normalized.includes("foco") || normalized.includes("clase")) return "#5bcf8e";
+      if (normalized.includes("medic") || normalized.includes("turno") || normalized.includes("salud")) return "#ff8a65";
+      if (normalized.includes("record") || normalized.includes("llamar") || normalized.includes("tramite")) return "#f3b34c";
+      return "#9d78ff";
+    };
+
+    const eventTone = (event: ApiEvent) =>
+      event.event_type?.color?.trim()
+      || toneByText(event.event_type?.name || event.title || "");
+
+    const categoryLabel = (event: ApiEvent) =>
+      event.event_type?.name?.trim()
+      || (event.status?.trim() ? event.status : "agenda");
+
     // ── Grid generation ───────────────────────────────────────────────────────
     const generateGrid = (month: number, year: number) => {
       // Remove all day articles (keep the 7 weekday headers)
@@ -119,6 +165,11 @@ export function CalendarPage() {
       const firstDayJs = new Date(year, month - 1, 1).getDay(); // 0=Sun
       const daysInMonth = new Date(year, month, 0).getDate();
       const offset = (firstDayJs + 6) % 7; // 0=Mon
+      const totalSlots = offset + daysInMonth;
+      const weekRows = Math.ceil(totalSlots / 7);
+
+      calendarGrid.setAttribute("data-week-rows", String(weekRows));
+      calendarGrid.style.gridTemplateRows = `22px repeat(${weekRows}, minmax(118px, auto))`;
 
       for (let i = 0; i < offset; i++) {
         const muted = document.createElement("article");
@@ -138,7 +189,8 @@ export function CalendarPage() {
         if (isToday) article.classList.add("today");
         article.innerHTML = `
           <div class="day-head"><div class="day-num">${String(d).padStart(2, "0")}</div></div>
-          <div class="day-label">Sin eventos</div>
+          <div class="day-empty">Libre para planear</div>
+          <div class="day-events"></div>
           <div class="markers"><span class="marker"></span></div>
         `;
         calendarGrid.appendChild(article);
@@ -152,9 +204,12 @@ export function CalendarPage() {
       const events = ensureEvents(day);
       const count = card.querySelector(".event-count");
       const markers = card.querySelector(".markers");
-      const label = card.querySelector(".day-label");
+      const eventsList = card.querySelector(".day-events");
+      const emptyState = card.querySelector(".day-empty");
 
       if (events.length) {
+        const featuredTone = events[0]?.tone ?? "";
+        card.style.setProperty("--day-accent", featuredTone);
         if (count) {
           count.textContent = String(events.length);
         } else {
@@ -164,17 +219,32 @@ export function CalendarPage() {
           card.querySelector(".day-head")?.appendChild(badge);
         }
         card.classList.add("featured");
-        if (label) label.textContent = events.map((e) => e.label).slice(0, 2).join(" · ");
+        if (emptyState) emptyState.textContent = "";
+        if (eventsList) {
+          const visibleEvents = events.slice(0, 2);
+          const remainingEvents = events.length - visibleEvents.length;
+          eventsList.innerHTML = visibleEvents
+            .map((event) => `
+              <div class="day-event-row" style="--event-accent:${event.tone}">
+                <span class="day-event-time">${escapeHtml(event.time)}</span>
+                <span class="day-event-title">${escapeHtml(event.label)}</span>
+              </div>
+            `)
+            .join("")
+            + (remainingEvents > 0 ? `<div class="day-event-more">+${remainingEvents} mas</div>` : "");
+        }
         if (markers) {
           markers.innerHTML = events
-            .slice(0, 3)
-            .map((_, i) => `<span class="marker ${i === 0 ? "strong" : ""}"></span>`)
+            .slice(0, 4)
+            .map((event, i) => `<span class="marker ${i === 0 ? "strong" : ""}" style="--marker-tone:${event.tone}"></span>`)
             .join("");
         }
       } else {
         count?.remove();
         card.classList.remove("featured");
-        if (label) label.textContent = "Sin eventos";
+        card.style.removeProperty("--day-accent");
+        if (emptyState) emptyState.textContent = "Libre para planear";
+        if (eventsList) eventsList.innerHTML = "";
         if (markers) markers.innerHTML = '<span class="marker"></span>';
       }
     };
@@ -186,6 +256,13 @@ export function CalendarPage() {
       if (statEventCount) statEventCount.textContent = `${totalEvents} evento${totalEvents !== 1 ? "s" : ""}`;
       if (statDaysWithEvents) statDaysWithEvents.textContent = `${daysWithEvents} dia${daysWithEvents !== 1 ? "s" : ""}`;
       if (statMonthLabel) statMonthLabel.textContent = `${MONTH_NAMES[currentMonth - 1]} ${currentYear}`;
+      if (statFocusLabel) {
+        statFocusLabel.textContent = totalEvents === 0
+          ? "Mes liviano"
+          : totalEvents <= 8
+            ? "Carga balanceada"
+            : "Mes intenso";
+      }
     };
 
     // ── Modal (day detail) ────────────────────────────────────────────────────
@@ -207,7 +284,7 @@ export function CalendarPage() {
 
       if (!events.length) {
         modalEventList.innerHTML =
-          '<div class="modal-empty">No hay eventos este dia. Usá "agregar evento" para crear uno.</div>';
+          '<div class="modal-empty">No hay eventos este dia todavia. Sumá uno para que aparezca en tu agenda visual y en el chat.</div>';
         return;
       }
 
@@ -216,9 +293,12 @@ export function CalendarPage() {
       modalEventList.innerHTML = events
         .map(
           (ev, i) => `
-          <button class="modal-event ${i === selectedEventIndex ? "is-active" : ""}" type="button" data-modal-event-index="${i}">
+          <button class="modal-event ${i === selectedEventIndex ? "is-active" : ""}" type="button" data-modal-event-index="${i}" style="--event-accent:${ev.tone}">
             <div class="modal-event-time">${ev.time}</div>
-            <div class="modal-event-label">${ev.label}</div>
+            <div class="modal-event-copy">
+              <div class="modal-event-label">${escapeHtml(ev.label)}</div>
+              <div class="modal-event-meta">${escapeHtml(ev.category)}</div>
+            </div>
           </button>
         `
         )
@@ -239,7 +319,7 @@ export function CalendarPage() {
       const events = ensureEvents(selectedDay);
 
       if (!events.length) {
-        eventPills.innerHTML = '<div class="event-empty">Sin eventos para este dia</div>';
+        eventPills.innerHTML = '<div class="event-empty">Dia despejado. Perfecto para sumar un bloque de foco o una reunion corta.</div>';
         removeEventBtn.disabled = true;
         return;
       }
@@ -250,9 +330,12 @@ export function CalendarPage() {
       eventPills.innerHTML = events
         .map(
           (ev, i) => `
-          <button class="event-pill ${i === selectedEventIndex ? "is-active" : ""}" type="button" data-event-index="${i}">
+          <button class="event-pill ${i === selectedEventIndex ? "is-active" : ""}" type="button" data-event-index="${i}" style="--event-accent:${ev.tone}">
             <span class="event-pill-time">${ev.time}</span>
-            <span class="event-pill-label">${ev.label}</span>
+            <span class="event-pill-copy">
+              <span class="event-pill-label">${escapeHtml(ev.label)}</span>
+              <span class="event-pill-meta">${escapeHtml(ev.category)}</span>
+            </span>
           </button>
         `
         )
@@ -272,12 +355,36 @@ export function CalendarPage() {
     const getDayNodes = () =>
       Array.from(document.querySelectorAll<HTMLElement>(".day[data-day]"));
 
+    const focusDayInGrid = (day: number, smooth = false) => {
+      const target = document.querySelector<HTMLElement>(`.day[data-day="${day}"]`);
+      if (!target) return;
+
+      const targetTop = target.offsetTop - 12;
+      const maxScroll = Math.max(0, calendarGridWrap.scrollHeight - calendarGridWrap.clientHeight);
+      const nextTop = Math.min(Math.max(0, targetTop), maxScroll);
+
+      calendarGridWrap.scrollTo({
+        top: nextTop,
+        behavior: smooth ? "smooth" : "auto",
+      });
+    };
+
+    const focusDayInGridNow = (day: number) => {
+      const target = document.querySelector<HTMLElement>(`.day[data-day="${day}"]`);
+      if (!target) return;
+
+      const targetTop = target.offsetTop - 12;
+      const maxScroll = Math.max(0, calendarGridWrap.scrollHeight - calendarGridWrap.clientHeight);
+      calendarGridWrap.scrollTop = Math.min(Math.max(0, targetTop), maxScroll);
+    };
+
     const selectDay = (day: number) => {
       selectedDay = day;
       selectedEventIndex = 0;
       getDayNodes().forEach((n) =>
         n.classList.toggle("selected", Number(n.dataset.day) === day)
       );
+      focusDayInGrid(day, true);
       renderTray();
       renderModal();
       openModal();
@@ -348,9 +455,18 @@ export function CalendarPage() {
           time: startTime,
           label: created.title,
           id: created.id,
+          status: created.status,
+          tone: eventTone(created),
+          category: categoryLabel(created),
         });
-      } catch {
-        ensureEvents(selectedDay).push({ time: startTime, label: title });
+        showToast(`Evento "${created.title}" guardado.`, "success");
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "No se pudo guardar el evento.";
+        createEventError.textContent = message;
+        createEventError.style.display = "block";
+        submitCreateEventBtn.disabled = false;
+        showToast(message, "error");
+        return;
       }
 
       selectedEventIndex = ensureEvents(selectedDay).length - 1;
@@ -368,7 +484,13 @@ export function CalendarPage() {
       if (!events.length) return;
       const ev = events[selectedEventIndex];
       if (ev.id !== undefined) {
-        try { await api.deleteEvent(ev.id); } catch { /* no-op */ }
+        try {
+          await api.deleteEvent(ev.id);
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "No se pudo eliminar el evento.";
+          showToast(message, "error");
+          return;
+        }
       }
       events.splice(selectedEventIndex, 1);
       selectedEventIndex = Math.max(0, selectedEventIndex - 1);
@@ -376,6 +498,7 @@ export function CalendarPage() {
       updateStats();
       renderTray();
       renderModal();
+      showToast("Evento eliminado del dia.", "success");
     };
 
     // ── Month loading ─────────────────────────────────────────────────────────
@@ -384,12 +507,15 @@ export function CalendarPage() {
       for (const k of Object.keys(eventsByDay)) delete eventsByDay[Number(k)];
 
       monthTitle.textContent = `${MONTH_NAMES[month - 1]} ${year}`;
+      if (monthStatus) monthStatus.textContent = "Sincronizando agenda...";
+      eventPills.innerHTML = '<div class="event-empty loading">Cargando eventos del mes...</div>';
       generateGrid(month, year);
       attachDayListeners();
 
       // Mark selected day
       const selNode = document.querySelector<HTMLElement>(`.day[data-day="${selectedDay}"]`);
       if (selNode) selNode.classList.add("selected");
+      focusDayInGridNow(selectedDay);
 
       try {
         const rawEvents = await api.getEvents(month, year);
@@ -401,15 +527,28 @@ export function CalendarPage() {
             minute: "2-digit",
             hour12: false,
           });
-          (eventsByDay[day] ??= []).push({ time, label: ev.title, id: ev.id });
+          (eventsByDay[day] ??= []).push({
+            time,
+            label: ev.title,
+            id: ev.id,
+            status: ev.status,
+            tone: eventTone(ev),
+            category: categoryLabel(ev),
+          });
         }
-      } catch { /* backend no disponible */ }
+        if (monthStatus) monthStatus.textContent = `${rawEvents.length} eventos cargados`;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "No se pudieron cargar los eventos del mes.";
+        if (monthStatus) monthStatus.textContent = "Modo sin datos";
+        showToast(message, "error");
+      }
 
       if (cancelled) return;
       getDayNodes().forEach((n) => syncDayCard(Number(n.dataset.day)));
       updateStats();
       renderTray();
       renderModal();
+      focusDayInGridNow(selectedDay);
     };
 
     // ── Navigation ────────────────────────────────────────────────────────────
