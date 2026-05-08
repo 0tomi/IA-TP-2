@@ -1001,12 +1001,14 @@ body.chat-page-react #root {
           <img src="__BOT_MASCOT_URL__" alt="Mascota del asistente">
         </div>
         <h2>Tu agenda inteligente ya esta lista</h2>
-        <p>Organiza reuniones, recordatorios y bloques de foco desde el chat. El calendario vive integrado y siempre puedes saltar entre ambas vistas sin perder la atmosfera de la app.</p>
+        <p>Organiza reuniones, recordatorios y bloques de foco desde el chat. El calendario vive integrado, las agendas ahora tienen mejor contexto visual y puedes moverte entre vistas sin perder la atmosfera de la app.</p>
         <div class="suggestion-chips">
           <button class="chip" onclick="sendSuggestion('Organiza mi manana con bloques de foco y una reunion de 30 minutos')">Planificar manana</button>
           <button class="chip" onclick="sendSuggestion('Agrega un recordatorio para llamar a secretaria a las 17:00')">Crear recordatorio</button>
           <button class="chip" onclick="sendSuggestion('Que tengo disponible para estudiar despues del mediodia')">Buscar huecos</button>
           <button class="chip" onclick="sendSuggestion('Armame una agenda liviana para hoy')">Agenda de hoy</button>
+          <button class="chip" onclick="sendSuggestion('Mostrame una version equilibrada de mi semana con estudio, descanso y pendientes')">Equilibrar semana</button>
+          <button class="chip" onclick="sendSuggestion('Revisa si tengo demasiadas cosas el viernes y sugeri mover algo')">Revisar carga</button>
         </div>
       </div>
     </div>

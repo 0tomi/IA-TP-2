@@ -341,6 +341,30 @@ body.calendar-page-react #root {
   font-size: 14px;
 }
 
+.calendar-status {
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid oklch(58% 0.18 255 / 0.14);
+  background: var(--surface-strong);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.calendar-status::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+}
+
 .calendar-actions {
   display: flex;
   align-items: center;
@@ -437,7 +461,7 @@ body.calendar-page-react #root {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 1px dashed oklch(58% 0.18 255 / 0.18);
+  border: 1px dashed color-mix(in oklab, var(--day-accent, var(--accent)) 46%, transparent);
   opacity: 0.76;
 }
 
@@ -462,9 +486,9 @@ body.calendar-page-react #root {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--accent-soft);
-  color: var(--accent);
-  border: 1px solid oklch(58% 0.18 255 / 0.22);
+  background: color-mix(in oklab, var(--day-accent, var(--accent)) 12%, transparent);
+  color: var(--day-accent, var(--accent));
+  border: 1px solid color-mix(in oklab, var(--day-accent, var(--accent)) 22%, transparent);
   font-family: var(--font-mono);
   font-size: 10px;
 }
@@ -473,7 +497,7 @@ body.calendar-page-react #root {
   min-height: 30px;
   font-size: 12px;
   line-height: 1.3;
-  color: var(--fg);
+  color: color-mix(in oklab, var(--fg) 84%, var(--muted));
   margin-bottom: 8px;
 }
 
@@ -487,10 +511,10 @@ body.calendar-page-react #root {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: oklch(58% 0.18 255 / 0.24);
+  background: color-mix(in oklab, var(--marker-tone, var(--accent)) 30%, transparent);
 }
 
-.marker.strong { background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+.marker.strong { background: var(--marker-tone, linear-gradient(135deg, var(--accent), var(--accent-2))); }
 
 .calendar-footer {
   display: flex;
@@ -581,20 +605,27 @@ body.calendar-page-react #root {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  min-height: 34px;
-  padding: 7px 10px;
-  border-radius: 999px;
-  border: 1px solid oklch(58% 0.18 255 / 0.18);
-  background: oklch(58% 0.18 255 / 0.08);
+  min-height: 44px;
+  padding: 8px 12px;
+  border-radius: 18px;
+  border: 1px solid color-mix(in oklab, var(--event-accent, var(--accent)) 20%, var(--border));
+  background: color-mix(in oklab, var(--event-accent, var(--accent)) 10%, var(--surface-strong));
 }
 
 .event-pill.is-active {
-  background: oklch(58% 0.18 255 / 0.14);
+  background: color-mix(in oklab, var(--event-accent, var(--accent)) 16%, var(--surface-strong));
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--event-accent, var(--accent)) 22%, transparent);
 }
 
 .event-pill-time {
   font-size: 10px;
-  color: var(--accent);
+  color: var(--event-accent, var(--accent));
+}
+
+.event-pill-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
 
 .event-pill-label,
@@ -603,10 +634,26 @@ body.calendar-page-react #root {
   color: var(--fg);
 }
 
+.event-pill-meta {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 .event-empty {
   color: var(--muted);
   border-color: var(--border);
   background: var(--surface);
+  border-style: dashed;
+}
+
+.event-empty.loading {
+  background:
+    linear-gradient(90deg, transparent, color-mix(in oklab, var(--surface-strong) 72%, white), transparent),
+    var(--surface);
+  background-size: 220px 100%, auto;
+  animation: tray-shimmer 1.4s linear infinite;
 }
 
 .event-actions {
@@ -648,17 +695,15 @@ body.calendar-page-react #root {
   align-items: center;
   justify-content: center;
   padding: 24px;
-  opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition: opacity 0.25s ease, visibility 0.25s ease;
+  overflow: hidden;
 }
 
 .create-event-modal { z-index: 40; }
 
 .day-modal.is-open,
 .create-event-modal.is-open {
-  opacity: 1;
   visibility: visible;
   pointer-events: auto;
 }
@@ -668,7 +713,12 @@ body.calendar-page-react #root {
   position: absolute;
   inset: 0;
   background: oklch(14% 0.03 295 / 0.34);
-  backdrop-filter: blur(12px);
+  opacity: 0;
+  backdrop-filter: blur(14px) saturate(115%);
+  -webkit-backdrop-filter: blur(14px) saturate(115%);
+  will-change: opacity, backdrop-filter;
+  transform: translateZ(0);
+  transition: opacity 0.14s ease-out;
 }
 
 .day-modal-card {
@@ -679,12 +729,23 @@ body.calendar-page-react #root {
   background: var(--surface-strong);
   box-shadow: 0 24px 80px oklch(0% 0 0 / 0.24);
   overflow: hidden;
+  opacity: 0;
   transform: translateY(18px) scale(0.98);
-  transition: transform 0.3s ease;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transition: transform 0.22s ease-out, opacity 0.18s ease-out;
+}
+
+.day-modal.is-open .day-modal-backdrop,
+.day-modal.is-open .create-event-backdrop,
+.create-event-modal.is-open .day-modal-backdrop,
+.create-event-modal.is-open .create-event-backdrop {
+  opacity: 1;
 }
 
 .day-modal.is-open .day-modal-card,
 .create-event-modal.is-open .day-modal-card {
+  opacity: 1;
   transform: translateY(0) scale(1);
 }
 
@@ -737,26 +798,41 @@ body.calendar-page-react #root {
   align-items: center;
   padding: 16px 18px;
   border-radius: 22px;
-  border: 1px solid var(--border);
-  background: var(--surface);
+  border: 1px solid color-mix(in oklab, var(--event-accent, var(--accent)) 16%, var(--border));
+  background: color-mix(in oklab, var(--event-accent, var(--accent)) 6%, var(--surface));
   box-shadow: var(--shadow-card);
   cursor: pointer;
 }
 
 .modal-event.is-active {
-  border-color: oklch(58% 0.18 255 / 0.28);
+  border-color: color-mix(in oklab, var(--event-accent, var(--accent)) 30%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--event-accent, var(--accent)) 24%, transparent);
 }
 
 .modal-event-time {
-  color: var(--accent);
+  color: var(--event-accent, var(--accent));
   font-size: 20px;
   letter-spacing: -0.04em;
+}
+
+.modal-event-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .modal-event-label {
   font-size: 20px;
   line-height: 1.1;
   letter-spacing: -0.04em;
+}
+
+.modal-event-meta {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .modal-empty {
@@ -786,6 +862,67 @@ body.calendar-page-react #root {
   flex-direction: column;
   gap: 6px;
   flex: 1;
+}
+
+.calendar-toast-stack {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 60;
+  display: grid;
+  gap: 10px;
+}
+
+.calendar-toast {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 260px;
+  max-width: 360px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--surface-strong) 92%, transparent);
+  box-shadow: var(--shadow-float);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+.calendar-toast.hide {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.calendar-toast.success {
+  border-color: oklch(69% 0.17 152 / 0.28);
+}
+
+.calendar-toast.error {
+  border-color: oklch(65% 0.2 20 / 0.28);
+}
+
+.calendar-toast-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  flex-shrink: 0;
+}
+
+.calendar-toast.success .calendar-toast-dot {
+  background: oklch(69% 0.17 152);
+}
+
+.calendar-toast.error .calendar-toast-dot {
+  background: oklch(65% 0.2 20);
+}
+
+@keyframes tray-shimmer {
+  from { background-position: -220px 0, 0 0; }
+  to { background-position: calc(100% + 220px) 0, 0 0; }
 }
 
 .form-label {
@@ -943,6 +1080,17 @@ body.calendar-page-react #root {
   .form-time-row {
     flex-direction: column;
   }
+
+  .calendar-toast-stack {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+  }
+
+  .calendar-toast {
+    min-width: 0;
+    max-width: none;
+  }
 }`,
   bodyHtml: `<div class="corner-decor top-left"></div>
 <div class="corner-decor top-right"></div>
@@ -1011,6 +1159,7 @@ body.calendar-page-react #root {
         <small>panel central</small>
         <h1 id="calendarMonthTitle">Cargando...</h1>
         <p>Vista mensual conectada al asistente para planificar compromisos, foco personal y recordatorios.</p>
+        <div class="calendar-status" id="monthStatus">Preparando tablero</div>
       </div>
       <div class="calendar-actions" aria-label="Navegacion del calendario">
         <button class="icon-btn" id="prevMonthBtn" type="button" aria-label="Mes anterior">
@@ -1038,6 +1187,10 @@ body.calendar-page-react #root {
         <span>mes</span>
         <strong id="statMonthLabel">—</strong>
       </div>
+      <div class="mini-stat">
+        <span>ritmo</span>
+        <strong id="statFocusLabel">—</strong>
+      </div>
     </div>
 
     <div class="calendar-grid-wrap">
@@ -1055,8 +1208,8 @@ body.calendar-page-react #root {
     <div class="calendar-footer">
       <div class="footer-main">
         <div class="legend">
-          <div class="legend-item"><span class="legend-dot strong"></span>dia con evento</div>
-          <div class="legend-item"><span class="legend-dot"></span>dia libre</div>
+          <div class="legend-item"><span class="legend-dot strong"></span>dia con actividad</div>
+          <div class="legend-item"><span class="legend-dot"></span>espacio libre</div>
           <div class="legend-item"><span class="legend-dot strong"></span>hoy destacado</div>
         </div>
         <div class="event-tray">
@@ -1138,5 +1291,7 @@ body.calendar-page-react #root {
       </div>
     </div>
   </section>
-</div>`,
+</div>
+
+<div class="calendar-toast-stack" id="calendarToastStack" aria-live="polite"></div>`,
 } as const;
