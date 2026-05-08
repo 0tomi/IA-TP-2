@@ -234,9 +234,10 @@ class ActionHandleChitchat(Action):
 
         if count >= 3.0:
             dispatcher.utter_message(
-                text="Me parece que nos estamos desviando. Decime si queres crear, consultar o corregir algo de tu agenda."
+                text="Esto es todo lo que puedo hacer por ahora. Si querés retomar, empezá un chat nuevo."
             )
-            return [SlotSet("chitchat_count", 0.0)]
+            dispatcher.utter_message(custom={"type": "end_chat"})
+            return [SlotSet("chitchat_count", count)]
 
         dispatcher.utter_message(
             text="Todo bien. Cuando quieras, te ayudo a agendar algo, buscar eventos o corregir una carga."

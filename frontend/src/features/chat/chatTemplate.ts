@@ -461,6 +461,18 @@ body.chat-page-react #root {
 .msg-status.sent { color: color-mix(in oklab, var(--accent) 78%, white); }
 .msg-status svg { width: 12px; height: 12px; }
 
+.chat-ended-banner {
+  text-align: center;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 10px 0 4px;
+  border-top: 1px solid color-mix(in oklab, var(--muted) 25%, transparent);
+  margin-top: 8px;
+}
+
 .typing-dot {
   width: 7px;
   height: 7px;

@@ -130,6 +130,7 @@ export function ChatPage() {
     let messageCount = 0;
     let isStreaming = false;
     let isListening = false;
+    let chatBlocked = false;
     let speechBaseText = "";
     const themeStorageKey = "agenda-theme";
     type BrowserSpeechRecognition = {
@@ -315,9 +316,24 @@ export function ChatPage() {
 
 
 
+    const blockChat = () => {
+      chatBlocked = true;
+      msgInput.disabled = true;
+      sendBtn.disabled = true;
+      msgInput.placeholder = "Chat finalizado. Iniciá un nuevo chat para continuar.";
+      const wrap = chatArea.querySelector(".msg-center-wrap");
+      if (wrap) {
+        const banner = document.createElement("div");
+        banner.className = "chat-ended-banner";
+        banner.textContent = "Chat finalizado";
+        wrap.appendChild(banner);
+      }
+      scrollToBottom(true);
+    };
+
     const sendMessage = async () => {
       const text = msgInput.value.trim();
-      if (!text || isStreaming) return;
+      if (!text || isStreaming || chatBlocked) return;
 
       stopListening(true);
       playSendSound();
@@ -349,9 +365,12 @@ export function ChatPage() {
         typingRow.remove();
 
         if (data && data.length > 0) {
-          data.forEach((msg: { text: string }) => {
+          data.forEach((msg: { text?: string; custom?: { type: string } }) => {
             if (msg.text) {
               addBotMessage(msg.text);
+            }
+            if (msg.custom?.type === "end_chat") {
+              blockChat();
             }
           });
         } else {
@@ -389,6 +408,9 @@ export function ChatPage() {
 
     const clearChat = () => {
       stopListening(true);
+      chatBlocked = false;
+      msgInput.disabled = false;
+      msgInput.placeholder = "";
       chatArea.innerHTML = "";
       const wrap = document.createElement("div");
       wrap.className = "msg-center-wrap";
@@ -456,7 +478,7 @@ export function ChatPage() {
       const hasText = msgInput.value.trim().length > 0;
       sendBtn.classList.toggle("is-ready-to-send", hasText);
       sendBtn.classList.toggle("is-listening", isListening);
-      sendBtn.disabled = isStreaming;
+      sendBtn.disabled = isStreaming || chatBlocked;
       sendBtn.title = hasText ? "Enviar" : isListening ? "Detener dictado" : "Dictar mensaje";
       voiceHint.textContent = isListening
         ? "Escuchando..."
