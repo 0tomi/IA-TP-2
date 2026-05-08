@@ -27,7 +27,10 @@ nlu:
       - crea una [reunion](tipo_evento) [pasado manana a las 11](fecha) en [oficina](nombre_agenda) por [1 hora](duracion)
       - quiero dejar cargado un [psicologo](tipo_evento) [el martes a las 17](fecha) en [salud](nombre_agenda)
       - anotame [cumpleanos de juan](tipo_evento) para [el sabado a las 21](fecha) en [familia](nombre_agenda)
-
+      - podes agendarme para [pasado mañana](fecha) un [evento](tipo_evento)
+      - agendame un [evento](tipo_evento) para [pasado mañana](fecha)
+      - crea una [reunion](tipo_evento) para [pasado mañana a las 11](fecha)
+      - quiero guardar algo para [pasado manana a las 15](fecha)
   - intent: consultar_evento
     examples: |
       - que tengo el [lunes](fecha)
@@ -107,6 +110,8 @@ nlu:
       - [cumpleanos](tipo_evento)
       - [manana a las 18](fecha) en [trabajo](nombre_agenda)
       - un [final](tipo_evento) el [jueves](fecha)
+      - [pasado mañana](fecha)
+      - [pasado mañana a las 11](fecha)
 
   - intent: informar_duracion
     examples: |

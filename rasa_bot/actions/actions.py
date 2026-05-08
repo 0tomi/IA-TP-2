@@ -33,8 +33,10 @@ def parse_date(date_str: Optional[str]) -> Optional[datetime]:
     if not date_str:
         return None
 
+    text = date_str.lower().replace("pasado mañana", "en 2 dias").replace("pasado manana", "en 2 dias")
+
     return dateparser.parse(
-        date_str,
+        text,
         languages=["es"],
         settings={"PREFER_DATES_FROM": "future"},
     )
@@ -537,15 +539,15 @@ class ActionConsultarEvento(Action):
                 dispatcher.utter_message(text=f"No encontre nada para {description}.")
                 return clear_flow_slots()
 
-            dispatcher.utter_message(text=f"Esto encontre para {description}:")
+            message_lines = [f"Esto encontre para {description}:"]
             for evento in eventos:
                 start_str = evento["start_datetime"].replace("Z", "")
                 start_dt = datetime.fromisoformat(start_str)
                 agenda = evento.get("agenda") or {}
                 agenda_suffix = f" en {agenda.get('name')}" if agenda.get("name") else ""
-                dispatcher.utter_message(
-                    text=f"- {evento['title']} a las {start_dt.strftime('%H:%M')}{agenda_suffix}"
-                )
+                message_lines.append(f"- {evento['title']} a las {start_dt.strftime('%H:%M')}{agenda_suffix}")
+                
+            dispatcher.utter_message(text="\n".join(message_lines))
         except requests.exceptions.ConnectionError:
             logger.exception("Agenda API is unreachable while querying events")
             dispatcher.utter_message(text="El backend esta caido y no puedo revisar tu agenda en este momento.")
