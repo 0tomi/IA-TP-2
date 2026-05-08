@@ -1,111 +1,162 @@
 version: "3.1"
 
 nlu:
+  - intent: crear_evento
+    examples: |
+      - agendame un [turno al medico](tipo_evento) para [manana a las 16](fecha)
+      - anotame un [parcial](tipo_evento) para [manana](fecha)
+      - agendame una [juntada](tipo_evento) el [viernes](fecha)
+      - necesito guardar una [reunion](tipo_evento) el [lunes que viene](fecha)
+      - acordate que tengo un [final](tipo_evento) [manana a la tarde](fecha)
+      - meteme un [turno medico](tipo_evento) para el [jueves](fecha)
+      - registrar [cumpleanos](tipo_evento) para el [15 de octubre](fecha)
+      - quiero crear un [evento](tipo_evento) para [hoy a las 20](fecha)
+      - haceme acordar del [recuperatorio](tipo_evento) el [miercoles](fecha)
+      - agrega una [clase de consulta](tipo_evento) para el [martes al mediodia](fecha)
+      - anota que tengo [entrenamiento](tipo_evento) [hoy a la noche](fecha)
+      - guardame el [partido de futbol](tipo_evento) para el [domingo](fecha)
+      - crea un [trabajo practico](tipo_evento) para el [25 de mayo](fecha)
+      - agendame [lavar el auto](tipo_evento) para el [sabado temprano](fecha)
+      - recordame el [pago de la tarjeta](tipo_evento) el [dia 10](fecha)
+      - agendame una [reunion de equipo](tipo_evento) [manana a las 9](fecha) en [trabajo](nombre_agenda)
+      - crea [dentista](tipo_evento) para el [jueves a las 18](fecha) en la agenda [personal](nombre_agenda)
+      - anotame un [final de algebra](tipo_evento) el [lunes a las 10:30](fecha) en [facultad](nombre_agenda)
+      - quiero guardar un [recordatorio](tipo_evento) para [hoy a las 18:45](fecha) por [15 minutos](duracion)
+      - meteme un [almuerzo con mama](tipo_evento) el [domingo a las 13](fecha) por [2 horas](duracion)
+      - agenda una [sesion de estudio](tipo_evento) [manana a las 19](fecha) en [estudios](nombre_agenda) por [90 minutos](duracion)
+      - crea una [reunion](tipo_evento) [pasado manana a las 11](fecha) en [oficina](nombre_agenda) por [1 hora](duracion)
+      - quiero dejar cargado un [psicologo](tipo_evento) [el martes a las 17](fecha) en [salud](nombre_agenda)
+      - anotame [cumpleanos de juan](tipo_evento) para [el sabado a las 21](fecha) en [familia](nombre_agenda)
 
+  - intent: consultar_evento
+    examples: |
+      - que tengo el [lunes](fecha)
+      - cuando es el [parcial](tipo_evento)
+      - ver mis eventos de [manana](fecha)
+      - che, que hay para [hoy](fecha)
+      - decime a que hora es la [reunion](tipo_evento)
+      - pasame mi calendario del [viernes](fecha)
+      - que cosas tengo agendadas para el [jueves](fecha)
+      - listame las cosas de la [semana que viene](fecha)
+      - cuando cae el [final](tipo_evento)
+      - mostrame la agenda de [hoy](fecha)
+      - fijate que tengo para [pasado manana](fecha)
+      - a que hora tengo el [turno medico](tipo_evento)
+      - quiero saber mis horarios del [sabado](fecha)
+      - buscame cuando es la [juntada](tipo_evento)
+      - mostrame todo lo del [miercoles](fecha)
+      - tengo algo el [martes](fecha)
+      - que [reuniones](tipo_evento) tengo [manana](fecha)
+      - que tengo [manana](fecha) en [trabajo](nombre_agenda)
+      - cuando es el [examen de algebra](tipo_evento) en [facultad](nombre_agenda)
+      - listame los eventos de [octubre](fecha) en [personal](nombre_agenda)
+      - buscame mis [recordatorios](tipo_evento) en [personal](nombre_agenda)
+      - que eventos tengo en [familia](nombre_agenda)
+      - mostrame mis [reuniones](tipo_evento) del [viernes](fecha) en [oficina](nombre_agenda)
 
-- intent: crear_evento
-  examples: |
-    - agendame un [turno al médico](tipo_evento) para [mañana a las 16hs](fecha)
-    - anotame un [parcial](tipo_evento) para [mañana](fecha)
-    - agendame una [juntada](tipo_evento) el [viernes](fecha)
-    - necesito guardar una [reunión](tipo_evento) el [lunes que viene](fecha)
-    - acordate que tengo un [final](tipo_evento) [mañana a la tarde](fecha)
-    - che, meteme un [turno médico](tipo_evento) para el [jueves](fecha)
-    - registrar [cumpleaños](tipo_evento) para el [15 de octubre](fecha)
-    - quiero crear un [evento](tipo_evento) para [hoy a las 20hs](fecha)
-    - haceme acordar del [recuperatorio](tipo_evento) el [miércoles](fecha)
-    - agregá una [clase de consulta](tipo_evento) para el [martes al mediodía](fecha)
-    - anotá que tengo [entrenamiento](tipo_evento) [hoy a la noche](fecha)
-    - guardame el [partido de fútbol](tipo_evento) para el [domingo](fecha)
-    - porfa, creá un [trabajo práctico](tipo_evento) para el [25 de mayo](fecha)
-    - agendá una [cena](tipo_evento) [pasado mañana](fecha)
-    - programá una [sesión de estudio](tipo_evento) para el [sábado a la mañana](fecha)
-    - quiero dejar anotado un [examen](tipo_evento) para la [semana que viene](fecha)
-    - anotame un [final de álgebra](tipo_evento) el [lunes a las 10:30](fecha)
-    - agendá [dentista](tipo_evento) para el [miércoles a las 15 horas](fecha)
-    - quiero guardar un [recordatorio](tipo_evento) para [hoy a las 18:45](fecha)
-    - meté una [reunión de equipo](tipo_evento) el [viernes a las 9](fecha)
-    - guardá que tengo [psicólogo](tipo_evento) el [martes que viene a las 17](fecha)
-    - anotá un [almuerzo con mamá](tipo_evento) para el [domingo a las 13](fecha)
-    - agendame [lavar el auto](tipo_evento) para el [sábado temprano](fecha)
-    - recordame el [pago de la tarjeta](tipo_evento) el [día 10](fecha)
+  - intent: chitchat
+    examples: |
+      - hola
+      - buenas
+      - que onda
+      - como andas
+      - todo bien
+      - que tal
+      - buen dia
+      - buenas tardes
+      - buenas noches
+      - che, hola
+      - adios
+      - chau
+      - nos vemos
+      - hasta luego
+      - saludos
+      - quien sos
+      - sos un bot
+      - que podes hacer
+      - hablas espanol
+      - estas ahi
+      - holis
+      - buenas buenas
 
-- intent: consultar_evento
-  examples: |
-    - ¿qué tengo el [lunes](fecha)?
-    - ¿cuándo es el [parcial](tipo_evento)?
-    - ver mis eventos de [mañana](fecha)
-    - che, ¿qué hay para [hoy](fecha)?
-    - decime a qué hora es la [reunión](tipo_evento)
-    - pasame mi calendario del [viernes](fecha)
-    - ¿qué cosas tengo agendadas para el [jueves](fecha)?
-    - listame las cosas de la [semana que viene](fecha)
-    - ¿cuándo cae el [final](tipo_evento)?
-    - mostrame la agenda de [hoy](fecha)
-    - fijate qué tengo para [pasado mañana](fecha)
-    - ¿a qué hora tengo el [turno médico](tipo_evento)?
-    - quiero saber mis horarios del [sábado](fecha)
-    - tirame los datos del [cumpleaños](tipo_evento)
-    - buscame cuándo es la [juntada](tipo_evento)
-    - mostrame todo lo del [miércoles](fecha)
-    - ¿qué planes tengo para el [domingo](fecha)?
-    - decime mis eventos para [la semana](fecha)
-    - ¿tengo algo el [martes](fecha)?
-    - ¿cuándo tengo que ir al [dentista](tipo_evento)?
-    - ¿cuándo es el [examen de álgebra](tipo_evento)?
-    - listame los eventos de [octubre](fecha)
+  - intent: informar_agenda
+    examples: |
+      - en la agenda [personal](nombre_agenda)
+      - guardalo en [trabajo](nombre_agenda)
+      - en la de [estudios](nombre_agenda)
+      - [personal](nombre_agenda)
+      - [trabajo](nombre_agenda)
+      - mandala a la agenda [facultad](nombre_agenda)
+      - en la [principal](nombre_agenda)
+      - usa la de [casa](nombre_agenda)
+      - en la agenda de [ocio](nombre_agenda)
+      - mandalo a [gym](nombre_agenda)
+      - guarda en [proyectos](nombre_agenda)
+      - en la agenda de [familia](nombre_agenda)
+      - cargalo en [oficina](nombre_agenda)
 
-- intent: chitchat
-  examples: |
-    - hola
-    - buenas
-    - qué onda
-    - que onda
-    - que onda pa
-    - q onda
-    - cómo andás
-    - como andas
-    - todo bien?
-    - todo piola
-    - qué tal
-    - que tal
-    - buen día
-    - buenas tardes
-    - buenas noches
-    - qué hacés
-    - que haces
-    - che, hola
-    - saludo
-    - adiós
-    - adios
-    - chau
-    - nos vemos
-    - hasta luego
-    - saludos
-    - quién sos?
-    - sos un bot?
-    - qué podés hacer?
-    - hablas español?
-    - estas ahí?
-    - holis
-    - buenas buenas
-    - hello
-    - hi
-    - cuídate
-    - chau chau
+  - intent: informar_detalle_evento
+    examples: |
+      - [manana](fecha)
+      - [manana a las 18](fecha)
+      - [el viernes a las 9](fecha)
+      - [el martes que viene](fecha)
+      - [parcial](tipo_evento)
+      - [reunion](tipo_evento)
+      - [turno medico](tipo_evento)
+      - [cumpleanos](tipo_evento)
+      - [manana a las 18](fecha) en [trabajo](nombre_agenda)
+      - un [final](tipo_evento) el [jueves](fecha)
 
-- intent: informar_agenda
-  examples: |
-    - en la agenda [personal](nombre_agenda)
-    - guardalo en [trabajo](nombre_agenda)
-    - en la de [estudios](nombre_agenda)
-    - [personal](nombre_agenda)
-    - [trabajo](nombre_agenda)
-    - mandala a la agenda [facultad](nombre_agenda)
-    - en la [principal](nombre_agenda)
-    - usá la de [casa](nombre_agenda)
-    - en la agenda de [ocio](nombre_agenda)
-    - mandalo a [gym](nombre_agenda)
-    - guardá en [proyectos](nombre_agenda)
-    - en la agenda de [familia](nombre_agenda)
-    - cargalo en [oficina](nombre_agenda)
+  - intent: informar_duracion
+    examples: |
+      - que dure [30 minutos](duracion)
+      - ponele [2 horas](duracion)
+      - dejalo en [90 minutos](duracion)
+      - va a durar [1 hora](duracion)
+      - mejor [45 minutos](duracion)
+      - hacelo de [3 horas](duracion)
+
+  - intent: corregir_evento
+    examples: |
+      - mejor para [manana a las 18](fecha)
+      - cambialo al [viernes a las 9](fecha)
+      - no, en [trabajo](nombre_agenda)
+      - mejor guardalo en [facultad](nombre_agenda)
+      - que sea un [final](tipo_evento)
+      - mejor un [recordatorio](tipo_evento)
+      - dejalo por [2 horas](duracion)
+      - mejor [30 minutos](duracion)
+      - no, el [martes a las 17](fecha) en [personal](nombre_agenda)
+      - mejor una [reunion](tipo_evento) en [oficina](nombre_agenda)
+
+  - intent: affirm
+    examples: |
+      - si
+      - sii
+      - dale
+      - de una
+      - confirmalo
+      - perfecto
+      - correcto
+      - exacto
+      - ok
+      - buenisimo
+
+  - intent: deny
+    examples: |
+      - no
+      - nop
+      - mejor no
+      - negativo
+      - no lo hagas
+      - no, cancelalo
+
+  - intent: cancelar
+    examples: |
+      - cancelar
+      - cancela eso
+      - olvida lo anterior
+      - dejalo ahi
+      - aborta la carga
+      - mejor salgo de esto

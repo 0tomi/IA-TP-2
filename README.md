@@ -74,6 +74,7 @@ make lint               # Valida el backend con Ruff
 make lint-fix           # Corrige errores automáticos con Ruff
 make lint-frontend      # Valida el frontend con ESLint
 make test               # Corre los tests del backend con pytest
+make test-rasa          # Corre los tests de Rasa (core + NLU)
 ```
 
 ### Base de datos

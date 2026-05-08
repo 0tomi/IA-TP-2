@@ -1,31 +1,59 @@
+version: "3.1"
+
 #### This file contains tests to evaluate that your bot behaves as expected.
 #### If you want to learn more, please see the docs: https://rasa.com/docs/rasa/testing-your-assistant
 
 stories:
-- story: crear evento dispara accion
-  steps:
-  - user: |
-      anotame un parcial para manana
-    intent: crear_evento
-  - action: action_validar_y_crear_evento
+  - story: crear evento y confirmar
+    steps:
+      - user: |
+          anotame un parcial para manana
+        intent: crear_evento
+      - action: action_validar_y_crear_evento
+      - user: |
+          si
+        intent: affirm
+      - action: action_confirmar_creacion_evento
 
-- story: consultar evento dispara accion
-  steps:
-  - user: |
-      que tengo manana
-    intent: consultar_evento
-  - action: action_consultar_evento
+  - story: crear evento y corregir agenda
+    steps:
+      - user: |
+          agendame una reunion para manana a las 10
+        intent: crear_evento
+      - action: action_validar_y_crear_evento
+      - user: |
+          en trabajo
+        intent: informar_agenda
+      - action: action_validar_y_crear_evento
 
-- story: responder chitchat
-  steps:
-  - user: |
-      hola
-    intent: chitchat
-  - action: action_handle_chitchat
+  - story: cancelar borrador
+    steps:
+      - user: |
+          anotame dentista para el jueves
+        intent: crear_evento
+      - action: action_validar_y_crear_evento
+      - user: |
+          no
+        intent: deny
+      - action: action_cancelar_operacion
 
-- story: continuar creacion al informar agenda
-  steps:
-  - user: |
-      en la agenda personal
-    intent: informar_agenda
-  - action: action_validar_y_crear_evento
+  - story: consultar por filtros
+    steps:
+      - user: |
+          que reuniones tengo manana en trabajo
+        intent: consultar_evento
+      - action: action_consultar_evento
+
+  - story: responder chitchat
+    steps:
+      - user: |
+          hola
+        intent: chitchat
+      - action: action_handle_chitchat
+
+  - story: manejar fallback
+    steps:
+      - user: |
+          blabla rarisimo
+        intent: nlu_fallback
+      - action: action_handle_fallback

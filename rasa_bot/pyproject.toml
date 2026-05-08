@@ -11,6 +11,8 @@ dependencies = [
     "requests",
     "dateparser==1.1.8"
 ]
+[tool.poetry]
+package-mode = false
 
 
 [build-system]

@@ -1,3 +1,60 @@
 version: "3.1"
 
-stories: []
+stories:
+  - story: crear evento y confirmar despues de completar fecha
+    steps:
+      - intent: crear_evento
+      - action: action_validar_y_crear_evento
+      - intent: informar_detalle_evento
+      - action: action_validar_y_crear_evento
+      - intent: affirm
+      - action: action_confirmar_creacion_evento
+
+  - story: crear evento y elegir agenda antes de confirmar
+    steps:
+      - intent: crear_evento
+      - action: action_validar_y_crear_evento
+      - intent: informar_agenda
+      - action: action_validar_y_crear_evento
+      - intent: affirm
+      - action: action_confirmar_creacion_evento
+
+  - story: crear evento con correccion antes de confirmar
+    steps:
+      - intent: crear_evento
+      - action: action_validar_y_crear_evento
+      - intent: corregir_evento
+      - action: action_validar_y_crear_evento
+      - intent: affirm
+      - action: action_confirmar_creacion_evento
+
+  - story: crear evento y cancelar
+    steps:
+      - intent: crear_evento
+      - action: action_validar_y_crear_evento
+      - intent: deny
+      - action: action_cancelar_operacion
+
+  - story: crear evento y ajustar duracion
+    steps:
+      - intent: crear_evento
+      - action: action_validar_y_crear_evento
+      - intent: informar_duracion
+      - action: action_validar_y_crear_evento
+      - intent: affirm
+      - action: action_confirmar_creacion_evento
+
+  - story: consultar eventos por filtros
+    steps:
+      - intent: consultar_evento
+      - action: action_consultar_evento
+
+  - story: responder chitchat
+    steps:
+      - intent: chitchat
+      - action: action_handle_chitchat
+
+  - story: manejar fallback real
+    steps:
+      - intent: nlu_fallback
+      - action: action_handle_fallback

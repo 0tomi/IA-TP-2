@@ -1,28 +1,57 @@
 version: "3.1"
 
 rules:
+  - rule: Manejar fallback real
+    steps:
+      - intent: nlu_fallback
+      - action: action_handle_fallback
 
+  - rule: Responder a chitchat
+    steps:
+      - intent: chitchat
+      - action: action_handle_chitchat
 
-- rule: Derivar a chitchat por defecto (fallback)
-  steps:
-  - intent: nlu_fallback
-  - action: action_handle_chitchat
-- rule: Responder a chitchat
-  steps:
-  - intent: chitchat
-  - action: action_handle_chitchat
+  - rule: Crear nuevo evento
+    steps:
+      - intent: crear_evento
+      - action: action_validar_y_crear_evento
 
-- rule: Crear nuevo evento
-  steps:
-  - intent: crear_evento
-  - action: action_validar_y_crear_evento
+  - rule: Continuar creando evento al informar agenda
+    steps:
+      - intent: informar_agenda
+      - action: action_validar_y_crear_evento
 
-- rule: Consultar eventos
-  steps:
-  - intent: consultar_evento
-  - action: action_consultar_evento
+  - rule: Continuar creando evento al informar detalle faltante
+    steps:
+      - intent: informar_detalle_evento
+      - action: action_validar_y_crear_evento
 
-- rule: Continuar creando evento tras informar agenda
-  steps:
-  - intent: informar_agenda
-  - action: action_validar_y_crear_evento
+  - rule: Continuar creando evento al informar duracion
+    steps:
+      - intent: informar_duracion
+      - action: action_validar_y_crear_evento
+
+  - rule: Recalcular borrador cuando corrigen datos
+    steps:
+      - intent: corregir_evento
+      - action: action_validar_y_crear_evento
+
+  - rule: Confirmar creacion de evento
+    steps:
+      - intent: affirm
+      - action: action_confirmar_creacion_evento
+
+  - rule: Cancelar operacion por negativa
+    steps:
+      - intent: deny
+      - action: action_cancelar_operacion
+
+  - rule: Cancelar operacion explicitamente
+    steps:
+      - intent: cancelar
+      - action: action_cancelar_operacion
+
+  - rule: Consultar eventos
+    steps:
+      - intent: consultar_evento
+      - action: action_consultar_evento

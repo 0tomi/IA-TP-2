@@ -5,40 +5,78 @@ intents:
   - consultar_evento
   - chitchat
   - informar_agenda
+  - informar_detalle_evento
+  - informar_duracion
+  - corregir_evento
+  - affirm
+  - deny
+  - cancelar
 
 entities:
   - tipo_evento
   - fecha
   - nombre_agenda
+  - duracion
 
 slots:
   tipo_evento:
     type: text
     mappings:
-    - type: from_entity
-      entity: tipo_evento
+      - type: from_entity
+        entity: tipo_evento
+
   nombre_agenda:
     type: text
     mappings:
-    - type: from_entity
-      entity: nombre_agenda
+      - type: from_entity
+        entity: nombre_agenda
+
   fecha_evento:
     type: text
     mappings:
-    - type: from_entity
-      entity: fecha
+      - type: from_entity
+        entity: fecha
+
+  duracion_texto:
+    type: text
+    mappings:
+      - type: from_entity
+        entity: duracion
+
+  duracion_minutos:
+    type: float
+    mappings:
+      - type: custom
+
+  pending_action:
+    type: text
+    mappings:
+      - type: custom
+
+  requested_slot:
+    type: text
+    mappings:
+      - type: custom
+
+  awaiting_confirmation:
+    type: bool
+    initial_value: false
+    mappings:
+      - type: custom
+
   chitchat_count:
     type: float
     initial_value: 0
     mappings:
-    - type: custom
+      - type: custom
 
 actions:
   - action_validar_y_crear_evento
+  - action_confirmar_creacion_evento
   - action_consultar_evento
   - action_handle_chitchat
-
-
+  - action_handle_fallback
+  - action_cancelar_operacion
 
 session_config:
   session_expiration_time: 10
