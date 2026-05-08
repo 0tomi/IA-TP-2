@@ -9,6 +9,7 @@ export const calendarTemplate = {
   --accent: oklch(58% 0.18 255);
   --accent-2: oklch(72% 0.08 220);
   --accent-soft: oklch(58% 0.18 255 / 0.12);
+  --ambient-2: oklch(72% 0.08 220 / 0.14);
   --shadow-card: 0 1px 3px oklch(0% 0 0 / 0.04), 0 8px 24px oklch(0% 0 0 / 0.06);
   --shadow-float: 0 14px 36px oklch(210 0.05 0 / 0.12);
   --font-display: 'Trebuchet MS', 'Segoe UI', sans-serif;
@@ -27,6 +28,7 @@ export const calendarTemplate = {
   --accent: oklch(74% 0.2 332);
   --accent-2: oklch(72% 0.15 290);
   --accent-soft: oklch(74% 0.2 332 / 0.18);
+  --ambient-2: oklch(66% 0.12 306 / 0.12);
   --shadow-card: 0 1px 2px oklch(0% 0 0 / 0.34), 0 14px 34px oklch(0% 0 0 / 0.32);
   --shadow-float: 0 18px 46px oklch(0% 0 0 / 0.42);
 }
@@ -48,7 +50,7 @@ body {
   overflow: hidden;
   background:
     radial-gradient(circle at top left, var(--accent-soft), transparent 26%),
-    radial-gradient(circle at bottom right, oklch(72% 0.08 220 / 0.14), transparent 28%),
+    radial-gradient(circle at bottom right, var(--ambient-2), transparent 28%),
     var(--bg);
   color: var(--fg);
 }
@@ -155,7 +157,7 @@ body.calendar-page-react #root {
   min-height: 40px;
   padding: 0 18px;
   border-radius: 999px;
-  border: 1px solid oklch(58% 0.18 255 / 0.16);
+  border: 1px solid color-mix(in oklab, var(--accent) 20%, transparent);
   background: var(--surface-strong);
   color: var(--fg);
   font-family: var(--font-mono);
@@ -172,8 +174,8 @@ body.calendar-page-react #root {
 .header-nav-btn.back-btn {
   padding: 0 20px 0 14px;
   gap: 10px;
-  border-color: oklch(58% 0.18 255 / 0.22);
-  background: linear-gradient(135deg, oklch(58% 0.18 255 / 0.1), var(--surface-strong));
+  border-color: color-mix(in oklab, var(--accent) 28%, transparent);
+  background: linear-gradient(135deg, color-mix(in oklab, var(--accent) 12%, transparent), var(--surface-strong));
 }
 
 .back-icon {
@@ -183,8 +185,8 @@ body.calendar-page-react #root {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: oklch(58% 0.18 255 / 0.12);
-  border: 1px solid oklch(58% 0.18 255 / 0.18);
+  background: color-mix(in oklab, var(--accent) 14%, transparent);
+  border: 1px solid color-mix(in oklab, var(--accent) 22%, transparent);
 }
 
 .back-icon svg {
@@ -212,7 +214,7 @@ body.calendar-page-react #root {
   gap: 8px;
   padding: 7px 12px;
   border-radius: 999px;
-  border: 1px solid oklch(58% 0.18 255 / 0.1);
+  border: 1px solid color-mix(in oklab, var(--accent) 14%, transparent);
   background: var(--surface);
   color: var(--muted);
   font-family: var(--font-mono);
@@ -1095,31 +1097,31 @@ body.calendar-page-react #root {
 
 .corner-decor { width: 120px; height: 120px; }
 .corner-decor.top-left { top: 0; left: 0; background: radial-gradient(circle at 0 0, var(--accent-soft), transparent 60%); }
-.corner-decor.top-right { top: 0; right: 0; background: radial-gradient(circle at 100% 0, oklch(72% 0.08 220 / 0.18), transparent 60%); }
-.corner-decor.bottom-left { left: 0; bottom: 0; background: radial-gradient(circle at 0 100%, oklch(58% 0.18 255 / 0.08), transparent 60%); }
-.corner-decor.bottom-right { right: 0; bottom: 0; background: radial-gradient(circle at 100% 100%, oklch(72% 0.08 220 / 0.14), transparent 60%); }
-.shape-orbit { border-radius: 50%; border: 1px solid oklch(58% 0.18 255 / 0.2); }
+.corner-decor.top-right { top: 0; right: 0; background: radial-gradient(circle at 100% 0, color-mix(in oklab, var(--accent-2) 18%, transparent), transparent 60%); }
+.corner-decor.bottom-left { left: 0; bottom: 0; background: radial-gradient(circle at 0 100%, color-mix(in oklab, var(--accent) 12%, transparent), transparent 60%); }
+.corner-decor.bottom-right { right: 0; bottom: 0; background: radial-gradient(circle at 100% 100%, color-mix(in oklab, var(--accent-2) 14%, transparent), transparent 60%); }
+.shape-orbit { border-radius: 50%; border: 1px solid color-mix(in oklab, var(--accent) 22%, transparent); }
 .shape-orbit { width: 240px; height: 240px; right: -90px; top: 110px; }
 .shape-orbit.left { width: 220px; height: 220px; left: -82px; top: 29%; right: auto; }
-.shape-ribbon.top { width: 220px; height: 220px; top: 96px; right: -128px; border: 1px solid oklch(72% 0.08 220 / 0.22); border-radius: 28px; transform: rotate(45deg); }
-.shape-ribbon.bottom { width: 220px; height: 220px; left: -144px; bottom: 82px; border: 1px solid oklch(58% 0.18 255 / 0.18); border-radius: 40px; transform: rotate(45deg); }
+.shape-ribbon.top { width: 220px; height: 220px; top: 96px; right: -128px; border: 1px solid color-mix(in oklab, var(--accent-2) 24%, transparent); border-radius: 28px; transform: rotate(45deg); }
+.shape-ribbon.bottom { width: 220px; height: 220px; left: -144px; bottom: 82px; border: 1px solid color-mix(in oklab, var(--accent) 18%, transparent); border-radius: 40px; transform: rotate(45deg); }
 .mesh-line.one { top: 142px; left: 12%; width: 220px; height: 1px; transform: rotate(-14deg); background: linear-gradient(90deg, transparent, var(--accent-soft), transparent); }
-.mesh-line.two { top: 61%; right: 8%; width: 280px; height: 1px; transform: rotate(18deg); background: linear-gradient(90deg, transparent, oklch(72% 0.08 220 / 0.18), transparent); }
+.mesh-line.two { top: 61%; right: 8%; width: 280px; height: 1px; transform: rotate(18deg); background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--accent-2) 22%, transparent), transparent); }
 .mesh-line.three { top: 31%; right: 14%; width: 180px; height: 1px; transform: rotate(-30deg); background: linear-gradient(90deg, transparent, var(--accent-soft), transparent); }
-.mesh-line.four { left: 8%; bottom: 17%; width: 250px; height: 1px; transform: rotate(23deg); background: linear-gradient(90deg, transparent, oklch(58% 0.18 255 / 0.14), transparent); }
-.shape-ring { border-radius: 50%; border: 1px dashed oklch(58% 0.18 255 / 0.2); opacity: 0.68; }
+.mesh-line.four { left: 8%; bottom: 17%; width: 250px; height: 1px; transform: rotate(23deg); background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--accent) 18%, transparent), transparent); }
+.shape-ring { border-radius: 50%; border: 1px dashed color-mix(in oklab, var(--accent) 22%, transparent); opacity: 0.68; }
 .shape-ring.one { width: 142px; height: 142px; top: 116px; left: 10%; }
 .shape-ring.two { width: 112px; height: 112px; right: 13%; bottom: 124px; }
-.shape-spark { width: 22px; height: 22px; border-radius: 7px; border: 1px solid oklch(58% 0.18 255 / 0.24); background: linear-gradient(135deg, oklch(58% 0.18 255 / 0.14), transparent 72%); transform: rotate(45deg); }
+.shape-spark { width: 22px; height: 22px; border-radius: 7px; border: 1px solid color-mix(in oklab, var(--accent) 26%, transparent); background: linear-gradient(135deg, color-mix(in oklab, var(--accent) 16%, transparent), transparent 72%); transform: rotate(45deg); }
 .shape-spark.one { top: 184px; right: 21%; }
 .shape-spark.two { left: 18%; bottom: 144px; }
-.frame-mark { width: 54px; height: 54px; border-color: oklch(58% 0.18 255 / 0.18); border-style: solid; }
+.frame-mark { width: 54px; height: 54px; border-color: color-mix(in oklab, var(--accent) 20%, transparent); border-style: solid; }
 .frame-mark.top-left { top: 88px; left: 22px; border-width: 1px 0 0 1px; border-top-left-radius: 14px; }
 .frame-mark.bottom-right { right: 22px; bottom: 28px; border-width: 0 1px 1px 0; border-bottom-right-radius: 14px; }
 
 @keyframes pulse-dot {
-  0%, 100% { box-shadow: 0 0 0 0 oklch(58% 0.18 255 / 0.36); }
-  50% { box-shadow: 0 0 0 7px oklch(58% 0.18 255 / 0); }
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 40%, transparent); }
+  50% { box-shadow: 0 0 0 7px color-mix(in oklab, var(--accent) 0%, transparent); }
 }
 
 @media (max-width: 960px) {

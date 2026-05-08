@@ -268,6 +268,7 @@ const pageStyles = `
   --accent: oklch(58% 0.18 255);
   --accent-2: oklch(72% 0.08 220);
   --accent-soft: oklch(58% 0.18 255 / 0.12);
+  --ambient-2: oklch(72% 0.08 220 / 0.14);
   --danger: oklch(63% 0.19 25);
   --success: oklch(68% 0.18 155);
   --shadow-card: 0 1px 3px oklch(0% 0 0 / 0.04), 0 8px 24px oklch(0% 0 0 / 0.06);
@@ -287,6 +288,7 @@ const pageStyles = `
   --accent: oklch(74% 0.2 332);
   --accent-2: oklch(72% 0.15 290);
   --accent-soft: oklch(74% 0.2 332 / 0.18);
+  --ambient-2: oklch(66% 0.12 306 / 0.12);
   --danger: oklch(70% 0.18 20);
   --success: oklch(77% 0.17 156);
   --shadow-card: 0 1px 2px oklch(0% 0 0 / 0.34), 0 14px 34px oklch(0% 0 0 / 0.32);
@@ -307,7 +309,7 @@ body {
   margin: 0;
   background:
     radial-gradient(circle at top left, var(--accent-soft), transparent 24%),
-    radial-gradient(circle at bottom right, oklch(72% 0.08 220 / 0.14), transparent 26%),
+    radial-gradient(circle at bottom right, var(--ambient-2), transparent 26%),
     var(--bg);
   color: var(--fg);
   font-family: var(--font-body);
@@ -353,19 +355,19 @@ body::before {
 .decor-top-right {
   top: 0;
   right: 0;
-  background: radial-gradient(circle at 100% 0, oklch(72% 0.08 220 / 0.18), transparent 65%);
+  background: radial-gradient(circle at 100% 0, color-mix(in oklab, var(--accent-2) 18%, transparent), transparent 65%);
 }
 
 .decor-bottom-left {
   bottom: 0;
   left: 0;
-  background: radial-gradient(circle at 0 100%, oklch(58% 0.18 255 / 0.08), transparent 65%);
+  background: radial-gradient(circle at 0 100%, color-mix(in oklab, var(--accent) 12%, transparent), transparent 65%);
 }
 
 .decor-bottom-right {
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at 100% 100%, oklch(72% 0.08 220 / 0.12), transparent 65%);
+  background: radial-gradient(circle at 100% 100%, color-mix(in oklab, var(--accent-2) 14%, transparent), transparent 65%);
 }
 
 .agendas-orbit {

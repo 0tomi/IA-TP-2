@@ -83,6 +83,11 @@ export function ChatPage() {
     const msgCountBadge = document.getElementById("msgCountBadge") as HTMLDivElement | null;
     const msgCountText = document.getElementById("msgCountText") as HTMLSpanElement | null;
     const themeLabel = document.getElementById("themeLabel") as HTMLSpanElement | null;
+    const clearChatModal = document.getElementById("clearChatModal") as HTMLDivElement | null;
+    const clearChatBackdrop = document.getElementById("clearChatBackdrop") as HTMLDivElement | null;
+    const closeClearChatBtn = document.getElementById("closeClearChatBtn") as HTMLButtonElement | null;
+    const cancelClearChatBtn = document.getElementById("cancelClearChatBtn") as HTMLButtonElement | null;
+    const confirmClearChatBtn = document.getElementById("confirmClearChatBtn") as HTMLButtonElement | null;
 
     if (
       !chatArea ||
@@ -93,7 +98,12 @@ export function ChatPage() {
       !scrollBottomBtn ||
       !msgCountBadge ||
       !msgCountText ||
-      !themeLabel
+      !themeLabel ||
+      !clearChatModal ||
+      !clearChatBackdrop ||
+      !closeClearChatBtn ||
+      !cancelClearChatBtn ||
+      !confirmClearChatBtn
     ) {
       return;
     }
@@ -322,12 +332,21 @@ export function ChatPage() {
 
     const sendSuggestion = (text: string) => {
       msgInput.value = text;
-      sendMessage();
+      void sendMessage();
+    };
+
+    const openClearChatModal = () => {
+      clearChatModal.classList.add("is-open");
+      clearChatModal.setAttribute("aria-hidden", "false");
+      confirmClearChatBtn.focus();
+    };
+
+    const closeClearChatModal = () => {
+      clearChatModal.classList.remove("is-open");
+      clearChatModal.setAttribute("aria-hidden", "true");
     };
 
     const clearChat = () => {
-      if (messageCount === 0) return;
-      if (!window.confirm("¿Limpiar todos los mensajes?")) return;
       chatArea.innerHTML = "";
       const wrap = document.createElement("div");
       wrap.className = "msg-center-wrap";
@@ -335,6 +354,9 @@ export function ChatPage() {
       wrap.appendChild(welcome);
       welcome.style.display = "flex";
       messageCount = 0;
+      msgCountText.textContent = "0 mensajes";
+      msgCountBadge.classList.remove("visible");
+      closeClearChatModal();
       scrollToBottom(false);
     };
 
@@ -388,9 +410,12 @@ export function ChatPage() {
     };
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Enter" && !event.shiftKey) {
+      if (event.key === "Escape") {
+        closeClearChatModal();
+      }
+      if (event.key === "Enter" && !event.shiftKey && clearChatModal.getAttribute("aria-hidden") === "true") {
         event.preventDefault();
-        sendMessage();
+        void sendMessage();
       }
     };
 
@@ -400,7 +425,7 @@ export function ChatPage() {
       scrollBottomBtn.classList.toggle("visible", !isNearBottom && messageCount > 2);
     };
 
-    window.clearChat = clearChat;
+    window.clearChat = openClearChatModal;
     window.exportChat = exportChat;
     window.sendSuggestion = sendSuggestion;
     window.sendMessage = sendMessage;
@@ -413,6 +438,10 @@ export function ChatPage() {
     msgInput.addEventListener("input", onInputCount);
     msgInput.addEventListener("keydown", onKeyDown);
     chatArea.addEventListener("scroll", onScroll);
+    clearChatBackdrop.addEventListener("click", closeClearChatModal);
+    closeClearChatBtn.addEventListener("click", closeClearChatModal);
+    cancelClearChatBtn.addEventListener("click", closeClearChatModal);
+    confirmClearChatBtn.addEventListener("click", clearChat);
     msgInput.focus();
     scrollToBottom(false);
 
@@ -421,6 +450,10 @@ export function ChatPage() {
       msgInput.removeEventListener("input", onInputCount);
       msgInput.removeEventListener("keydown", onKeyDown);
       chatArea.removeEventListener("scroll", onScroll);
+      clearChatBackdrop.removeEventListener("click", closeClearChatModal);
+      closeClearChatBtn.removeEventListener("click", closeClearChatModal);
+      cancelClearChatBtn.removeEventListener("click", closeClearChatModal);
+      confirmClearChatBtn.removeEventListener("click", clearChat);
       delete window.clearChat;
       delete window.exportChat;
       delete window.sendSuggestion;
