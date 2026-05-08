@@ -913,6 +913,29 @@ distributed = ["distributed (==2022.10.2)"]
 test = ["pandas[test]", "pre-commit", "pytest", "pytest-rerunfailures", "pytest-xdist"]
 
 [[package]]
+name = "dateparser"
+version = "1.1.8"
+description = "Date parsing library designed to parse dates from HTML pages"
+optional = false
+python-versions = ">=3.7"
+groups = ["main"]
+files = [
+    {file = "dateparser-1.1.8-py2.py3-none-any.whl", hash = "sha256:070b29b5bbf4b1ec2cd51c96ea040dc68a614de703910a91ad1abba18f9f379f"},
+    {file = "dateparser-1.1.8.tar.gz", hash = "sha256:86b8b7517efcc558f085a142cdb7620f0921543fcabdb538c8a4c4001d8178e3"},
+]
+
+[package.dependencies]
+python-dateutil = "*"
+pytz = "*"
+regex = "<2019.2.19 || >2019.2.19,<2021.8.27 || >2021.8.27"
+tzlocal = "*"
+
+[package.extras]
+calendars = ["convertdate", "hijri-converter"]
+fasttext = ["fasttext"]
+langdetect = ["langdetect"]
+
+[[package]]
 name = "dnspython"
 version = "2.3.0"
 description = "DNS toolkit"
@@ -5754,4 +5777,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "f16badc168e9f830e7fb75b7bfc80fcf10c9705a31768edf6fb988fb68f8153d"
+content-hash = "6cb9af442e8e94062304ba057b8415586a17cd5e3b5af27ea840f96fad6afcf7"
