@@ -591,7 +591,7 @@ body.chat-page-react #root {
 
 .input-card {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   gap: 10px;
   padding: 12px 12px 12px 18px;
   border-radius: var(--radius-xl);
@@ -616,9 +616,10 @@ body.chat-page-react #root {
   background: transparent;
   color: var(--fg);
   font: inherit;
-  line-height: 1.4;
-  padding: 8px 0;
+  line-height: 1.35;
+  padding: 10px 0;
   overflow-y: auto;
+  display: block;
 }
 
 .msg-input::placeholder { color: var(--muted); }
@@ -634,7 +635,10 @@ body.chat-page-react #root {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: transform 0.24s ease, box-shadow 0.24s ease, opacity 0.2s ease, background 0.24s ease;
 }
 
 .send-btn:hover {
@@ -649,7 +653,58 @@ body.chat-page-react #root {
   box-shadow: none;
 }
 
+.send-btn.is-listening {
+  animation: mic-pulse 1.6s ease-in-out infinite;
+}
+
+.send-btn-icon {
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.24s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 .send-btn svg { width: 18px; height: 18px; }
+
+.send-btn-icon.send {
+  opacity: 0;
+  transform: translateY(10px) scale(0.84);
+}
+
+.send-btn-icon.mic {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.send-btn.is-ready-to-send .send-btn-icon.send {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.send-btn.is-ready-to-send .send-btn-icon.mic {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.84);
+}
+
+.voice-hint {
+  color: var(--muted);
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.voice-hint.is-active {
+  color: var(--accent);
+}
+
+.voice-hint.is-disabled {
+  opacity: 0.75;
+}
+
+@keyframes mic-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 oklch(58% 0.18 255 / 0.22); }
+  50% { box-shadow: 0 0 0 8px oklch(58% 0.18 255 / 0); }
+}
 
 .input-meta {
   display: flex;
@@ -1206,15 +1261,25 @@ body.chat-page-react #root {
     <div class="input-wrapper">
       <div class="input-card">
         <textarea class="msg-input" id="msgInput" placeholder="Escribe un pedido para tu agenda personal..." rows="1" maxlength="4000"></textarea>
-        <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="Enviar">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="19" x2="12" y2="5"></line>
-            <polyline points="5 12 12 5 19 12"></polyline>
-          </svg>
+        <button class="send-btn" id="sendBtn" type="button" title="Dictar mensaje">
+          <span class="send-btn-icon mic" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 1 1-6 0V6a3 3 0 0 1 3-3Z"></path>
+              <path d="M19 10a7 7 0 0 1-14 0"></path>
+              <path d="M12 17v4"></path>
+              <path d="M8 21h8"></path>
+            </svg>
+          </span>
+          <span class="send-btn-icon send" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="19" x2="12" y2="5"></line>
+              <polyline points="5 12 12 5 19 12"></polyline>
+            </svg>
+          </span>
         </button>
       </div>
       <div class="input-meta">
-        <span class="shortcut-hint"><kbd>Enter</kbd> enviar · <kbd>Shift+Enter</kbd> salto de linea</span>
+        <span class="shortcut-hint voice-hint" id="voiceHint"><kbd>Microfono</kbd> para dictar · <kbd>Enter</kbd> enviar</span>
         <span class="char-count" id="charCount">0 / 4000</span>
       </div>
     </div>

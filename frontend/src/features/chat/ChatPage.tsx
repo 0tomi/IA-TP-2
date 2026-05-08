@@ -79,6 +79,7 @@ export function ChatPage() {
     const msgInput = document.getElementById("msgInput") as HTMLTextAreaElement | null;
     const sendBtn = document.getElementById("sendBtn") as HTMLButtonElement | null;
     const charCount = document.getElementById("charCount") as HTMLSpanElement | null;
+    const voiceHint = document.getElementById("voiceHint") as HTMLSpanElement | null;
     const scrollBottomBtn = document.getElementById("scrollBottomBtn") as HTMLButtonElement | null;
     const msgCountBadge = document.getElementById("msgCountBadge") as HTMLDivElement | null;
     const msgCountText = document.getElementById("msgCountText") as HTMLSpanElement | null;
@@ -95,6 +96,7 @@ export function ChatPage() {
       !msgInput ||
       !sendBtn ||
       !charCount ||
+      !voiceHint ||
       !scrollBottomBtn ||
       !msgCountBadge ||
       !msgCountText ||
@@ -111,7 +113,27 @@ export function ChatPage() {
     const mascotSrc = botMascotUrl;
     let messageCount = 0;
     let isStreaming = false;
+    let isListening = false;
+    let speechBaseText = "";
     const themeStorageKey = "agenda-theme";
+    type BrowserSpeechRecognition = {
+      continuous: boolean;
+      interimResults: boolean;
+      lang: string;
+      onstart: ((ev: Event) => void) | null;
+      onend: ((ev: Event) => void) | null;
+      onresult: ((ev: Event & { resultIndex: number; results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
+      onerror: ((ev: Event & { error?: string }) => void) | null;
+      start(): void;
+      stop(): void;
+      abort(): void;
+    };
+    const speechWindow = window as Window & {
+      SpeechRecognition?: new () => BrowserSpeechRecognition;
+      webkitSpeechRecognition?: new () => BrowserSpeechRecognition;
+    };
+    const SpeechRecognitionApi = speechWindow.SpeechRecognition || speechWindow.webkitSpeechRecognition;
+    const recognition = SpeechRecognitionApi ? new SpeechRecognitionApi() : null;
 
     const applyTheme = (theme: "light" | "dark") => {
       document.documentElement.dataset.theme = theme;
@@ -125,7 +147,11 @@ export function ChatPage() {
 
     applyTheme(getSavedTheme());
 
-
+    if (recognition) {
+      recognition.lang = "es-AR";
+      recognition.continuous = true;
+      recognition.interimResults = true;
+    }
 
     const now = () =>
       new Date().toLocaleTimeString("es-AR", {
@@ -277,14 +303,13 @@ export function ChatPage() {
       const text = msgInput.value.trim();
       if (!text || isStreaming) return;
 
+      stopListening(true);
       playSendSound();
       welcome.style.display = "none";
       addUserMessage(text);
       msgInput.value = "";
-      msgInput.style.height = "auto";
-      charCount.classList.remove("visible");
-      sendBtn.disabled = true;
       isStreaming = true;
+      syncInputUi();
 
       const typingRow = addTypingIndicator();
 
@@ -324,7 +349,7 @@ export function ChatPage() {
         console.error("Rasa Error:", error);
       } finally {
         isStreaming = false;
-        sendBtn.disabled = false;
+        syncInputUi();
         msgInput.focus();
         scrollToBottom(true);
       }
@@ -347,6 +372,7 @@ export function ChatPage() {
     };
 
     const clearChat = () => {
+      stopListening(true);
       chatArea.innerHTML = "";
       const wrap = document.createElement("div");
       wrap.className = "msg-center-wrap";
@@ -357,6 +383,7 @@ export function ChatPage() {
       msgCountText.textContent = "0 mensajes";
       msgCountBadge.classList.remove("visible");
       closeClearChatModal();
+      syncInputUi();
       scrollToBottom(false);
     };
 
@@ -409,15 +436,107 @@ export function ChatPage() {
       charCount.classList.toggle("warning", len > 3500);
     };
 
+    const updateComposerState = () => {
+      const hasText = msgInput.value.trim().length > 0;
+      sendBtn.classList.toggle("is-ready-to-send", hasText);
+      sendBtn.classList.toggle("is-listening", isListening);
+      sendBtn.disabled = isStreaming;
+      sendBtn.title = hasText ? "Enviar" : isListening ? "Detener dictado" : "Dictar mensaje";
+      voiceHint.textContent = isListening
+        ? "Escuchando..."
+        : recognition
+          ? "Toca el microfono para dictar"
+          : "Dictado no disponible en este navegador";
+      voiceHint.classList.toggle("is-active", isListening);
+      voiceHint.classList.toggle("is-disabled", !recognition);
+    };
+
+    const syncInputUi = () => {
+      onInputResize();
+      onInputCount();
+      updateComposerState();
+    };
+
+    const stopListening = (abort = false) => {
+      if (!recognition || !isListening) return;
+      if (abort) {
+        recognition.abort();
+      } else {
+        recognition.stop();
+      }
+    };
+
+    const startListening = () => {
+      if (!recognition || isStreaming || isListening) return;
+      speechBaseText = msgInput.value.trim();
+      try {
+        recognition.start();
+      } catch (error) {
+        console.error("Speech recognition start error:", error);
+      }
+    };
+
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         closeClearChatModal();
+        stopListening(true);
       }
       if (event.key === "Enter" && !event.shiftKey && clearChatModal.getAttribute("aria-hidden") === "true") {
         event.preventDefault();
         void sendMessage();
       }
     };
+
+    const onSendButtonClick = () => {
+      if (msgInput.value.trim()) {
+        void sendMessage();
+        return;
+      }
+
+      if (!recognition) {
+        msgInput.focus();
+        return;
+      }
+
+      if (isListening) {
+        stopListening();
+        return;
+      }
+
+      startListening();
+    };
+
+    if (recognition) {
+      recognition.onstart = () => {
+        isListening = true;
+        updateComposerState();
+      };
+
+      recognition.onresult = (event) => {
+        let transcript = "";
+        for (let index = event.resultIndex; index < event.results.length; index += 1) {
+          transcript += event.results[index][0]?.transcript ?? "";
+        }
+
+        const nextValue = [speechBaseText, transcript.trim()].filter(Boolean).join(speechBaseText ? " " : "");
+        msgInput.value = nextValue;
+        syncInputUi();
+      };
+
+      recognition.onerror = (event) => {
+        isListening = false;
+        if (event.error !== "no-speech") {
+          voiceHint.textContent = "No pude transcribir. Proba otra vez.";
+        }
+        updateComposerState();
+      };
+
+      recognition.onend = () => {
+        isListening = false;
+        speechBaseText = msgInput.value.trim();
+        updateComposerState();
+      };
+    }
 
     const onScroll = () => {
       const { scrollTop, scrollHeight, clientHeight } = chatArea;
@@ -434,26 +553,34 @@ export function ChatPage() {
     window.openCalendarPage = openCalendarPage;
     window.toggleChatTheme = toggleTheme;
 
-    msgInput.addEventListener("input", onInputResize);
-    msgInput.addEventListener("input", onInputCount);
+    msgInput.addEventListener("input", syncInputUi);
     msgInput.addEventListener("keydown", onKeyDown);
+    sendBtn.addEventListener("click", onSendButtonClick);
     chatArea.addEventListener("scroll", onScroll);
     clearChatBackdrop.addEventListener("click", closeClearChatModal);
     closeClearChatBtn.addEventListener("click", closeClearChatModal);
     cancelClearChatBtn.addEventListener("click", closeClearChatModal);
     confirmClearChatBtn.addEventListener("click", clearChat);
     msgInput.focus();
+    syncInputUi();
     scrollToBottom(false);
 
     return () => {
-      msgInput.removeEventListener("input", onInputResize);
-      msgInput.removeEventListener("input", onInputCount);
+      msgInput.removeEventListener("input", syncInputUi);
       msgInput.removeEventListener("keydown", onKeyDown);
+      sendBtn.removeEventListener("click", onSendButtonClick);
       chatArea.removeEventListener("scroll", onScroll);
       clearChatBackdrop.removeEventListener("click", closeClearChatModal);
       closeClearChatBtn.removeEventListener("click", closeClearChatModal);
       cancelClearChatBtn.removeEventListener("click", closeClearChatModal);
       confirmClearChatBtn.removeEventListener("click", clearChat);
+      if (recognition) {
+        recognition.onstart = null;
+        recognition.onresult = null;
+        recognition.onerror = null;
+        recognition.onend = null;
+        recognition.abort();
+      }
       delete window.clearChat;
       delete window.exportChat;
       delete window.sendSuggestion;
