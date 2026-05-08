@@ -47,6 +47,7 @@ install-frontend:
 
 install-rasa:
 	cd $(RASABOT_DIR) && poetry lock && poetry install
+	cd $(RASABOT_DIR) && poetry run rasa train
 
 # ── Desarrollo ────────────────────────────────────────────────────────────────
 
