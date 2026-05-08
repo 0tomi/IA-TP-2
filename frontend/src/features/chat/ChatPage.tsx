@@ -4,6 +4,21 @@ import botMascotUrl from "../../shared/assets/bot-mascot.svg?url";
 import { InjectedPage } from "../../shared/components/InjectedPage";
 import { chatTemplate } from "./chatTemplate";
 
+const RASA_BASE_URL = import.meta.env.VITE_RASA_URL ?? "http://127.0.0.1:5005";
+const RASA_SENDER_STORAGE_KEY = "rasa-sender-id";
+
+function getRasaSenderId() {
+  const existing = window.sessionStorage.getItem(RASA_SENDER_STORAGE_KEY);
+  if (existing) return existing;
+
+  const senderId = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+    ? crypto.randomUUID()
+    : `sender-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+  window.sessionStorage.setItem(RASA_SENDER_STORAGE_KEY, senderId);
+  return senderId;
+}
+
 declare global {
   interface Window {
     clearChat?: () => void;
@@ -111,6 +126,7 @@ export function ChatPage() {
     }
 
     const mascotSrc = botMascotUrl;
+    const rasaSenderId = getRasaSenderId();
     let messageCount = 0;
     let isStreaming = false;
     let isListening = false;
@@ -314,13 +330,13 @@ export function ChatPage() {
       const typingRow = addTypingIndicator();
 
       try {
-        const response = await fetch("http://127.0.0.1:5005/webhooks/rest/webhook", {
+        const response = await fetch(`${RASA_BASE_URL}/webhooks/rest/webhook`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            sender: "user",
+            sender: rasaSenderId,
             message: text,
           }),
         });
@@ -344,7 +360,7 @@ export function ChatPage() {
       } catch (error) {
         typingRow.remove();
         addBotMessage(
-          "Error de conexión con el bot. Asegurate de que Rasa esté corriendo con el comando: `poetry run rasa run --enable-api --cors '*'`"
+          "Error de conexión con el bot. Asegurate de tener corriendo `make dev` o, si lo levantás manualmente, `poetry run rasa run --enable-api --cors '*'` y `poetry run rasa run actions`."
         );
         console.error("Rasa Error:", error);
       } finally {

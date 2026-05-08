@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 from fastapi import HTTPException, status
 from sqlmodel import Session, select
@@ -64,7 +64,7 @@ def update_event(session: Session, event: Event, data: EventUpdate) -> Event:
 
     for field, value in updates.items():
         setattr(event, field, value)
-    event.updated_at = datetime.now(UTC).replace(tzinfo=None)
+    event.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
     session.add(event)
     session.commit()

@@ -155,3 +155,8 @@ cython_debug/
 # Node / React frontend
 node_modules/
 *.tsbuildinfo
+
+# Rasa artifacts
+rasa_bot/.rasa/
+rasa_bot/models/
+rasa_bot/results/

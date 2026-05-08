@@ -1,8 +1,10 @@
 import logging
-from typing import Any, Text, Dict, List
-import requests
+import os
 from datetime import datetime, timedelta
+from typing import Any, Text, Dict, List
+
 import dateparser
+import requests
 
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
@@ -10,7 +12,8 @@ from rasa_sdk.events import SlotSet
 
 logger = logging.getLogger(__name__)
 
-API_BASE_URL = "http://localhost:8000"
+API_BASE_URL = os.getenv("AGENDA_API_URL", "http://localhost:8000")
+
 
 def get_or_create_event_type(name: str) -> int:
     try:

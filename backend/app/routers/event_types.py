@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
@@ -42,7 +42,7 @@ def update_event_type(
 
     for field, value in data.model_dump(exclude_unset=True).items():
         setattr(event_type, field, value)
-    event_type.updated_at = datetime.now(UTC).replace(tzinfo=None)
+    event_type.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
     session.add(event_type)
     session.commit()

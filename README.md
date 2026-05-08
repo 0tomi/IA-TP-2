@@ -6,7 +6,7 @@
 
 *Trabajo Práctico 2 · Cátedra de Inteligencia Artificial*
 
-![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.10-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
 ![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
@@ -38,7 +38,7 @@ Este proyecto implementa un asistente conversacional que permite al usuario gest
 
 ## Requisitos previos
 
-- Python **3.11+**
+- Python **3.10**
 - [Poetry](https://python-poetry.org/docs/#installation) — `pip install poetry`
 - Node.js **18+** y npm
 
@@ -51,17 +51,20 @@ Este proyecto implementa un asistente conversacional que permite al usuario gest
 ### Instalación
 
 ```bash
-make install            # Instala dependencias de backend y frontend
+make install            # Instala dependencias de backend, frontend y rasa bot
 make install-backend    # Solo backend (Poetry)
 make install-frontend   # Solo frontend (npm)
+make install-rasa       # Solo rasa bot (Poetry)
 ```
 
 ### Desarrollo
 
 ```bash
-make dev                # Levanta backend y frontend en paralelo
+make dev                # Levanta backend, frontend, rasa y action server
 make dev-backend        # Solo backend  →  http://localhost:8000
 make dev-frontend       # Solo frontend →  http://localhost:5173
+make dev-rasa           # Solo rasa bot →  http://localhost:5005
+make dev-rasa-actions   # Solo action server de Rasa → http://localhost:5055
 ```
 
 ### Calidad de código

@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
@@ -42,7 +42,7 @@ def update_agenda(
 
     for field, value in data.model_dump(exclude_unset=True).items():
         setattr(agenda, field, value)
-    agenda.updated_at = datetime.now(UTC).replace(tzinfo=None)
+    agenda.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
     session.add(agenda)
     session.commit()

@@ -8,7 +8,7 @@ assistant_id: 20260505-204416-numerous-forte
 
 # Configuration for Rasa NLU.
 # https://rasa.com/docs/rasa/nlu/components/
-language: en
+language: es
 
 pipeline:
   - name: WhitespaceTokenizer

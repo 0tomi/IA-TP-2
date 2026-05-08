@@ -3,7 +3,7 @@ FRONTEND_DIR := frontend
 RASABOT_DIR  := rasa_bot
 
 .PHONY: help install install-backend install-frontend install-rasa \
-         dev dev-backend dev-frontend dev-rasa \
+         dev dev-backend dev-frontend dev-rasa dev-rasa-actions \
          build test lint lint-fix lint-frontend seed-dev
 
 help:
@@ -16,10 +16,11 @@ help:
 	@echo "    make install-rasa     Solo rasa bot (Poetry)"
 	@echo ""
 	@echo "  Desarrollo:"
-	@echo "    make dev             Levanta los 3 servicios en paralelo"
+	@echo "    make dev             Levanta backend, frontend, rasa y action server"
 	@echo "    make dev-backend     Solo backend  → http://localhost:8000"
 	@echo "    make dev-frontend    Solo frontend → http://localhost:5173"
 	@echo "    make dev-rasa        Solo rasa bot → http://localhost:5005"
+	@echo "    make dev-rasa-actions Solo action server de Rasa → http://localhost:5055"
 	@echo ""
 	@echo "  Otros:"
 	@echo "    make build            Compila el frontend para producción"
@@ -52,7 +53,8 @@ install-rasa:
 dev:
 	cd $(BACKEND_DIR) && poetry run uvicorn app.main:app --reload &
 	cd $(FRONTEND_DIR) && npm run dev &
-	cd $(RASABOT_DIR) && poetry run rasa run --m models --port 5005 &
+	cd $(RASABOT_DIR) && poetry run rasa run --m models --enable-api --cors "*" --port 5005 &
+	cd $(RASABOT_DIR) && poetry run rasa run actions --port 5055
 
 dev-backend:
 	cd $(BACKEND_DIR) && poetry run uvicorn app.main:app --reload
@@ -61,7 +63,10 @@ dev-frontend:
 	cd $(FRONTEND_DIR) && npm run dev
 
 dev-rasa:
-	cd $(RASABOT_DIR) && poetry run rasa run --m models --port 5005
+	cd $(RASABOT_DIR) && poetry run rasa run --m models --enable-api --cors "*" --port 5005
+
+dev-rasa-actions:
+	cd $(RASABOT_DIR) && poetry run rasa run actions --port 5055
 
 # ── Build ─────────────────────────────────────────────────────────────────────
 

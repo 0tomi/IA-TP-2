@@ -1,10 +1,10 @@
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 from sqlmodel import Field, Relationship, SQLModel
 
 
 def now_utc() -> datetime:
-    return datetime.now(UTC).replace(tzinfo=None)
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class Agenda(SQLModel, table=True):
