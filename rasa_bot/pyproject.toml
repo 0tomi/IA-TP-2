@@ -7,7 +7,9 @@ authors = [
 ]
 requires-python = ">=3.10,<3.11"
 dependencies = [
-    "rasa (>=3.6.21,<4.0.0)"
+    "rasa (>=3.6.21,<4.0.0)",
+    "requests",
+    "dateparser==1.1.8"
 ]
 
 
