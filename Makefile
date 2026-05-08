@@ -1,22 +1,25 @@
 BACKEND_DIR  := backend
 FRONTEND_DIR := frontend
+RASABOT_DIR  := rasa_bot
 
-.PHONY: help install install-backend install-frontend \
-         dev dev-backend dev-frontend \
+.PHONY: help install install-backend install-frontend install-rasa \
+         dev dev-backend dev-frontend dev-rasa \
          build test lint lint-fix lint-frontend seed-dev
 
 help:
 	@echo "Comandos disponibles:"
 	@echo ""
 	@echo "  Instalación:"
-	@echo "    make install          Instala dependencias de backend y frontend"
-	@echo "    make install-backend  Solo backend (Poetry)"
+	@echo "    make install          Instala dependencias de backend, frontend y rasa bot"
+	@echo "    make install-backend Solo backend (Poetry)"
 	@echo "    make install-frontend Solo frontend (npm)"
+	@echo "    make install-rasa     Solo rasa bot (Poetry)"
 	@echo ""
 	@echo "  Desarrollo:"
-	@echo "    make dev              Levanta backend y frontend en paralelo"
-	@echo "    make dev-backend      Solo backend  → http://localhost:8000"
-	@echo "    make dev-frontend     Solo frontend → http://localhost:5173"
+	@echo "    make dev             Levanta los 3 servicios en paralelo"
+	@echo "    make dev-backend     Solo backend  → http://localhost:8000"
+	@echo "    make dev-frontend    Solo frontend → http://localhost:5173"
+	@echo "    make dev-rasa        Solo rasa bot → http://localhost:5005"
 	@echo ""
 	@echo "  Otros:"
 	@echo "    make build            Compila el frontend para producción"
@@ -28,7 +31,7 @@ help:
 
 # ── Instalación ───────────────────────────────────────────────────────────────
 
-install: install-backend install-frontend
+install: install-backend install-frontend install-rasa
 
 install-backend:
 	cd $(BACKEND_DIR) && poetry lock && poetry install
@@ -41,17 +44,24 @@ install-frontend:
 		echo "Creado $(FRONTEND_DIR)/.env desde .env.example"; \
 	fi
 
+install-rasa:
+	cd $(RASABOT_DIR) && poetry lock && poetry install
+
 # ── Desarrollo ────────────────────────────────────────────────────────────────
 
 dev:
 	cd $(BACKEND_DIR) && poetry run uvicorn app.main:app --reload &
-	cd $(FRONTEND_DIR) && npm run dev
+	cd $(FRONTEND_DIR) && npm run dev &
+	cd $(RASABOT_DIR) && poetry run rasa run --m models --port 5005 &
 
 dev-backend:
 	cd $(BACKEND_DIR) && poetry run uvicorn app.main:app --reload
 
 dev-frontend:
 	cd $(FRONTEND_DIR) && npm run dev
+
+dev-rasa:
+	cd $(RASABOT_DIR) && poetry run rasa run --m models --port 5005
 
 # ── Build ─────────────────────────────────────────────────────────────────────
 
