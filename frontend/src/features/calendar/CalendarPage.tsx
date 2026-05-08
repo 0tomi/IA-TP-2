@@ -51,6 +51,7 @@ export function CalendarPage() {
     const nextMonthBtn      = document.getElementById("nextMonthBtn") as HTMLButtonElement | null;
     const todayBtn          = document.getElementById("todayBtn") as HTMLButtonElement | null;
     const calendarGrid      = document.getElementById("calendarGrid");
+    const calendarGridWrap  = document.querySelector(".calendar-grid-wrap") as HTMLDivElement | null;
     const statEventCount    = document.getElementById("statEventCount");
     const statDaysWithEvents = document.getElementById("statDaysWithEvents");
     const statMonthLabel    = document.getElementById("statMonthLabel");
@@ -75,7 +76,7 @@ export function CalendarPage() {
       !dayModal || !dayModalBackdrop || !closeModalBtn || !modalDayTitle ||
       !modalDaySubtitle || !modalEventList || !modalAddEventBtn || !modalRemoveEventBtn ||
       !themeLabel || !monthTitle || !prevMonthBtn || !nextMonthBtn || !todayBtn ||
-      !calendarGrid || !createEventModal || !createEventBackdrop || !closeCreateEventBtn ||
+      !calendarGrid || !calendarGridWrap || !createEventModal || !createEventBackdrop || !closeCreateEventBtn ||
       !cancelCreateEventBtn || !submitCreateEventBtn || !newEventTitle || !newEventStart ||
       !newEventEnd || !createEventSubtitle || !createEventError
     ) return;
@@ -164,6 +165,11 @@ export function CalendarPage() {
       const firstDayJs = new Date(year, month - 1, 1).getDay(); // 0=Sun
       const daysInMonth = new Date(year, month, 0).getDate();
       const offset = (firstDayJs + 6) % 7; // 0=Mon
+      const totalSlots = offset + daysInMonth;
+      const weekRows = Math.ceil(totalSlots / 7);
+
+      calendarGrid.setAttribute("data-week-rows", String(weekRows));
+      calendarGrid.style.gridTemplateRows = `22px repeat(${weekRows}, minmax(118px, auto))`;
 
       for (let i = 0; i < offset; i++) {
         const muted = document.createElement("article");
@@ -183,7 +189,8 @@ export function CalendarPage() {
         if (isToday) article.classList.add("today");
         article.innerHTML = `
           <div class="day-head"><div class="day-num">${String(d).padStart(2, "0")}</div></div>
-          <div class="day-label">Libre para planear</div>
+          <div class="day-empty">Libre para planear</div>
+          <div class="day-events"></div>
           <div class="markers"><span class="marker"></span></div>
         `;
         calendarGrid.appendChild(article);
@@ -197,7 +204,8 @@ export function CalendarPage() {
       const events = ensureEvents(day);
       const count = card.querySelector(".event-count");
       const markers = card.querySelector(".markers");
-      const label = card.querySelector(".day-label");
+      const eventsList = card.querySelector(".day-events");
+      const emptyState = card.querySelector(".day-empty");
 
       if (events.length) {
         const featuredTone = events[0]?.tone ?? "";
@@ -211,10 +219,23 @@ export function CalendarPage() {
           card.querySelector(".day-head")?.appendChild(badge);
         }
         card.classList.add("featured");
-        if (label) label.textContent = events.map((e) => e.label).slice(0, 2).join(" · ");
+        if (emptyState) emptyState.textContent = "";
+        if (eventsList) {
+          const visibleEvents = events.slice(0, 2);
+          const remainingEvents = events.length - visibleEvents.length;
+          eventsList.innerHTML = visibleEvents
+            .map((event) => `
+              <div class="day-event-row" style="--event-accent:${event.tone}">
+                <span class="day-event-time">${escapeHtml(event.time)}</span>
+                <span class="day-event-title">${escapeHtml(event.label)}</span>
+              </div>
+            `)
+            .join("")
+            + (remainingEvents > 0 ? `<div class="day-event-more">+${remainingEvents} mas</div>` : "");
+        }
         if (markers) {
           markers.innerHTML = events
-            .slice(0, 3)
+            .slice(0, 4)
             .map((event, i) => `<span class="marker ${i === 0 ? "strong" : ""}" style="--marker-tone:${event.tone}"></span>`)
             .join("");
         }
@@ -222,7 +243,8 @@ export function CalendarPage() {
         count?.remove();
         card.classList.remove("featured");
         card.style.removeProperty("--day-accent");
-        if (label) label.textContent = "Libre para planear";
+        if (emptyState) emptyState.textContent = "Libre para planear";
+        if (eventsList) eventsList.innerHTML = "";
         if (markers) markers.innerHTML = '<span class="marker"></span>';
       }
     };
@@ -333,12 +355,36 @@ export function CalendarPage() {
     const getDayNodes = () =>
       Array.from(document.querySelectorAll<HTMLElement>(".day[data-day]"));
 
+    const focusDayInGrid = (day: number, smooth = false) => {
+      const target = document.querySelector<HTMLElement>(`.day[data-day="${day}"]`);
+      if (!target) return;
+
+      const targetTop = target.offsetTop - 12;
+      const maxScroll = Math.max(0, calendarGridWrap.scrollHeight - calendarGridWrap.clientHeight);
+      const nextTop = Math.min(Math.max(0, targetTop), maxScroll);
+
+      calendarGridWrap.scrollTo({
+        top: nextTop,
+        behavior: smooth ? "smooth" : "auto",
+      });
+    };
+
+    const focusDayInGridNow = (day: number) => {
+      const target = document.querySelector<HTMLElement>(`.day[data-day="${day}"]`);
+      if (!target) return;
+
+      const targetTop = target.offsetTop - 12;
+      const maxScroll = Math.max(0, calendarGridWrap.scrollHeight - calendarGridWrap.clientHeight);
+      calendarGridWrap.scrollTop = Math.min(Math.max(0, targetTop), maxScroll);
+    };
+
     const selectDay = (day: number) => {
       selectedDay = day;
       selectedEventIndex = 0;
       getDayNodes().forEach((n) =>
         n.classList.toggle("selected", Number(n.dataset.day) === day)
       );
+      focusDayInGrid(day, true);
       renderTray();
       renderModal();
       openModal();
@@ -469,6 +515,7 @@ export function CalendarPage() {
       // Mark selected day
       const selNode = document.querySelector<HTMLElement>(`.day[data-day="${selectedDay}"]`);
       if (selNode) selNode.classList.add("selected");
+      focusDayInGridNow(selectedDay);
 
       try {
         const rawEvents = await api.getEvents(month, year);
@@ -501,6 +548,7 @@ export function CalendarPage() {
       updateStats();
       renderTray();
       renderModal();
+      focusDayInGridNow(selectedDay);
     };
 
     // ── Navigation ────────────────────────────────────────────────────────────
