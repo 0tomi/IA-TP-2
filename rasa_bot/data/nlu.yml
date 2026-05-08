@@ -5,6 +5,7 @@ nlu:
 
 - intent: crear_evento
   examples: |
+    - agendame un [turno al médico](tipo_evento) para [mañana a las 16hs](fecha)
     - anotame un [parcial](tipo_evento) para [mañana](fecha)
     - agendame una [juntada](tipo_evento) el [viernes](fecha)
     - necesito guardar una [reunión](tipo_evento) el [lunes que viene](fecha)
@@ -20,6 +21,14 @@ nlu:
     - agendá una [cena](tipo_evento) [pasado mañana](fecha)
     - programá una [sesión de estudio](tipo_evento) para el [sábado a la mañana](fecha)
     - quiero dejar anotado un [examen](tipo_evento) para la [semana que viene](fecha)
+    - anotame un [final de álgebra](tipo_evento) el [lunes a las 10:30](fecha)
+    - agendá [dentista](tipo_evento) para el [miércoles a las 15 horas](fecha)
+    - quiero guardar un [recordatorio](tipo_evento) para [hoy a las 18:45](fecha)
+    - meté una [reunión de equipo](tipo_evento) el [viernes a las 9](fecha)
+    - guardá que tengo [psicólogo](tipo_evento) el [martes que viene a las 17](fecha)
+    - anotá un [almuerzo con mamá](tipo_evento) para el [domingo a las 13](fecha)
+    - agendame [lavar el auto](tipo_evento) para el [sábado temprano](fecha)
+    - recordame el [pago de la tarjeta](tipo_evento) el [día 10](fecha)
 
 - intent: consultar_evento
   examples: |
@@ -38,6 +47,13 @@ nlu:
     - quiero saber mis horarios del [sábado](fecha)
     - tirame los datos del [cumpleaños](tipo_evento)
     - buscame cuándo es la [juntada](tipo_evento)
+    - mostrame todo lo del [miércoles](fecha)
+    - ¿qué planes tengo para el [domingo](fecha)?
+    - decime mis eventos para [la semana](fecha)
+    - ¿tengo algo el [martes](fecha)?
+    - ¿cuándo tengo que ir al [dentista](tipo_evento)?
+    - ¿cuándo es el [examen de álgebra](tipo_evento)?
+    - listame los eventos de [octubre](fecha)
 
 - intent: chitchat
   examples: |
@@ -66,6 +82,17 @@ nlu:
     - nos vemos
     - hasta luego
     - saludos
+    - quién sos?
+    - sos un bot?
+    - qué podés hacer?
+    - hablas español?
+    - estas ahí?
+    - holis
+    - buenas buenas
+    - hello
+    - hi
+    - cuídate
+    - chau chau
 
 - intent: informar_agenda
   examples: |
@@ -75,3 +102,10 @@ nlu:
     - [personal](nombre_agenda)
     - [trabajo](nombre_agenda)
     - mandala a la agenda [facultad](nombre_agenda)
+    - en la [principal](nombre_agenda)
+    - usá la de [casa](nombre_agenda)
+    - en la agenda de [ocio](nombre_agenda)
+    - mandalo a [gym](nombre_agenda)
+    - guardá en [proyectos](nombre_agenda)
+    - en la agenda de [familia](nombre_agenda)
+    - cargalo en [oficina](nombre_agenda)
