@@ -9,6 +9,7 @@ export const calendarTemplate = {
   --accent: oklch(58% 0.18 255);
   --accent-2: oklch(72% 0.08 220);
   --accent-soft: oklch(58% 0.18 255 / 0.12);
+  --ambient-2: oklch(72% 0.08 220 / 0.14);
   --shadow-card: 0 1px 3px oklch(0% 0 0 / 0.04), 0 8px 24px oklch(0% 0 0 / 0.06);
   --shadow-float: 0 14px 36px oklch(210 0.05 0 / 0.12);
   --font-display: 'Trebuchet MS', 'Segoe UI', sans-serif;
@@ -27,6 +28,7 @@ export const calendarTemplate = {
   --accent: oklch(74% 0.2 332);
   --accent-2: oklch(72% 0.15 290);
   --accent-soft: oklch(74% 0.2 332 / 0.18);
+  --ambient-2: oklch(66% 0.12 306 / 0.12);
   --shadow-card: 0 1px 2px oklch(0% 0 0 / 0.34), 0 14px 34px oklch(0% 0 0 / 0.32);
   --shadow-float: 0 18px 46px oklch(0% 0 0 / 0.42);
 }
@@ -48,7 +50,7 @@ body {
   overflow: hidden;
   background:
     radial-gradient(circle at top left, var(--accent-soft), transparent 26%),
-    radial-gradient(circle at bottom right, oklch(72% 0.08 220 / 0.14), transparent 28%),
+    radial-gradient(circle at bottom right, var(--ambient-2), transparent 28%),
     var(--bg);
   color: var(--fg);
 }
@@ -155,7 +157,7 @@ body.calendar-page-react #root {
   min-height: 40px;
   padding: 0 18px;
   border-radius: 999px;
-  border: 1px solid oklch(58% 0.18 255 / 0.16);
+  border: 1px solid color-mix(in oklab, var(--accent) 20%, transparent);
   background: var(--surface-strong);
   color: var(--fg);
   font-family: var(--font-mono);
@@ -172,8 +174,8 @@ body.calendar-page-react #root {
 .header-nav-btn.back-btn {
   padding: 0 20px 0 14px;
   gap: 10px;
-  border-color: oklch(58% 0.18 255 / 0.22);
-  background: linear-gradient(135deg, oklch(58% 0.18 255 / 0.1), var(--surface-strong));
+  border-color: color-mix(in oklab, var(--accent) 28%, transparent);
+  background: linear-gradient(135deg, color-mix(in oklab, var(--accent) 12%, transparent), var(--surface-strong));
 }
 
 .back-icon {
@@ -183,8 +185,8 @@ body.calendar-page-react #root {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: oklch(58% 0.18 255 / 0.12);
-  border: 1px solid oklch(58% 0.18 255 / 0.18);
+  background: color-mix(in oklab, var(--accent) 14%, transparent);
+  border: 1px solid color-mix(in oklab, var(--accent) 22%, transparent);
 }
 
 .back-icon svg {
@@ -212,7 +214,7 @@ body.calendar-page-react #root {
   gap: 8px;
   padding: 7px 12px;
   border-radius: 999px;
-  border: 1px solid oklch(58% 0.18 255 / 0.1);
+  border: 1px solid color-mix(in oklab, var(--accent) 14%, transparent);
   background: var(--surface);
   color: var(--muted);
   font-family: var(--font-mono);
@@ -304,8 +306,7 @@ body.calendar-page-react #root {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 20px 20px 14px;
-  border-bottom: 1px solid var(--border);
+  padding: 20px 20px 18px;
 }
 
 .calendar-title small,
@@ -341,6 +342,30 @@ body.calendar-page-react #root {
   font-size: 14px;
 }
 
+.calendar-status {
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid oklch(58% 0.18 255 / 0.14);
+  background: var(--surface-strong);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.calendar-status::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+}
+
 .calendar-actions {
   display: flex;
   align-items: center;
@@ -350,8 +375,28 @@ body.calendar-page-react #root {
 .calendar-meta {
   display: flex;
   gap: 12px;
-  padding: 14px 20px 0;
+  padding: 10px 20px 8px;
   flex-wrap: wrap;
+  position: relative;
+}
+
+.calendar-meta::after {
+  content: '';
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: -2px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--border) 92%, transparent) 12%,
+    color-mix(in oklab, var(--border) 72%, transparent) 50%,
+    color-mix(in oklab, var(--border) 92%, transparent) 88%,
+    transparent
+  );
+  opacity: 0.7;
+  pointer-events: none;
 }
 
 .mini-stat {
@@ -378,15 +423,44 @@ body.calendar-page-react #root {
 
 .calendar-grid-wrap {
   min-height: 0;
-  padding: 14px 20px;
+  padding: 20px 20px 18px;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, var(--accent) 44%, transparent) transparent;
+  position: relative;
+}
+
+.calendar-grid-wrap::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.calendar-grid-wrap::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.calendar-grid-wrap::-webkit-scrollbar-thumb {
+  background:
+    linear-gradient(180deg, color-mix(in oklab, var(--accent) 56%, white), color-mix(in oklab, var(--accent-2) 52%, white));
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+}
+
+.calendar-grid-wrap::-webkit-scrollbar-thumb:hover {
+  background:
+    linear-gradient(180deg, color-mix(in oklab, var(--accent) 70%, white), color-mix(in oklab, var(--accent-2) 66%, white));
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
-  grid-template-rows: 22px repeat(5, minmax(0, 1fr));
+  grid-template-rows: 22px repeat(5, minmax(118px, auto));
   gap: 8px;
-  height: 100%;
+  min-height: 100%;
+  align-content: start;
 }
 
 .weekday {
@@ -398,7 +472,7 @@ body.calendar-page-react #root {
 
 .day {
   min-height: 0;
-  padding: 10px;
+  padding: 10px 10px 10px;
   border: 1px solid var(--border);
   border-radius: 22px;
   background: var(--surface-strong);
@@ -406,6 +480,9 @@ body.calendar-page-react #root {
   cursor: pointer;
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .day:hover {
@@ -437,7 +514,7 @@ body.calendar-page-react #root {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 1px dashed oklch(58% 0.18 255 / 0.18);
+  border: 1px dashed color-mix(in oklab, var(--day-accent, var(--accent)) 46%, transparent);
   opacity: 0.76;
 }
 
@@ -445,7 +522,6 @@ body.calendar-page-react #root {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
 }
 
 .day-num {
@@ -462,43 +538,120 @@ body.calendar-page-react #root {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--accent-soft);
-  color: var(--accent);
-  border: 1px solid oklch(58% 0.18 255 / 0.22);
+  background: color-mix(in oklab, var(--day-accent, var(--accent)) 12%, transparent);
+  color: var(--day-accent, var(--accent));
+  border: 1px solid color-mix(in oklab, var(--day-accent, var(--accent)) 22%, transparent);
   font-family: var(--font-mono);
   font-size: 10px;
 }
 
-.day-label {
-  min-height: 30px;
+.day-empty {
+  min-height: 16px;
   font-size: 12px;
-  line-height: 1.3;
+  line-height: 1.25;
+  color: color-mix(in oklab, var(--fg) 88%, var(--muted));
+}
+
+.day-events {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-height: 0;
+  flex: 1;
+}
+
+.day-event-row,
+.day-event-more {
+  min-height: 26px;
+  border-radius: 11px;
+  font-size: 10px;
+}
+
+.day-event-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 7px;
+  border: 1px solid color-mix(in oklab, var(--event-accent, var(--accent)) 18%, transparent);
+  background: color-mix(in oklab, var(--event-accent, var(--accent)) 10%, transparent);
+}
+
+.day-event-time,
+.day-event-more {
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.day-event-time {
+  flex-shrink: 0;
+  padding: 2px 5px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--event-accent, var(--accent)) 14%, transparent);
+  color: var(--event-accent, var(--accent));
+  font-size: 9px;
+}
+
+.day-event-title {
+  flex: 1;
   color: var(--fg);
-  margin-bottom: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.day-event-more {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 4px;
+  color: var(--muted);
 }
 
 .markers {
   display: flex;
   gap: 5px;
   flex-wrap: wrap;
+  margin-top: 2px;
 }
 
 .marker {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: oklch(58% 0.18 255 / 0.24);
+  background: color-mix(in oklab, var(--marker-tone, var(--accent)) 30%, transparent);
 }
 
-.marker.strong { background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+.marker.strong { background: var(--marker-tone, linear-gradient(135deg, var(--accent), var(--accent-2))); }
 
 .calendar-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 0 20px 18px;
+  padding: 12px 20px 18px;
   flex-wrap: wrap;
+  position: relative;
+}
+
+.calendar-footer::before {
+  content: '';
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--border) 92%, transparent) 12%,
+    color-mix(in oklab, var(--border) 72%, transparent) 50%,
+    color-mix(in oklab, var(--border) 92%, transparent) 88%,
+    transparent
+  );
+  opacity: 0.7;
+  pointer-events: none;
 }
 
 .footer-main {
@@ -581,20 +734,27 @@ body.calendar-page-react #root {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  min-height: 34px;
-  padding: 7px 10px;
-  border-radius: 999px;
-  border: 1px solid oklch(58% 0.18 255 / 0.18);
-  background: oklch(58% 0.18 255 / 0.08);
+  min-height: 44px;
+  padding: 8px 12px;
+  border-radius: 18px;
+  border: 1px solid color-mix(in oklab, var(--event-accent, var(--accent)) 20%, var(--border));
+  background: color-mix(in oklab, var(--event-accent, var(--accent)) 10%, var(--surface-strong));
 }
 
 .event-pill.is-active {
-  background: oklch(58% 0.18 255 / 0.14);
+  background: color-mix(in oklab, var(--event-accent, var(--accent)) 16%, var(--surface-strong));
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--event-accent, var(--accent)) 22%, transparent);
 }
 
 .event-pill-time {
   font-size: 10px;
-  color: var(--accent);
+  color: var(--event-accent, var(--accent));
+}
+
+.event-pill-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
 
 .event-pill-label,
@@ -603,10 +763,26 @@ body.calendar-page-react #root {
   color: var(--fg);
 }
 
+.event-pill-meta {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 .event-empty {
   color: var(--muted);
   border-color: var(--border);
   background: var(--surface);
+  border-style: dashed;
+}
+
+.event-empty.loading {
+  background:
+    linear-gradient(90deg, transparent, color-mix(in oklab, var(--surface-strong) 72%, white), transparent),
+    var(--surface);
+  background-size: 220px 100%, auto;
+  animation: tray-shimmer 1.4s linear infinite;
 }
 
 .event-actions {
@@ -648,17 +824,15 @@ body.calendar-page-react #root {
   align-items: center;
   justify-content: center;
   padding: 24px;
-  opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition: opacity 0.25s ease, visibility 0.25s ease;
+  overflow: hidden;
 }
 
 .create-event-modal { z-index: 40; }
 
 .day-modal.is-open,
 .create-event-modal.is-open {
-  opacity: 1;
   visibility: visible;
   pointer-events: auto;
 }
@@ -668,7 +842,12 @@ body.calendar-page-react #root {
   position: absolute;
   inset: 0;
   background: oklch(14% 0.03 295 / 0.34);
-  backdrop-filter: blur(12px);
+  opacity: 0;
+  backdrop-filter: blur(14px) saturate(115%);
+  -webkit-backdrop-filter: blur(14px) saturate(115%);
+  will-change: opacity, backdrop-filter;
+  transform: translateZ(0);
+  transition: opacity 0.14s ease-out;
 }
 
 .day-modal-card {
@@ -679,12 +858,23 @@ body.calendar-page-react #root {
   background: var(--surface-strong);
   box-shadow: 0 24px 80px oklch(0% 0 0 / 0.24);
   overflow: hidden;
+  opacity: 0;
   transform: translateY(18px) scale(0.98);
-  transition: transform 0.3s ease;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transition: transform 0.22s ease-out, opacity 0.18s ease-out;
+}
+
+.day-modal.is-open .day-modal-backdrop,
+.day-modal.is-open .create-event-backdrop,
+.create-event-modal.is-open .day-modal-backdrop,
+.create-event-modal.is-open .create-event-backdrop {
+  opacity: 1;
 }
 
 .day-modal.is-open .day-modal-card,
 .create-event-modal.is-open .day-modal-card {
+  opacity: 1;
   transform: translateY(0) scale(1);
 }
 
@@ -737,26 +927,41 @@ body.calendar-page-react #root {
   align-items: center;
   padding: 16px 18px;
   border-radius: 22px;
-  border: 1px solid var(--border);
-  background: var(--surface);
+  border: 1px solid color-mix(in oklab, var(--event-accent, var(--accent)) 16%, var(--border));
+  background: color-mix(in oklab, var(--event-accent, var(--accent)) 6%, var(--surface));
   box-shadow: var(--shadow-card);
   cursor: pointer;
 }
 
 .modal-event.is-active {
-  border-color: oklch(58% 0.18 255 / 0.28);
+  border-color: color-mix(in oklab, var(--event-accent, var(--accent)) 30%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--event-accent, var(--accent)) 24%, transparent);
 }
 
 .modal-event-time {
-  color: var(--accent);
+  color: var(--event-accent, var(--accent));
   font-size: 20px;
   letter-spacing: -0.04em;
+}
+
+.modal-event-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .modal-event-label {
   font-size: 20px;
   line-height: 1.1;
   letter-spacing: -0.04em;
+}
+
+.modal-event-meta {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .modal-empty {
@@ -786,6 +991,67 @@ body.calendar-page-react #root {
   flex-direction: column;
   gap: 6px;
   flex: 1;
+}
+
+.calendar-toast-stack {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 60;
+  display: grid;
+  gap: 10px;
+}
+
+.calendar-toast {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 260px;
+  max-width: 360px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--surface-strong) 92%, transparent);
+  box-shadow: var(--shadow-float);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+.calendar-toast.hide {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.calendar-toast.success {
+  border-color: oklch(69% 0.17 152 / 0.28);
+}
+
+.calendar-toast.error {
+  border-color: oklch(65% 0.2 20 / 0.28);
+}
+
+.calendar-toast-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  flex-shrink: 0;
+}
+
+.calendar-toast.success .calendar-toast-dot {
+  background: oklch(69% 0.17 152);
+}
+
+.calendar-toast.error .calendar-toast-dot {
+  background: oklch(65% 0.2 20);
+}
+
+@keyframes tray-shimmer {
+  from { background-position: -220px 0, 0 0; }
+  to { background-position: calc(100% + 220px) 0, 0 0; }
 }
 
 .form-label {
@@ -831,31 +1097,31 @@ body.calendar-page-react #root {
 
 .corner-decor { width: 120px; height: 120px; }
 .corner-decor.top-left { top: 0; left: 0; background: radial-gradient(circle at 0 0, var(--accent-soft), transparent 60%); }
-.corner-decor.top-right { top: 0; right: 0; background: radial-gradient(circle at 100% 0, oklch(72% 0.08 220 / 0.18), transparent 60%); }
-.corner-decor.bottom-left { left: 0; bottom: 0; background: radial-gradient(circle at 0 100%, oklch(58% 0.18 255 / 0.08), transparent 60%); }
-.corner-decor.bottom-right { right: 0; bottom: 0; background: radial-gradient(circle at 100% 100%, oklch(72% 0.08 220 / 0.14), transparent 60%); }
-.shape-orbit { border-radius: 50%; border: 1px solid oklch(58% 0.18 255 / 0.2); }
+.corner-decor.top-right { top: 0; right: 0; background: radial-gradient(circle at 100% 0, color-mix(in oklab, var(--accent-2) 18%, transparent), transparent 60%); }
+.corner-decor.bottom-left { left: 0; bottom: 0; background: radial-gradient(circle at 0 100%, color-mix(in oklab, var(--accent) 12%, transparent), transparent 60%); }
+.corner-decor.bottom-right { right: 0; bottom: 0; background: radial-gradient(circle at 100% 100%, color-mix(in oklab, var(--accent-2) 14%, transparent), transparent 60%); }
+.shape-orbit { border-radius: 50%; border: 1px solid color-mix(in oklab, var(--accent) 22%, transparent); }
 .shape-orbit { width: 240px; height: 240px; right: -90px; top: 110px; }
 .shape-orbit.left { width: 220px; height: 220px; left: -82px; top: 29%; right: auto; }
-.shape-ribbon.top { width: 220px; height: 220px; top: 96px; right: -128px; border: 1px solid oklch(72% 0.08 220 / 0.22); border-radius: 28px; transform: rotate(45deg); }
-.shape-ribbon.bottom { width: 220px; height: 220px; left: -144px; bottom: 82px; border: 1px solid oklch(58% 0.18 255 / 0.18); border-radius: 40px; transform: rotate(45deg); }
+.shape-ribbon.top { width: 220px; height: 220px; top: 96px; right: -128px; border: 1px solid color-mix(in oklab, var(--accent-2) 24%, transparent); border-radius: 28px; transform: rotate(45deg); }
+.shape-ribbon.bottom { width: 220px; height: 220px; left: -144px; bottom: 82px; border: 1px solid color-mix(in oklab, var(--accent) 18%, transparent); border-radius: 40px; transform: rotate(45deg); }
 .mesh-line.one { top: 142px; left: 12%; width: 220px; height: 1px; transform: rotate(-14deg); background: linear-gradient(90deg, transparent, var(--accent-soft), transparent); }
-.mesh-line.two { top: 61%; right: 8%; width: 280px; height: 1px; transform: rotate(18deg); background: linear-gradient(90deg, transparent, oklch(72% 0.08 220 / 0.18), transparent); }
+.mesh-line.two { top: 61%; right: 8%; width: 280px; height: 1px; transform: rotate(18deg); background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--accent-2) 22%, transparent), transparent); }
 .mesh-line.three { top: 31%; right: 14%; width: 180px; height: 1px; transform: rotate(-30deg); background: linear-gradient(90deg, transparent, var(--accent-soft), transparent); }
-.mesh-line.four { left: 8%; bottom: 17%; width: 250px; height: 1px; transform: rotate(23deg); background: linear-gradient(90deg, transparent, oklch(58% 0.18 255 / 0.14), transparent); }
-.shape-ring { border-radius: 50%; border: 1px dashed oklch(58% 0.18 255 / 0.2); opacity: 0.68; }
+.mesh-line.four { left: 8%; bottom: 17%; width: 250px; height: 1px; transform: rotate(23deg); background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--accent) 18%, transparent), transparent); }
+.shape-ring { border-radius: 50%; border: 1px dashed color-mix(in oklab, var(--accent) 22%, transparent); opacity: 0.68; }
 .shape-ring.one { width: 142px; height: 142px; top: 116px; left: 10%; }
 .shape-ring.two { width: 112px; height: 112px; right: 13%; bottom: 124px; }
-.shape-spark { width: 22px; height: 22px; border-radius: 7px; border: 1px solid oklch(58% 0.18 255 / 0.24); background: linear-gradient(135deg, oklch(58% 0.18 255 / 0.14), transparent 72%); transform: rotate(45deg); }
+.shape-spark { width: 22px; height: 22px; border-radius: 7px; border: 1px solid color-mix(in oklab, var(--accent) 26%, transparent); background: linear-gradient(135deg, color-mix(in oklab, var(--accent) 16%, transparent), transparent 72%); transform: rotate(45deg); }
 .shape-spark.one { top: 184px; right: 21%; }
 .shape-spark.two { left: 18%; bottom: 144px; }
-.frame-mark { width: 54px; height: 54px; border-color: oklch(58% 0.18 255 / 0.18); border-style: solid; }
+.frame-mark { width: 54px; height: 54px; border-color: color-mix(in oklab, var(--accent) 20%, transparent); border-style: solid; }
 .frame-mark.top-left { top: 88px; left: 22px; border-width: 1px 0 0 1px; border-top-left-radius: 14px; }
 .frame-mark.bottom-right { right: 22px; bottom: 28px; border-width: 0 1px 1px 0; border-bottom-right-radius: 14px; }
 
 @keyframes pulse-dot {
-  0%, 100% { box-shadow: 0 0 0 0 oklch(58% 0.18 255 / 0.36); }
-  50% { box-shadow: 0 0 0 7px oklch(58% 0.18 255 / 0); }
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 40%, transparent); }
+  50% { box-shadow: 0 0 0 7px color-mix(in oklab, var(--accent) 0%, transparent); }
 }
 
 @media (max-width: 960px) {
@@ -943,6 +1209,17 @@ body.calendar-page-react #root {
   .form-time-row {
     flex-direction: column;
   }
+
+  .calendar-toast-stack {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+  }
+
+  .calendar-toast {
+    min-width: 0;
+    max-width: none;
+  }
 }`,
   bodyHtml: `<div class="corner-decor top-left"></div>
 <div class="corner-decor top-right"></div>
@@ -1011,6 +1288,7 @@ body.calendar-page-react #root {
         <small>panel central</small>
         <h1 id="calendarMonthTitle">Cargando...</h1>
         <p>Vista mensual conectada al asistente para planificar compromisos, foco personal y recordatorios.</p>
+        <div class="calendar-status" id="monthStatus">Preparando tablero</div>
       </div>
       <div class="calendar-actions" aria-label="Navegacion del calendario">
         <button class="icon-btn" id="prevMonthBtn" type="button" aria-label="Mes anterior">
@@ -1038,6 +1316,10 @@ body.calendar-page-react #root {
         <span>mes</span>
         <strong id="statMonthLabel">—</strong>
       </div>
+      <div class="mini-stat">
+        <span>ritmo</span>
+        <strong id="statFocusLabel">—</strong>
+      </div>
     </div>
 
     <div class="calendar-grid-wrap">
@@ -1055,8 +1337,8 @@ body.calendar-page-react #root {
     <div class="calendar-footer">
       <div class="footer-main">
         <div class="legend">
-          <div class="legend-item"><span class="legend-dot strong"></span>dia con evento</div>
-          <div class="legend-item"><span class="legend-dot"></span>dia libre</div>
+          <div class="legend-item"><span class="legend-dot strong"></span>dia con actividad</div>
+          <div class="legend-item"><span class="legend-dot"></span>espacio libre</div>
           <div class="legend-item"><span class="legend-dot strong"></span>hoy destacado</div>
         </div>
         <div class="event-tray">
@@ -1138,5 +1420,7 @@ body.calendar-page-react #root {
       </div>
     </div>
   </section>
-</div>`,
+</div>
+
+<div class="calendar-toast-stack" id="calendarToastStack" aria-live="polite"></div>`,
 } as const;

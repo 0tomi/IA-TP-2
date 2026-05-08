@@ -9,6 +9,13 @@ export const chatTemplate = {
   --accent: oklch(58% 0.18 255);
   --accent-2: oklch(72% 0.08 220);
   --accent-soft: oklch(58% 0.18 255 / 0.12);
+  --ambient-1: oklch(58% 0.18 255 / 0.1);
+  --ambient-2: oklch(72% 0.08 220 / 0.14);
+  --grid-line: oklch(92% 0.005 250);
+  --texture-dot: oklch(18% 0.012 250 / 0.08);
+  --texture-haze: oklch(58% 0.18 255 / 0.035);
+  --signal-line: oklch(58% 0.18 255 / 0.2);
+  --signal-line-soft: oklch(72% 0.08 220 / 0.2);
   --success: oklch(69% 0.17 152);
   --shadow-card: 0 1px 3px oklch(0% 0 0 / 0.04), 0 8px 24px oklch(0% 0 0 / 0.06);
   --shadow-float: 0 14px 36px oklch(210 0.05 0 / 0.12);
@@ -34,6 +41,13 @@ export const chatTemplate = {
   --accent: oklch(74% 0.2 332);
   --accent-2: oklch(72% 0.15 290);
   --accent-soft: oklch(74% 0.2 332 / 0.18);
+  --ambient-1: oklch(74% 0.2 332 / 0.11);
+  --ambient-2: oklch(66% 0.12 306 / 0.12);
+  --grid-line: oklch(36% 0.04 300);
+  --texture-dot: oklch(95% 0.01 320 / 0.045);
+  --texture-haze: oklch(74% 0.2 332 / 0.03);
+  --signal-line: oklch(74% 0.2 332 / 0.18);
+  --signal-line-soft: oklch(66% 0.12 306 / 0.16);
   --success: oklch(77% 0.17 156);
   --shadow-card: 0 1px 2px oklch(0% 0 0 / 0.34), 0 14px 34px oklch(0% 0 0 / 0.32);
   --shadow-float: 0 18px 46px oklch(0% 0 0 / 0.42);
@@ -55,8 +69,8 @@ body {
   min-height: 100dvh;
   overflow: hidden;
   background:
-    radial-gradient(circle at top left, oklch(58% 0.18 255 / 0.1), transparent 26%),
-    radial-gradient(circle at bottom right, oklch(72% 0.08 220 / 0.14), transparent 28%),
+    radial-gradient(circle at top left, var(--ambient-1), transparent 26%),
+    radial-gradient(circle at bottom right, var(--ambient-2), transparent 28%),
     var(--bg);
   color: var(--fg);
 }
@@ -65,8 +79,12 @@ body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-  opacity: 0.025;
+  background-image:
+    radial-gradient(circle at 1px 1px, var(--texture-dot) 0.9px, transparent 0),
+    radial-gradient(circle at 50% 50%, var(--texture-haze), transparent 68%);
+  background-size: 18px 18px, 100% 100%;
+  background-position: 0 0, center;
+  opacity: 0.42;
   pointer-events: none;
 }
 
@@ -75,8 +93,8 @@ body::after {
   position: fixed;
   inset: 0;
   background-image:
-    linear-gradient(var(--border) 1px, transparent 1px),
-    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
   background-size: 60px 60px;
   opacity: 0.14;
   pointer-events: none;
@@ -292,7 +310,7 @@ body.chat-page-react #root {
   bottom: 0;
   left: 50%;
   width: 1px;
-  background: linear-gradient(180deg, transparent, oklch(58% 0.18 255 / 0.08) 15%, oklch(58% 0.18 255 / 0.05) 85%, transparent);
+  background: linear-gradient(180deg, transparent, color-mix(in oklab, var(--accent) 22%, transparent) 15%, color-mix(in oklab, var(--accent) 14%, transparent) 85%, transparent);
   transform: translateX(-50%);
   pointer-events: none;
   opacity: 0.6;
@@ -335,9 +353,9 @@ body.chat-page-react #root {
 }
 
 .msg-row.bot .msg-avatar {
-  background: oklch(58% 0.18 255 / 0.1);
-  border: 1px solid oklch(58% 0.18 255 / 0.25);
-  box-shadow: 0 0 0 4px oklch(58% 0.18 255 / 0.05);
+  background: color-mix(in oklab, var(--accent) 14%, transparent);
+  border: 1px solid color-mix(in oklab, var(--accent) 28%, transparent);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 10%, transparent);
 }
 
 .msg-row.user .msg-avatar {
@@ -412,7 +430,7 @@ body.chat-page-react #root {
 }
 
 .msg-row.bot .msg-card code {
-  background: oklch(58% 0.18 255 / 0.12);
+  background: color-mix(in oklab, var(--accent) 16%, transparent);
   color: var(--accent);
 }
 
@@ -477,7 +495,7 @@ body.chat-page-react #root {
   width: 300px;
   height: 300px;
   border-radius: 50%;
-  background: radial-gradient(circle, oklch(58% 0.18 255 / 0.06) 0%, transparent 70%);
+  background: radial-gradient(circle, color-mix(in oklab, var(--accent) 10%, transparent) 0%, transparent 70%);
   pointer-events: none;
   animation: welcome-pulse 4s ease-in-out infinite;
 }
@@ -488,7 +506,7 @@ body.chat-page-react #root {
   width: 420px;
   height: 420px;
   border-radius: 50%;
-  border: 1px dashed oklch(58% 0.18 255 / 0.09);
+  border: 1px dashed color-mix(in oklab, var(--accent) 18%, transparent);
   opacity: 0.6;
   pointer-events: none;
 }
@@ -505,8 +523,8 @@ body.chat-page-react #root {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: oklch(58% 0.18 255 / 0.08);
-  border: 1px solid oklch(58% 0.18 255 / 0.22);
+  background: color-mix(in oklab, var(--accent) 10%, transparent);
+  border: 1px solid color-mix(in oklab, var(--accent) 24%, transparent);
   box-shadow: var(--shadow-float);
   z-index: 1;
 }
@@ -532,8 +550,8 @@ body.chat-page-react #root {
 }
 
 .suggestion-chips {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, max-content);
   justify-content: center;
   gap: 10px;
   z-index: 1;
@@ -553,7 +571,7 @@ body.chat-page-react #root {
 
 .chip:hover {
   transform: translateY(-1px);
-  border-color: oklch(58% 0.18 255 / 0.35);
+  border-color: color-mix(in oklab, var(--accent) 38%, transparent);
 }
 
 .input-area {
@@ -573,7 +591,7 @@ body.chat-page-react #root {
 
 .input-card {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   gap: 10px;
   padding: 12px 12px 12px 18px;
   border-radius: var(--radius-xl);
@@ -584,7 +602,7 @@ body.chat-page-react #root {
 }
 
 .input-card:focus-within {
-  border-color: oklch(58% 0.18 255 / 0.44);
+  border-color: color-mix(in oklab, var(--accent) 48%, transparent);
   box-shadow: var(--shadow-glow-strong);
 }
 
@@ -598,9 +616,10 @@ body.chat-page-react #root {
   background: transparent;
   color: var(--fg);
   font: inherit;
-  line-height: 1.4;
-  padding: 8px 0;
+  line-height: 1.35;
+  padding: 10px 0;
   overflow-y: auto;
+  display: block;
 }
 
 .msg-input::placeholder { color: var(--muted); }
@@ -616,7 +635,10 @@ body.chat-page-react #root {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: transform 0.24s ease, box-shadow 0.24s ease, opacity 0.2s ease, background 0.24s ease;
 }
 
 .send-btn:hover {
@@ -631,7 +653,58 @@ body.chat-page-react #root {
   box-shadow: none;
 }
 
+.send-btn.is-listening {
+  animation: mic-pulse 1.6s ease-in-out infinite;
+}
+
+.send-btn-icon {
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.24s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 .send-btn svg { width: 18px; height: 18px; }
+
+.send-btn-icon.send {
+  opacity: 0;
+  transform: translateY(10px) scale(0.84);
+}
+
+.send-btn-icon.mic {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.send-btn.is-ready-to-send .send-btn-icon.send {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.send-btn.is-ready-to-send .send-btn-icon.mic {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.84);
+}
+
+.voice-hint {
+  color: var(--muted);
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.voice-hint.is-active {
+  color: var(--accent);
+}
+
+.voice-hint.is-disabled {
+  opacity: 0.75;
+}
+
+@keyframes mic-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 oklch(58% 0.18 255 / 0.22); }
+  50% { box-shadow: 0 0 0 8px oklch(58% 0.18 255 / 0); }
+}
 
 .input-meta {
   display: flex;
@@ -713,7 +786,7 @@ body.chat-page-react #root {
 .ambient-dot {
   position: absolute;
   border-radius: 50%;
-  background: oklch(58% 0.18 255 / 0.2);
+  background: color-mix(in oklab, var(--accent) 28%, transparent);
   animation: float-dots linear infinite;
 }
 
@@ -733,21 +806,21 @@ body.chat-page-react #root {
 
 .corner-decor { width: 120px; height: 120px; }
 .corner-decor.top-left { top: 0; left: 0; background: radial-gradient(circle at 0 0, var(--accent-soft), transparent 60%); }
-.corner-decor.top-right { top: 0; right: 0; background: radial-gradient(circle at 100% 0, oklch(72% 0.08 220 / 0.18), transparent 60%); }
-.corner-decor.bottom-left { bottom: 0; left: 0; background: radial-gradient(circle at 0 100%, oklch(58% 0.18 255 / 0.08), transparent 60%); }
-.corner-decor.bottom-right { bottom: 0; right: 0; background: radial-gradient(circle at 100% 100%, oklch(72% 0.08 220 / 0.14), transparent 60%); }
+.corner-decor.top-right { top: 0; right: 0; background: radial-gradient(circle at 100% 0, var(--ambient-2), transparent 60%); }
+.corner-decor.bottom-left { bottom: 0; left: 0; background: radial-gradient(circle at 0 100%, color-mix(in oklab, var(--accent) 12%, transparent), transparent 60%); }
+.corner-decor.bottom-right { bottom: 0; right: 0; background: radial-gradient(circle at 100% 100%, color-mix(in oklab, var(--accent-2) 16%, transparent), transparent 60%); }
 
 .shape-orbit {
   border-radius: 50%;
-  border: 1px solid oklch(58% 0.18 255 / 0.22);
+  border: 1px solid color-mix(in oklab, var(--accent) 26%, transparent);
 }
 
 .shape-orbit.left { width: 220px; height: 220px; left: -80px; top: 24%; }
 .shape-orbit.right { width: 280px; height: 280px; right: -120px; bottom: 16%; }
-.shape-ribbon.top { width: 240px; height: 240px; top: 110px; right: -130px; border: 1px solid oklch(72% 0.08 220 / 0.22); border-radius: 28px; transform: rotate(45deg); }
-.shape-ribbon.bottom { width: 240px; height: 240px; bottom: 90px; left: -150px; border: 1px solid oklch(58% 0.18 255 / 0.18); border-radius: 42px; transform: rotate(45deg); }
+.shape-ribbon.top { width: 240px; height: 240px; top: 110px; right: -130px; border: 1px solid color-mix(in oklab, var(--accent-2) 24%, transparent); border-radius: 28px; transform: rotate(45deg); }
+.shape-ribbon.bottom { width: 240px; height: 240px; bottom: 90px; left: -150px; border: 1px solid color-mix(in oklab, var(--accent) 20%, transparent); border-radius: 42px; transform: rotate(45deg); }
 .mesh-line.one { top: 148px; left: 12%; width: 220px; height: 1px; transform: rotate(-14deg); background: linear-gradient(90deg, transparent, var(--accent-soft), transparent); }
-.mesh-line.two { top: 62%; right: 8%; width: 280px; height: 1px; transform: rotate(18deg); background: linear-gradient(90deg, transparent, oklch(72% 0.08 220 / 0.18), transparent); }
+.mesh-line.two { top: 62%; right: 8%; width: 280px; height: 1px; transform: rotate(18deg); background: linear-gradient(90deg, transparent, var(--ambient-2), transparent); }
 .mesh-line.three { bottom: 146px; left: 24%; width: 180px; height: 1px; transform: rotate(-22deg); background: linear-gradient(90deg, transparent, var(--accent-soft), transparent); }
 
 .signal-cluster {
@@ -772,15 +845,15 @@ body.chat-page-react #root {
   position: absolute;
 }
 
-.signal-ring { inset: 0; border-radius: 50%; border: 1px solid oklch(58% 0.18 255 / 0.18); }
+.signal-ring { inset: 0; border-radius: 50%; border: 1px solid var(--signal-line); }
 .signal-ring.ring-1 { inset: 28px; animation: signalPulse 5.5s ease-in-out infinite; }
 .signal-ring.ring-2 { inset: 54px; border-style: dashed; animation: signalRotate 16s linear infinite; }
 .signal-ring.ring-3 { inset: 82px; animation: signalPulse 4.2s ease-in-out infinite reverse; }
-.signal-sweep { inset: 22px; border-radius: 50%; background: conic-gradient(from 0deg, transparent 0deg 290deg, oklch(58% 0.18 255 / 0.18) 326deg, transparent 360deg); mask: radial-gradient(circle, transparent 58%, black 59%); -webkit-mask: radial-gradient(circle, transparent 58%, black 59%); animation: signalRotate 8s linear infinite; }
+.signal-sweep { inset: 22px; border-radius: 50%; background: conic-gradient(from 0deg, transparent 0deg 290deg, var(--signal-line) 326deg, transparent 360deg); mask: radial-gradient(circle, transparent 58%, black 59%); -webkit-mask: radial-gradient(circle, transparent 58%, black 59%); animation: signalRotate 8s linear infinite; }
 .signal-node { top: 26px; right: 52px; width: 12px; height: 12px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), color-mix(in oklab, var(--accent-2) 72%, white)); animation: signalOrbit 8s linear infinite, signalBlink 3.6s ease-in-out infinite; transform-origin: 58px 84px; }
 .signal-core { top: 50%; left: 50%; width: 16px; height: 16px; transform: translate(-50%, -50%); border-radius: 50%; background: linear-gradient(135deg, var(--accent), color-mix(in oklab, var(--accent-2) 72%, white)); animation: signalBlink 3.2s ease-in-out infinite; }
-.signal-bar { top: 50%; right: -8px; width: 84px; height: 1px; background: linear-gradient(90deg, oklch(58% 0.18 255 / 0.26), transparent); }
-.signal-cluster.left .signal-bar { right: auto; left: -8px; background: linear-gradient(90deg, transparent, oklch(72% 0.08 220 / 0.22)); }
+.signal-bar { top: 50%; right: -8px; width: 84px; height: 1px; background: linear-gradient(90deg, var(--signal-line), transparent); }
+.signal-cluster.left .signal-bar { right: auto; left: -8px; background: linear-gradient(90deg, transparent, var(--signal-line-soft)); }
 
 @keyframes signalRotate {
   from { transform: rotate(0deg); }
@@ -863,6 +936,131 @@ body.chat-page-react #root {
 
 .scroll-bottom-btn svg { width: 12px; height: 12px; }
 
+.chat-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.chat-modal.is-open {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.chat-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: oklch(14% 0.03 295 / 0.42);
+  backdrop-filter: blur(14px) saturate(118%);
+  -webkit-backdrop-filter: blur(14px) saturate(118%);
+  opacity: 0;
+  transition: opacity 0.16s ease-out;
+}
+
+.chat-modal-card {
+  position: relative;
+  width: min(460px, calc(100% - 24px));
+  padding: 24px 24px 22px;
+  border-radius: 28px;
+  border: 1px solid var(--border);
+  background: var(--surface-strong);
+  box-shadow: 0 24px 80px oklch(0% 0 0 / 0.28);
+  transform: translateY(16px) scale(0.985);
+  opacity: 0;
+  transition: transform 0.2s ease-out, opacity 0.18s ease-out;
+}
+
+.chat-modal.is-open .chat-modal-backdrop,
+.chat-modal.is-open .chat-modal-card {
+  opacity: 1;
+}
+
+.chat-modal.is-open .chat-modal-card {
+  transform: translateY(0) scale(1);
+}
+
+.chat-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.chat-modal-kicker,
+.chat-modal-note {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.chat-modal-title {
+  margin-top: 8px;
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 34px);
+  letter-spacing: -0.04em;
+  line-height: 1.02;
+}
+
+.chat-modal-copy {
+  margin: 0 0 18px;
+  color: var(--muted);
+}
+
+.chat-modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.chat-modal-note {
+  flex: 1;
+  min-width: 180px;
+}
+
+.chat-modal-btns {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.chat-modal-btn {
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--fg);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.chat-modal-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-card);
+}
+
+.chat-modal-btn.primary {
+  border-color: color-mix(in oklab, var(--accent) 26%, transparent);
+  background: linear-gradient(135deg, var(--accent), color-mix(in oklab, var(--accent-2) 74%, white));
+  color: white;
+}
+
 @keyframes pulse-dot {
   0%, 100% { box-shadow: 0 0 0 0 oklch(58% 0.18 255 / 0.36); }
   50% { box-shadow: 0 0 0 7px oklch(58% 0.18 255 / 0); }
@@ -912,8 +1110,41 @@ body.chat-page-react #root {
     padding-top: 48px;
   }
 
+  .suggestion-chips {
+    grid-template-columns: repeat(2, minmax(0, max-content));
+  }
+
   .msg-content {
     max-width: 88%;
+  }
+
+  .chat-modal {
+    padding: 14px;
+  }
+
+  .chat-modal-card {
+    width: min(100%, 100%);
+    padding: 20px 18px 18px;
+    border-radius: 22px;
+  }
+
+  .chat-modal-actions,
+  .chat-modal-btns {
+    width: 100%;
+  }
+
+  .suggestion-chips {
+    grid-template-columns: 1fr;
+    width: min(100%, 320px);
+  }
+
+  .chip {
+    width: 100%;
+  }
+
+  .chat-modal-btn {
+    flex: 1;
+    justify-content: center;
   }
 }`,
   bodyHtml: `<div class="corner-decor top-left"></div>
@@ -1001,12 +1232,14 @@ body.chat-page-react #root {
           <img src="__BOT_MASCOT_URL__" alt="Mascota del asistente">
         </div>
         <h2>Tu agenda inteligente ya esta lista</h2>
-        <p>Organiza reuniones, recordatorios y bloques de foco desde el chat. El calendario vive integrado y siempre puedes saltar entre ambas vistas sin perder la atmosfera de la app.</p>
+        <p>Organiza reuniones, recordatorios y bloques de foco desde el chat. El calendario vive integrado, las agendas ahora tienen mejor contexto visual y puedes moverte entre vistas sin perder la atmosfera de la app.</p>
         <div class="suggestion-chips">
-          <button class="chip" onclick="sendSuggestion('Organiza mi manana con bloques de foco y una reunion de 30 minutos')">Planificar manana</button>
+          <button class="chip" onclick="sendSuggestion('Organiza mi mañana con bloques de foco y una reunión de 30 minutos')">Planificar mañana</button>
           <button class="chip" onclick="sendSuggestion('Agrega un recordatorio para llamar a secretaria a las 17:00')">Crear recordatorio</button>
-          <button class="chip" onclick="sendSuggestion('Que tengo disponible para estudiar despues del mediodia')">Buscar huecos</button>
+          <button class="chip" onclick="sendSuggestion('Qué tengo disponible para estudiar después del mediodía')">Buscar huecos</button>
           <button class="chip" onclick="sendSuggestion('Armame una agenda liviana para hoy')">Agenda de hoy</button>
+          <button class="chip" onclick="sendSuggestion('Mostrame una versión equilibrada de mi semana con estudio, descanso y pendientes')">Equilibrar semana</button>
+          <button class="chip" onclick="sendSuggestion('Revisá si tengo demasiadas cosas el viernes y sugerí mover algo')">Revisar carga</button>
         </div>
       </div>
     </div>
@@ -1028,18 +1261,53 @@ body.chat-page-react #root {
     <div class="input-wrapper">
       <div class="input-card">
         <textarea class="msg-input" id="msgInput" placeholder="Escribe un pedido para tu agenda personal..." rows="1" maxlength="4000"></textarea>
-        <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="Enviar">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="19" x2="12" y2="5"></line>
-            <polyline points="5 12 12 5 19 12"></polyline>
-          </svg>
+        <button class="send-btn" id="sendBtn" type="button" title="Dictar mensaje">
+          <span class="send-btn-icon mic" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 1 1-6 0V6a3 3 0 0 1 3-3Z"></path>
+              <path d="M19 10a7 7 0 0 1-14 0"></path>
+              <path d="M12 17v4"></path>
+              <path d="M8 21h8"></path>
+            </svg>
+          </span>
+          <span class="send-btn-icon send" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="19" x2="12" y2="5"></line>
+              <polyline points="5 12 12 5 19 12"></polyline>
+            </svg>
+          </span>
         </button>
       </div>
       <div class="input-meta">
-        <span class="shortcut-hint"><kbd>Enter</kbd> enviar · <kbd>Shift+Enter</kbd> salto de linea</span>
+        <span class="shortcut-hint voice-hint" id="voiceHint"><kbd>Microfono</kbd> para dictar · <kbd>Enter</kbd> enviar</span>
         <span class="char-count" id="charCount">0 / 4000</span>
       </div>
     </div>
   </div>
-</section>`,
+</section>
+
+<div class="chat-modal" id="clearChatModal" aria-hidden="true">
+  <div class="chat-modal-backdrop" id="clearChatBackdrop"></div>
+  <section class="chat-modal-card" role="dialog" aria-modal="true" aria-labelledby="clearChatTitle">
+    <div class="chat-modal-header">
+      <div>
+        <span class="chat-modal-kicker">nuevo chat</span>
+        <h2 class="chat-modal-title" id="clearChatTitle">¿Limpiar esta conversación?</h2>
+      </div>
+      <button class="icon-btn" id="closeClearChatBtn" type="button" aria-label="Cerrar modal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 6 6 18M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    <p class="chat-modal-copy">Se van a borrar los mensajes visibles del chat actual para que arranques de cero. No afecta tu calendario ni tus agendas.</p>
+    <div class="chat-modal-actions">
+      <div class="chat-modal-note">Esta acción solo limpia la vista actual.</div>
+      <div class="chat-modal-btns">
+        <button class="chat-modal-btn" id="cancelClearChatBtn" type="button">Cancelar</button>
+        <button class="chat-modal-btn primary" id="confirmClearChatBtn" type="button">Nuevo chat</button>
+      </div>
+    </div>
+  </section>
+</div>`,
 } as const;
