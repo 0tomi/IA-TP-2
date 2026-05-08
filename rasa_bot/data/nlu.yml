@@ -31,6 +31,23 @@ nlu:
       - agendame un [evento](tipo_evento) para [pasado mañana](fecha)
       - crea una [reunion](tipo_evento) para [pasado mañana a las 11](fecha)
       - quiero guardar algo para [pasado manana a las 15](fecha)
+      - tengo un [parcial](tipo_evento) el [jueves](fecha)
+      - necesito agendar un [dentista](tipo_evento) para [manana](fecha)
+      - programame un [recordatorio](tipo_evento) a las [16](fecha)
+      - queria saber si puedo poner un [reunion](tipo_evento) el [viernes](fecha)
+      - hay alguna forma de agendar un [turno](tipo_evento) para [pasado manana](fecha)?
+      - agregame a la agenda un [trabajo practico](tipo_evento) para el [15 de junio](fecha)
+      - quiero programar un [bloqueo](tipo_evento) de [2 horas](duracion) [manana](fecha)
+      - reservame un [espacio](tipo_evento) para [el sabado a la manana](fecha)
+      - tengo que coordinar un [almuerzo](tipo_evento) con [juan](nombre_agenda) el [domingo](fecha)
+      - anotame un [coffee break](tipo_evento) para [la tarde del viernes](fecha)
+      - necesito bloquear [3 horas](duracion) el [lunes](fecha) para [estudios](nombre_agenda)
+      - colocame un [meeting con clientes](tipo_evento) para [manana a las 10](fecha) en [trabajo](nombre_agenda)
+      - guarda un [checkup](tipo_evento) para el [proximo miercoles](fecha) en [salud](nombre_agenda)
+      - creame un [evento](tipo_evento) que dure [1 hora](duracion) para [hoy a la tarde](fecha)
+      - tengo un [chico](tipo_evento) [manana](fecha)
+      - bloquear un [hueco](tipo_evento) para [el viernes](fecha)
+      - programame un [consultorio](tipo_evento) [manana](fecha)
   - intent: consultar_evento
     examples: |
       - que tengo el [lunes](fecha)
@@ -56,6 +73,20 @@ nlu:
       - buscame mis [recordatorios](tipo_evento) en [personal](nombre_agenda)
       - que eventos tengo en [familia](nombre_agenda)
       - mostrame mis [reuniones](tipo_evento) del [viernes](fecha) en [oficina](nombre_agenda)
+      - que tengo pendiente para [esta semana](fecha)?
+      - revisame la agenda del [lunes](fecha)
+      - tengo algo agendado para [manana](fecha)?
+      - que se viene en [estudios](nombre_agenda)?
+      - mostrame todo lo que tengo en [trabajo](nombre_agenda)
+      - hay algun [evento](tipo_evento) para [hoy](fecha)?
+      - cuando es mi proximo [recordatorio](tipo_evento)?
+      - que tengo en la agenda [personal](nombre_agenda) para [esta semana](fecha)?
+      - buscame un [parcial](tipo_evento) en [facultad](nombre_agenda)
+      - cuentos eventos tengo para [manana](fecha)?
+      - necesito ver mi calendario del [mes que viene](fecha)
+      - revisame los [cumples](tipo_evento) en [familia](nombre_agenda)
+      - tengo algo para [la tarde](fecha)?
+      - decime que hay el [viernes](fecha) a la [noche](fecha)
 
   - intent: chitchat
     examples: |
@@ -81,6 +112,18 @@ nlu:
       - estas ahi
       - holis
       - buenas buenas
+      - buen dia, como estas?
+      - que tal, todo ok?
+      - hola! todo bien por aca
+      - como va
+      - buen dia! saludos
+      - estoy aqui
+      - a donde puedo ir con vos?
+      - necesito ayuda
+      - hay alguien ahi?
+      - me podes ayudar?
+      - que haces?
+      - parlame un poco
 
   - intent: informar_agenda
     examples: |
@@ -121,6 +164,15 @@ nlu:
       - va a durar [1 hora](duracion)
       - mejor [45 minutos](duracion)
       - hacelo de [3 horas](duracion)
+      - que dure [1 hora y media](duracion)
+      - es algo cortito, [15 minutos](duracion)
+      - [todo el dia](duracion) aprox
+      - [3 horas](duracion) maximo
+      - va a ser un [rato largo](duracion) digamos [2 horas](duracion)
+      - [media hora](duracion) estaria bien
+      - ponele que sea [90 minutos](duracion)
+      - [mitad de hora](duracion)
+      - alrededor de [1 hora](duracion)
 
   - intent: corregir_evento
     examples: |
@@ -134,6 +186,18 @@ nlu:
       - mejor [30 minutos](duracion)
       - no, el [martes a las 17](fecha) en [personal](nombre_agenda)
       - mejor una [reunion](tipo_evento) en [oficina](nombre_agenda)
+      - no, mejor [el martes](fecha)
+      - mejor no, [manana](fecha)
+      - cambialo al [viernes](fecha) a las [14](fecha)
+      - no es [manana](fecha), [pasado manana](fecha)
+      - en realidad quiero que sea en [trabajo](nombre_agenda)
+      - no, mejor en la [personal](nombre_agenda)
+      - mejor un [recordatorio](tipo_evento) no un [evento](tipo_evento)
+      - en vez de [30 minutos](duracion) que sea [1 hora](duracion)
+      - no es un [parcial](tipo_evento), es un [final](tipo_evento)
+      - mejor [2 horas](duracion), no [1 hora](duracion)
+      - la [fecha](fecha) no, [el sabado](fecha)
+      - no, [personal](nombre_agenda) no [trabajo](nombre_agenda)
 
   - intent: affirm
     examples: |
