@@ -44,6 +44,8 @@ slots:
         conditions:
           - active_loop: evento_form
             requested_slot: fecha_evento
+          - active_loop: consulta_form
+            requested_slot: fecha_evento
 
   duracion_texto:
     type: text
@@ -67,6 +69,11 @@ slots:
     mappings:
       - type: custom
 
+  pending_action:
+    type: text
+    mappings:
+      - type: custom
+
   chitchat_count:
     type: float
     initial_value: 0
@@ -75,6 +82,7 @@ slots:
 
 actions:
   - validate_evento_form
+  - validate_consulta_form
   - action_preparar_confirmacion
   - action_confirmar_creacion_evento
   - action_consultar_evento
@@ -84,8 +92,21 @@ actions:
 
 forms:
   evento_form:
+    ignored_intents:
+      - chitchat
+      - cancelar
+      - deny
+      - consultar_evento
     required_slots:
       - tipo_evento
+      - fecha_evento
+  consulta_form:
+    ignored_intents:
+      - chitchat
+      - cancelar
+      - deny
+      - crear_evento
+    required_slots:
       - fecha_evento
 
 responses:
@@ -95,6 +116,8 @@ responses:
     - text: "¿Para cuándo lo querés agendar? (Ejemplo: mañana a las 18, o el viernes a la mañana)"
   utter_ask_nombre_agenda:
     - text: "Tenés varias agendas guardadas. ¿En cuál querés que lo anote?"
+  utter_ask_consulta_form_fecha_evento:
+    - text: "¿Para qué día querés consultar la agenda? (Ejemplo: hoy, mañana o el viernes)"
 
 session_config:
   session_expiration_time: 10

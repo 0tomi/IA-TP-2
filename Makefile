@@ -83,7 +83,7 @@ test:
 
 test-rasa:
 	cd $(RASABOT_DIR) && poetry run rasa test core --stories tests/test_stories.yml
-	cd $(RASABOT_DIR) && poetry run rasa test nlu --nlu data/nlu.yml
+	cd $(RASABOT_DIR) && poetry run rasa test nlu --nlu tests/test_nlu.yml
 
 train-rasa:
 	cd $(RASABOT_DIR) && poetry run rasa train

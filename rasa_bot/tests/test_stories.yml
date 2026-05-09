@@ -4,34 +4,102 @@ version: "3.1"
 #### If you want to learn more, please see the docs: https://rasa.com/docs/rasa/testing-your-assistant
 
 stories:
+  - story: crear evento generico pide tipo concreto
+    steps:
+      - user: |
+          Agendame un evento para mañana
+        intent: crear_evento
+        entities:
+          - fecha: mañana
+      - action: evento_form
+      - active_loop: evento_form
+      - slot_was_set:
+          - fecha_evento: mañana
+          - requested_slot: tipo_evento
+
+  - story: crear evento generico y completar tipo
+    steps:
+      - user: |
+          agendame un evento para mañana
+        intent: crear_evento
+        entities:
+          - fecha: mañana
+      - action: evento_form
+      - active_loop: evento_form
+      - slot_was_set:
+          - fecha_evento: mañana
+          - requested_slot: tipo_evento
+      - user: |
+          reunion
+        intent: informar_detalle_evento
+        entities:
+          - tipo_evento: reunion
+      - action: evento_form
+      - active_loop: null
+      - action: action_preparar_confirmacion
+
+  - story: consultar eventos hoy no usa tipo generico
+    steps:
+      - user: |
+          que eventos tengo hoy
+        intent: consultar_evento
+        entities:
+          - fecha: hoy
+      - action: action_consultar_evento
+
   - story: crear evento y confirmar
     steps:
       - user: |
           anotame un parcial para manana
         intent: crear_evento
-      - action: action_validar_y_crear_evento
+      - action: evento_form
+      - action: action_preparar_confirmacion
       - user: |
           si
         intent: affirm
       - action: action_confirmar_creacion_evento
 
-  - story: crear evento y corregir agenda
+  - story: crear evento y completar agenda
+    steps:
+      - user: |
+          agendame un evento para manana a las 10
+        intent: crear_evento
+        entities:
+          - fecha: manana a las 10
+      - action: evento_form
+      - active_loop: evento_form
+      - slot_was_set:
+          - requested_slot: tipo_evento
+      - user: |
+          reunion
+        intent: informar_detalle_evento
+        entities:
+          - tipo_evento: reunion
+      - action: evento_form
+      - active_loop: null
+      - action: action_preparar_confirmacion
+
+  - story: crear evento y corregir antes de confirmar
     steps:
       - user: |
           agendame una reunion para manana a las 10
         intent: crear_evento
-      - action: action_validar_y_crear_evento
+      - action: evento_form
+      - action: action_preparar_confirmacion
       - user: |
-          en trabajo
-        intent: informar_agenda
-      - action: action_validar_y_crear_evento
+          mejor a las 11
+        intent: corregir_evento
+      - action: action_preparar_confirmacion
 
   - story: cancelar borrador
     steps:
       - user: |
-          anotame dentista para el jueves
+          agendame un evento para el jueves
         intent: crear_evento
-      - action: action_validar_y_crear_evento
+        entities:
+          - fecha: el jueves
+      - action: evento_form
+      - active_loop: evento_form
       - user: |
           no
         intent: deny
@@ -54,6 +122,6 @@ stories:
   - story: manejar fallback
     steps:
       - user: |
-          blabla rarisimo
+          xyzzy qwerty asdfgh sin sentido 984
         intent: nlu_fallback
       - action: action_handle_fallback

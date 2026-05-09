@@ -10,7 +10,7 @@ nlu:
       - acordate que tengo un [final](tipo_evento) [manana a la tarde](fecha)
       - meteme un [turno medico](tipo_evento) para el [jueves](fecha)
       - registrar [cumpleanos](tipo_evento) para el [15 de octubre](fecha)
-      - quiero crear un [evento](tipo_evento) para [hoy a las 20](fecha)
+      - quiero crear un evento para [hoy a las 20](fecha)
       - haceme acordar del [recuperatorio](tipo_evento) el [miercoles](fecha)
       - agrega una [clase de consulta](tipo_evento) para el [martes al mediodia](fecha)
       - anota que tengo [entrenamiento](tipo_evento) [hoy a la noche](fecha)
@@ -27,8 +27,8 @@ nlu:
       - crea una [reunion](tipo_evento) [pasado manana a las 11](fecha) en [oficina](nombre_agenda) por [1 hora](duracion)
       - quiero dejar cargado un [psicologo](tipo_evento) [el martes a las 17](fecha) en [salud](nombre_agenda)
       - anotame [cumpleanos de juan](tipo_evento) para [el sabado a las 21](fecha) en [familia](nombre_agenda)
-      - podes agendarme para [pasado mañana](fecha) un [evento](tipo_evento)
-      - agendame un [evento](tipo_evento) para [pasado mañana](fecha)
+      - podes agendarme un evento para [pasado mañana](fecha)
+      - agendame un evento para [pasado mañana](fecha)
       - crea una [reunion](tipo_evento) para [pasado mañana a las 11](fecha)
       - quiero guardar algo para [pasado manana a las 15](fecha)
       - tengo un [parcial](tipo_evento) el [jueves](fecha)
@@ -44,7 +44,7 @@ nlu:
       - necesito bloquear [3 horas](duracion) el [lunes](fecha) para [estudios](nombre_agenda)
       - colocame un [meeting con clientes](tipo_evento) para [manana a las 10](fecha) en [trabajo](nombre_agenda)
       - guarda un [checkup](tipo_evento) para el [proximo miercoles](fecha) en [salud](nombre_agenda)
-      - creame un [evento](tipo_evento) que dure [1 hora](duracion) para [hoy a la tarde](fecha)
+      - creame un evento que dure [1 hora](duracion) para [hoy a la tarde](fecha)
       - tengo un [chico](tipo_evento) [manana](fecha)
       - bloquear un [hueco](tipo_evento) para [el viernes](fecha)
       - programame un [consultorio](tipo_evento) [manana](fecha)
@@ -78,7 +78,7 @@ nlu:
       - tengo algo agendado para [manana](fecha)?
       - que se viene en [estudios](nombre_agenda)?
       - mostrame todo lo que tengo en [trabajo](nombre_agenda)
-      - hay algun [evento](tipo_evento) para [hoy](fecha)?
+      - hay algun evento para [hoy](fecha)?
       - cuando es mi proximo [recordatorio](tipo_evento)?
       - que tengo en la agenda [personal](nombre_agenda) para [esta semana](fecha)?
       - buscame un [parcial](tipo_evento) en [facultad](nombre_agenda)
@@ -87,6 +87,14 @@ nlu:
       - revisame los [cumples](tipo_evento) en [familia](nombre_agenda)
       - tengo algo para [la tarde](fecha)?
       - decime que hay el [viernes](fecha) a la [noche](fecha)
+      - que tengo
+      - que hay en mi agenda
+      - mostrame mis eventos
+      - revisame el calendario
+      - tengo algo pendiente?
+      - que se viene?
+      - consulta mi agenda
+      - quiero ver mis proximos eventos
 
   - intent: chitchat
     examples: |
@@ -192,12 +200,19 @@ nlu:
       - no es [manana](fecha), [pasado manana](fecha)
       - en realidad quiero que sea en [trabajo](nombre_agenda)
       - no, mejor en la [personal](nombre_agenda)
-      - mejor un [recordatorio](tipo_evento) no un [evento](tipo_evento)
+      - mejor un [recordatorio](tipo_evento) no un evento
       - en vez de [30 minutos](duracion) que sea [1 hora](duracion)
       - no es un [parcial](tipo_evento), es un [final](tipo_evento)
       - mejor [2 horas](duracion), no [1 hora](duracion)
       - la [fecha](fecha) no, [el sabado](fecha)
       - no, [personal](nombre_agenda) no [trabajo](nombre_agenda)
+      - mejor a las [11](fecha)
+      - mejor [mañana a las 11](fecha)
+      - cambialo para [pasado mañana a las 10](fecha)
+      - en realidad va en [trabajo](nombre_agenda)
+      - dejalo en [facultad](nombre_agenda)
+      - que sea por [45 minutos](duracion)
+      - no, que dure [2 horas](duracion)
 
   - intent: affirm
     examples: |

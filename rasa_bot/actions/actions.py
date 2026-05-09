@@ -41,6 +41,7 @@ def clear_flow_slots() -> List[SlotSet]:
         SlotSet("duracion_texto", None),
         SlotSet("duracion_minutos", None),
         SlotSet("awaiting_confirmation", False),
+        SlotSet("pending_action", None),
     ]
 
 
@@ -318,6 +319,54 @@ def build_search_description(filters: List[str]) -> str:
     return ", ".join(filters[:-1]) + f" y {filters[-1]}"
 
 
+def latest_intent_name(tracker: Tracker) -> str:
+    intent = tracker.latest_message.get("intent") or {}
+    return intent.get("name", "")
+
+
+def latest_entities(tracker: Tracker) -> Dict[str, Any]:
+    entities: Dict[str, Any] = {}
+    for entity in tracker.latest_message.get("entities", []):
+        name = entity.get("entity")
+        value = entity.get("value")
+        if name and value:
+            entities[name] = value
+    return entities
+
+
+def is_empty_or_noise(value: Any) -> bool:
+    if value is None:
+        return True
+    text = str(value).strip().lower()
+    return text in {"", "hola", "buenas", "chau", "adios", "no", "si", "sí", "ok", "dale", "cancelar", "cancela"}
+
+
+def is_generic_event_type(value: Any) -> bool:
+    if value is None:
+        return False
+    text = str(value).strip().lower()
+    return text in {"evento", "eventos", "cosa", "cosas", "algo"}
+
+
+def is_generic_event_request(value: Any, tracker: Tracker) -> bool:
+    """Detecta cuando el form toma toda la frase como tipo de evento.
+
+    Si el usuario dice "agendame un evento para mañana", queremos pedir un
+    tipo concreto. En algunos modelos Rasa puede no extraer `tipo_evento` y el
+    mapping `from_text` del slot pedido podría pasar la frase completa como
+    candidato a `tipo_evento`.
+    """
+    if value is None:
+        return False
+
+    entities = latest_entities(tracker)
+    if entities.get("tipo_evento"):
+        return False
+
+    text = str(value).strip().lower()
+    return bool(re.search(r"\b(evento|eventos|cosa|cosas|algo)\b", text))
+
+
 class ActionHandleChitchat(Action):
     def name(self) -> Text:
         return "action_handle_chitchat"
@@ -331,17 +380,25 @@ class ActionHandleChitchat(Action):
         count = tracker.get_slot("chitchat_count") or 0.0
         count += 1.0
 
+        active_loop_name = (tracker.active_loop or {}).get("name")
+
         if count >= 3.0:
             dispatcher.utter_message(
                 text="Esto es todo lo que puedo hacer por ahora. Si querés retomar, empezá un chat nuevo."
             )
             dispatcher.utter_message(custom={"type": "end_chat"})
-            return [SlotSet("chitchat_count", count)]
+            events: List[Dict[Text, Any]] = [SlotSet("chitchat_count", count)]
+            if active_loop_name:
+                events.append(ActiveLoop(None))
+            return events
 
         dispatcher.utter_message(
             text="Todo bien. Cuando quieras, te ayudo a agendar algo, buscar eventos o corregir una carga."
         )
-        return [SlotSet("chitchat_count", count)]
+        events = [SlotSet("chitchat_count", count)]
+        if active_loop_name:
+            events.append(FollowupAction(active_loop_name))
+        return events
 
 
 class ActionHandleFallback(Action):
@@ -357,24 +414,26 @@ class ActionHandleFallback(Action):
         pending_action = tracker.get_slot("pending_action")
         requested_slot = tracker.get_slot("requested_slot")
         awaiting_confirmation = tracker.get_slot("awaiting_confirmation")
+        active_loop_name = (tracker.active_loop or {}).get("name")
+        is_creating = pending_action == "create" or active_loop_name == "evento_form"
 
         if awaiting_confirmation:
             dispatcher.utter_message(
                 text="No llegue a entenderte. Si queres seguir, respondeme 'si' para confirmar, 'no' para cancelar o corregime el dato que quieras cambiar."
             )
-        elif pending_action == "create" and requested_slot == "tipo_evento":
+        elif is_creating and requested_slot == "tipo_evento":
             dispatcher.utter_message(
                 text="No llegue a captar el tipo de evento. Decime algo como 'parcial', 'reunion' o 'turno medico'."
             )
-        elif pending_action == "create" and requested_slot == "fecha_evento":
+        elif is_creating and requested_slot == "fecha_evento":
             dispatcher.utter_message(
                 text="No pude entender la fecha. Decimela de otra forma, por ejemplo 'manana a las 18' o 'el viernes a las 9'."
             )
-        elif pending_action == "create" and requested_slot == "nombre_agenda":
+        elif is_creating and requested_slot == "nombre_agenda":
             dispatcher.utter_message(
                 text="Decime el nombre exacto de la agenda donde queres guardarlo."
             )
-        elif pending_action == "create" and requested_slot == "duracion_texto":
+        elif is_creating and requested_slot == "duracion_texto":
             dispatcher.utter_message(
                 text="No entendi la duracion. Podes decirme algo como '30 minutos' o '2 horas'."
             )
@@ -393,7 +452,7 @@ class ActionHandleFallback(Action):
                     for k, v in llm_result.get("entities", {}).items():
                         if v and v != "...":
                             slots.append(SlotSet(k, v))
-                    slots.append(FollowupAction("action_validar_y_crear_evento"))
+                    slots.append(FollowupAction("evento_form"))
                     return slots
                 
                 elif intent == "consultar_evento":
@@ -417,7 +476,10 @@ class ActionHandleFallback(Action):
                 text="No termine de entenderte. Podes pedirme que cree un evento, consulte tu agenda o corregir el borrador que venimos armando."
             )
 
-        return [SlotSet("chitchat_count", 0.0)]
+        events: List[Dict[Text, Any]] = [SlotSet("chitchat_count", 0.0)]
+        if active_loop_name:
+            events.append(FollowupAction(active_loop_name))
+        return events
 
 
 class ValidateEventoForm(FormValidationAction):
@@ -445,6 +507,73 @@ class ValidateEventoForm(FormValidationAction):
                 
         return slots
 
+    def validate_tipo_evento(
+        self,
+        slot_value: Any,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict,
+    ) -> Dict[Text, Any]:
+        intent = latest_intent_name(tracker)
+        if intent in {"chitchat", "cancelar", "deny", "consultar_evento"} or is_empty_or_noise(slot_value):
+            dispatcher.utter_message(
+                text="No llegué a captar el tipo de evento. Decime algo como 'parcial', 'reunión' o 'turno médico'."
+            )
+            return {"tipo_evento": None}
+        if is_generic_event_type(slot_value) or is_generic_event_request(slot_value, tracker):
+            dispatcher.utter_message(
+                text="Dale, ¿qué tipo de evento querés agendar? Por ejemplo: parcial, reunión, dentista o cumpleaños."
+            )
+            return {"tipo_evento": None}
+        return {"tipo_evento": str(slot_value).strip()}
+
+    def validate_nombre_agenda(
+        self,
+        slot_value: Any,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict,
+    ) -> Dict[Text, Any]:
+        if is_empty_or_noise(slot_value):
+            dispatcher.utter_message(text="Decime el nombre de la agenda donde querés guardarlo.")
+            return {"nombre_agenda": None}
+
+        name = str(slot_value).strip()
+        try:
+            agendas = fetch_agendas()
+        except Exception:
+            # Si el backend no está disponible, no bloqueamos el form: la acción final mostrará el error real.
+            return {"nombre_agenda": name}
+
+        if not agendas:
+            return {"nombre_agenda": name}
+
+        for agenda in agendas:
+            if agenda["name"].lower() == name.lower():
+                return {"nombre_agenda": agenda["name"]}
+
+        available = ", ".join(agenda["name"] for agenda in agendas)
+        dispatcher.utter_message(
+            text=f"No encontré una agenda llamada '{name}'. Las disponibles son: {available}."
+        )
+        return {"nombre_agenda": None}
+
+    def validate_duracion_texto(
+        self,
+        slot_value: Any,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict,
+    ) -> Dict[Text, Any]:
+        if not slot_value:
+            return {"duracion_texto": None}
+        if parse_duration_minutes(str(slot_value)) is None:
+            dispatcher.utter_message(
+                text="No pude interpretar esa duración. Si querés, decime algo como '30 minutos' o '2 horas'."
+            )
+            return {"duracion_texto": None}
+        return {"duracion_texto": str(slot_value).strip()}
+
     def validate_fecha_evento(
         self,
         slot_value: Any,
@@ -452,11 +581,52 @@ class ValidateEventoForm(FormValidationAction):
         tracker: Tracker,
         domain: DomainDict,
     ) -> Dict[Text, Any]:
-        dt = parse_date(slot_value)
+        intent = latest_intent_name(tracker)
+        if intent in {"chitchat", "cancelar", "deny", "consultar_evento"} or is_empty_or_noise(slot_value):
+            dispatcher.utter_message(text="No pude entender bien la fecha. Decímela de otra forma, por ejemplo 'mañana a las 18'.")
+            return {"fecha_evento": None}
+
+        dt = parse_date(str(slot_value))
         if not dt:
             dispatcher.utter_message(text="No pude entender bien la fecha. Decímela de otra forma, por ejemplo 'mañana a las 18'.")
             return {"fecha_evento": None}
-        return {"fecha_evento": slot_value}
+        if dt < datetime.now() - timedelta(minutes=5):
+            dispatcher.utter_message(text="Esa fecha parece estar en el pasado. Decime una fecha futura, por ejemplo 'mañana a las 18'.")
+            return {"fecha_evento": None}
+        return {"fecha_evento": str(slot_value).strip()}
+
+
+class ValidateConsultaForm(FormValidationAction):
+    def name(self) -> Text:
+        return "validate_consulta_form"
+
+    async def required_slots(
+        self,
+        domain_slots: List[Text],
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict,
+    ) -> List[Text]:
+        entities = latest_entities(tracker)
+        if entities.get("fecha") or tracker.get_slot("fecha_evento"):
+            return []
+        return ["fecha_evento"]
+
+    def validate_fecha_evento(
+        self,
+        slot_value: Any,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict,
+    ) -> Dict[Text, Any]:
+        if is_empty_or_noise(slot_value):
+            dispatcher.utter_message(text="Decime para qué día querés consultar, por ejemplo 'hoy', 'mañana' o 'el viernes'.")
+            return {"fecha_evento": None}
+        dt = parse_date(str(slot_value))
+        if not dt:
+            dispatcher.utter_message(text="No pude entender la fecha de la consulta. Probá con algo como 'mañana' o 'el viernes'.")
+            return {"fecha_evento": None}
+        return {"fecha_evento": str(slot_value).strip()}
 
 
 class ActionPrepararConfirmacion(Action):
@@ -474,7 +644,14 @@ class ActionPrepararConfirmacion(Action):
         nombre_agenda = tracker.get_slot("nombre_agenda")
         duracion_texto = tracker.get_slot("duracion_texto")
 
+        if not tipo_evento or not fecha_evento:
+            dispatcher.utter_message(text="Me faltan datos para armar el borrador. Decime qué evento querés crear y para cuándo.")
+            return [SlotSet("awaiting_confirmation", False), FollowupAction("evento_form")]
+
         start_dt = parse_date(fecha_evento)
+        if not start_dt:
+            dispatcher.utter_message(text="No pude interpretar la fecha del borrador. Decimela de otra forma, por ejemplo 'mañana a las 18'.")
+            return [SlotSet("fecha_evento", None), SlotSet("awaiting_confirmation", False), FollowupAction("evento_form")]
 
         agenda_id, agenda_name, _, agenda_error = resolve_agenda_for_create(nombre_agenda)
         if agenda_error:
@@ -608,22 +785,34 @@ class ActionConsultarEvento(Action):
     ) -> List[Dict[Text, Any]]:
         # Si hay un form activo (se rompió/canceló implícitamente al pedir otra cosa),
         # priorizamos el mensaje actual.
-        current_entities = {e['entity']: e['value'] for e in tracker.latest_message.get('entities', [])}
-        
-        if tracker.active_loop.get("name") == "evento_form":
-            fecha_evento = current_entities.get("fecha")
-            tipo_evento = current_entities.get("tipo_evento")
-            nombre_agenda = current_entities.get("nombre_agenda")
-        else:
+        current_entities = latest_entities(tracker)
+        active_loop_name = (tracker.active_loop or {}).get("name")
+        interrupted_creation = active_loop_name == "evento_form"
+
+        def finish_query_events() -> List[Dict[Text, Any]]:
+            events = clear_flow_slots()
+            if interrupted_creation:
+                events.append(ActiveLoop(None))
+            return events
+
+        # Para consultas priorizamos SIEMPRE las entidades del mensaje actual.
+        # Usar slots globales de creación acá contamina consultas nuevas con datos viejos
+        # (por ejemplo, tipo_evento="evento" de un intento anterior de creación).
+        fecha_evento = current_entities.get("fecha")
+        tipo_evento = current_entities.get("tipo_evento")
+        nombre_agenda = current_entities.get("nombre_agenda")
+
+        if not fecha_evento and (tracker.active_loop or {}).get("name") == "consulta_form":
             fecha_evento = tracker.get_slot("fecha_evento")
-            tipo_evento = tracker.get_slot("tipo_evento")
-            nombre_agenda = tracker.get_slot("nombre_agenda")
+
+        if is_generic_event_type(tipo_evento):
+            tipo_evento = None
 
         if not any([fecha_evento, tipo_evento, nombre_agenda]):
             dispatcher.utter_message(
-                text="Decime al menos una pista para buscar: una fecha, un tipo de evento o una agenda."
+                text="Dale, dejo de lado la carga actual y pasamos a consultar tu agenda." if interrupted_creation else "Dale, consultemos tu agenda."
             )
-            return [SlotSet("pending_action", "query")]
+            return finish_query_events() + [SlotSet("pending_action", "query"), FollowupAction("consulta_form")]
 
         params: Dict[str, Any] = {}
         filters: List[str] = []
@@ -634,7 +823,7 @@ class ActionConsultarEvento(Action):
                 dispatcher.utter_message(
                     text="No pude entender la fecha de la consulta. Decimela de otra forma, por ejemplo 'manana' o 'el viernes'."
                 )
-                return [SlotSet("pending_action", "query")]
+                return [SlotSet("fecha_evento", None), SlotSet("pending_action", "query"), FollowupAction("consulta_form")]
 
             start_dt = dt.replace(hour=0, minute=0, second=0, microsecond=0)
             end_dt = dt.replace(hour=23, minute=59, second=59, microsecond=0)
@@ -646,7 +835,7 @@ class ActionConsultarEvento(Action):
             event_type_id, resolved_event_type, event_type_error = resolve_event_type(tipo_evento, create_if_missing=False)
             if event_type_error:
                 dispatcher.utter_message(text=event_type_error)
-                return clear_flow_slots()
+                return finish_query_events()
 
             params["event_type_id"] = event_type_id
             filters.append(f"del tipo '{resolved_event_type}'")
@@ -655,7 +844,7 @@ class ActionConsultarEvento(Action):
             agenda_id, resolved_agenda, agenda_error = resolve_agenda_for_query(nombre_agenda)
             if agenda_error:
                 dispatcher.utter_message(text=agenda_error)
-                return clear_flow_slots()
+                return finish_query_events()
 
             params["agenda_id"] = agenda_id
             filters.append(f"en la agenda '{resolved_agenda}'")
@@ -668,7 +857,7 @@ class ActionConsultarEvento(Action):
             description = build_search_description(filters)
             if not eventos:
                 dispatcher.utter_message(text=f"No encontre nada para {description}.")
-                return clear_flow_slots()
+                return finish_query_events()
 
             message_lines = [f"Esto encontre para {description}:"]
             for evento in eventos:
@@ -686,4 +875,4 @@ class ActionConsultarEvento(Action):
             logger.exception("Agenda API returned an error while querying events")
             dispatcher.utter_message(text=f"Hubo un error al consultar tu agenda: {exc}")
 
-        return clear_flow_slots()
+        return finish_query_events()

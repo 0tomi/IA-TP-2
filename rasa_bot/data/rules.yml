@@ -33,6 +33,45 @@ rules:
       - action: evento_form
       - active_loop: evento_form
 
+  - rule: Completar detalle dentro del formulario de evento
+    condition:
+      - active_loop: evento_form
+    steps:
+      - intent: informar_detalle_evento
+      - action: evento_form
+      - active_loop: evento_form
+
+  - rule: Completar duracion dentro del formulario de evento
+    condition:
+      - active_loop: evento_form
+    steps:
+      - intent: informar_duracion
+      - action: evento_form
+      - active_loop: evento_form
+
+  - rule: Recalcular borrador cuando corrigen antes de confirmar
+    condition:
+      - slot_was_set:
+          - awaiting_confirmation: true
+    steps:
+      - intent: corregir_evento
+      - action: action_preparar_confirmacion
+
+  - rule: Consultar eventos interrumpiendo creacion
+    condition:
+      - active_loop: evento_form
+    steps:
+      - intent: consultar_evento
+      - action: action_consultar_evento
+
+  - rule: Submit exitoso del formulario de consulta
+    condition:
+      - active_loop: consulta_form
+    steps:
+      - action: consulta_form
+      - active_loop: null
+      - action: action_consultar_evento
+
   - rule: Confirmar creacion de evento
     steps:
       - intent: affirm

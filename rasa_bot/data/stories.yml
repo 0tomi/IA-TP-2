@@ -23,7 +23,7 @@ stories:
       - intent: affirm
       - action: action_confirmar_creacion_evento
 
-  - story: crear evento con correccion antes de confirmar
+  - story: crear evento con correccion dentro del form
     steps:
       - intent: crear_evento
       - action: evento_form
@@ -34,6 +34,31 @@ stories:
       - action: action_preparar_confirmacion
       - intent: affirm
       - action: action_confirmar_creacion_evento
+
+  - story: crear evento y corregir antes de confirmar
+    steps:
+      - intent: crear_evento
+      - action: evento_form
+      - active_loop: evento_form
+      - active_loop: null
+      - action: action_preparar_confirmacion
+      - intent: corregir_evento
+      - action: action_preparar_confirmacion
+      - intent: affirm
+      - action: action_confirmar_creacion_evento
+
+
+  - story: crear evento completando datos sueltos
+    steps:
+      - intent: crear_evento
+      - action: evento_form
+      - active_loop: evento_form
+      - intent: informar_detalle_evento
+      - action: evento_form
+      - active_loop: evento_form
+      - intent: informar_duracion
+      - action: evento_form
+      - active_loop: evento_form
 
   - story: crear evento y cancelar
     steps:
@@ -47,6 +72,15 @@ stories:
     steps:
       - intent: consultar_evento
       - action: action_consultar_evento
+
+  - story: consultar interrumpe creacion
+    steps:
+      - intent: crear_evento
+      - action: evento_form
+      - active_loop: evento_form
+      - intent: consultar_evento
+      - action: action_consultar_evento
+      - active_loop: null
 
   - story: responder chitchat
     steps:

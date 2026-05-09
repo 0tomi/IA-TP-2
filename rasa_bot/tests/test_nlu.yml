@@ -1,0 +1,16 @@
+version: "3.1"
+
+nlu:
+  - intent: crear_evento
+    examples: |
+      - Agendame un evento para [mañana](fecha)
+      - agendame un evento para [mañana](fecha)
+      - podes agendarme un evento para [pasado mañana](fecha)
+      - agendame una [reunion](tipo_evento) para [mañana](fecha)
+
+  - intent: consultar_evento
+    examples: |
+      - que eventos tengo [hoy](fecha)
+      - hay algun evento para [hoy](fecha)?
+      - que tengo [mañana](fecha)
+      - que [reuniones](tipo_evento) tengo [mañana](fecha)
