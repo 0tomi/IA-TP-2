@@ -3,6 +3,7 @@ version: "3.1"
 intents:
   - crear_evento
   - consultar_evento
+  - consultar_tipos_evento
   - chitchat
   - informar_agenda
   - informar_detalle_evento
@@ -28,6 +29,11 @@ slots:
         conditions:
           - active_loop: evento_form
             requested_slot: tipo_evento
+
+  nombre_evento:
+    type: text
+    mappings:
+      - type: custom
 
   nombre_agenda:
     type: text
@@ -86,8 +92,11 @@ actions:
   - action_preparar_confirmacion
   - action_confirmar_creacion_evento
   - action_consultar_evento
+  - action_consultar_tipos_evento
+  - action_ask_evento_form_tipo_evento
   - action_handle_chitchat
   - action_handle_fallback
+  - action_handle_denial_with_correction
   - action_cancelar_operacion
 
 forms:

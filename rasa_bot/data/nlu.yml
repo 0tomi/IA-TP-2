@@ -96,6 +96,29 @@ nlu:
       - consulta mi agenda
       - quiero ver mis proximos eventos
 
+  - intent: consultar_tipos_evento
+    examples: |
+      - que tipos de evento tengo?
+      - que tipos de eventos hay?
+      - cuales son los tipos de evento?
+      - mostrame los tipos de eventos
+      - que categorias de evento existen?
+      - cuales son los tipos disponibles?
+      - que tipos de evento puedo usar?
+      - hay que tipos de evento registrados?
+      - mostrame que tipos de eventos tenes cargados
+      - que tipos de eventos me ofreces?
+      - listame los tipos de eventos que hay
+      - que eventos puedo crear?
+      - cuales son las categorias disponibles?
+      - que tipos de cosas puedo agendar?
+      - mostrame todos los tipos de evento
+      - que opciones de tipo de evento hay?
+      - tenes tipos de eventos guardados?
+      - quiero saber los tipos de evento
+      - dame la lista de tipos de evento
+      - que tipos de evento estan disponibles?
+
   - intent: chitchat
     examples: |
       - hola

@@ -77,10 +77,23 @@ rules:
       - intent: affirm
       - action: action_confirmar_creacion_evento
 
+  - rule: Manejar negativa durante confirmacion
+    condition:
+      - slot_was_set:
+          - awaiting_confirmation: true
+    steps:
+      - intent: deny
+      - action: action_handle_denial_with_correction
+
   - rule: Cancelar operacion por negativa
     steps:
       - intent: deny
       - action: action_cancelar_operacion
+
+  - rule: Consultar tipos de evento
+    steps:
+      - intent: consultar_tipos_evento
+      - action: action_consultar_tipos_evento
 
   - rule: Cancelar operacion explicitamente
     steps:

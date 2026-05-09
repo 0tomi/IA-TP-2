@@ -36,6 +36,7 @@ if GEMINI_API_KEY and genai:
 def clear_flow_slots() -> List[SlotSet]:
     return [
         SlotSet("tipo_evento", None),
+        SlotSet("nombre_evento", None),
         SlotSet("fecha_evento", None),
         SlotSet("nombre_agenda", None),
         SlotSet("duracion_texto", None),
@@ -124,21 +125,137 @@ def fallback_intent_with_llm(user_text: str) -> Optional[dict]:
     
     return None
 
+def extract_type_and_name(user_text: str, available_types: List[str]) -> Optional[tuple]:
+    """Separa la categoría del tipo de evento del nombre específico usando LLM.
+
+    Solo se invoca si hay un LLM configurado. Si no, retorna None y el
+    llamador usa el texto tal cual (comportamiento original).
+    """
+    if not ((GEMINI_API_KEY and genai) or MINIMAX_API_KEY):
+        return None
+
+    types_str = ", ".join(available_types) if available_types else "ninguno registrado aún"
+    prompt = (
+        f"El usuario quiere agendar algo y respondió: '{user_text}'.\n"
+        f"Tipos de evento disponibles: {types_str}.\n\n"
+        "Tarea:\n"
+        "1. CATEGORÍA (tipo): si coincide con uno disponible úsalo tal cual; "
+        "sino usá una categoría corta de 1-2 palabras.\n"
+        "2. NOMBRE (título): la descripción completa y específica que usó el usuario.\n\n"
+        "Respondé ÚNICAMENTE JSON válido sin markdown:\n"
+        '{"tipo": "parcial", "nombre": "Parcial de Algoritmos"}'
+    )
+
+    try:
+        if GEMINI_API_KEY and genai:
+            model_name = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+            model = genai.GenerativeModel(model_name)
+            response = model.generate_content(prompt)
+            result = response.text.strip().replace("```json", "").replace("```", "").strip()
+            data = json.loads(result)
+            tipo = data.get("tipo", "").strip()
+            nombre = data.get("nombre", "").strip()
+            if tipo and nombre:
+                return tipo, nombre
+        elif MINIMAX_API_KEY:
+            headers = {"Authorization": f"Bearer {MINIMAX_API_KEY}", "Content-Type": "application/json"}
+            payload = {"model": "minimax-text-01", "messages": [{"role": "user", "content": prompt}], "temperature": 0.1}
+            resp = requests.post("https://api.minimax.chat/v1/text/chatcompletion_v2", json=payload, headers=headers, timeout=10)
+            if resp.ok:
+                result = resp.json()["choices"][0]["message"]["content"].strip()
+                result = result.replace("```json", "").replace("```", "").strip()
+                data = json.loads(result)
+                tipo = data.get("tipo", "").strip()
+                nombre = data.get("nombre", "").strip()
+                if tipo and nombre:
+                    return tipo, nombre
+    except Exception as e:
+        logger.error(f"Fallo extract_type_and_name para '{user_text}': {e}")
+
+    return None
+
+
+def extract_correction_from_denial(user_text: str) -> Optional[dict]:
+    """Detecta si un deny incluye datos de corrección del borrador.
+
+    Retorna un dict con los campos a actualizar, o None si es un rechazo
+    puro o si no hay LLM disponible.
+    """
+    if not ((GEMINI_API_KEY and genai) or MINIMAX_API_KEY):
+        return None
+
+    prompt = (
+        f"El usuario está revisando un borrador de evento y respondió: '{user_text}'.\n"
+        "Detectá si el mensaje incluye datos para CORREGIR el borrador "
+        "(fecha/hora, tipo de evento, agenda, duración).\n"
+        "Si es solo un rechazo sin datos ('no', 'mejor no', 'cancelalo') respondé null.\n"
+        "Si hay corrección, devolvé solo los campos que cambian (omitir los que no se mencionan):\n"
+        '{"fecha_evento": "...", "tipo_evento": "...", "nombre_evento": "...", '
+        '"nombre_agenda": "...", "duracion_texto": "..."}\n'
+        "Respondé ÚNICAMENTE JSON válido sin markdown, o la palabra null."
+    )
+
+    try:
+        if GEMINI_API_KEY and genai:
+            model_name = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+            model = genai.GenerativeModel(model_name)
+            response = model.generate_content(prompt)
+            result = response.text.strip().replace("```json", "").replace("```", "").strip()
+            if result.lower() == "null":
+                return None
+            return json.loads(result)
+        elif MINIMAX_API_KEY:
+            headers = {"Authorization": f"Bearer {MINIMAX_API_KEY}", "Content-Type": "application/json"}
+            payload = {"model": "minimax-text-01", "messages": [{"role": "user", "content": prompt}], "temperature": 0.1}
+            resp = requests.post("https://api.minimax.chat/v1/text/chatcompletion_v2", json=payload, headers=headers, timeout=10)
+            if resp.ok:
+                result = resp.json()["choices"][0]["message"]["content"].strip()
+                result = result.replace("```json", "").replace("```", "").strip()
+                if result.lower() == "null":
+                    return None
+                return json.loads(result)
+    except Exception as e:
+        logger.error(f"Fallo extract_correction_from_denial para '{user_text}': {e}")
+
+    return None
+
+
+_DAYS_ES = r"lunes|martes|mi[eé]rcoles|jueves|viernes|s[aá]bado|domingo"
+
+
+def _normalize_date_input(text: str) -> str:
+    """Normaliza expresiones de fecha/hora en español rioplatense antes de dateparser.
+
+    Cubre: sufijo 'hs'/'h', horas en 24h sin minutos, artículos antes de días.
+    """
+    text = text.lower()
+    text = text.replace("pasado mañana", "en 2 dias").replace("pasado manana", "en 2 dias")
+    # '20:30hs' → '20:30' | '20hs' → '20:00'
+    text = re.sub(r"(\d{1,2}):(\d{2})\s*hs?\b", r"\1:\2", text)
+    text = re.sub(r"(\d{1,2})\s*hs?\b", r"\1:00", text)
+    # 'las 20' → 'las 20:00' (hora en 24h sin minutos)
+    text = re.sub(r"\blas\s+(\d{1,2})\b(?!:\d)", r"las \1:00", text)
+    # 'el (próximo) viernes' → 'viernes'  (dateparser resuelve mejor sin artículo)
+    text = re.sub(r"\bel\s+(?:pr[oó]ximo\s+)?(" + _DAYS_ES + r")\b", r"\1", text)
+    text = re.sub(r"\bpr[oó]ximo\s+(" + _DAYS_ES + r")\b", r"\1", text)
+    return text
+
+
 def parse_date(date_str: Optional[str]) -> Optional[datetime]:
     if not date_str:
         return None
 
-    text = date_str.lower().replace("pasado mañana", "en 2 dias").replace("pasado manana", "en 2 dias")
+    text = _normalize_date_input(date_str)
 
     parsed_date = dateparser.parse(
         text,
         languages=["es"],
         settings={"PREFER_DATES_FROM": "future"},
     )
-    
+
     if not parsed_date:
         parsed_date = fallback_parse_date_with_llm(date_str)
-        
+
     return parsed_date
 
 
@@ -302,10 +419,10 @@ def resolve_event_type(name: str, create_if_missing: bool) -> tuple[Optional[int
         return None, None, f"Hubo un problema al resolver el tipo de evento: {exc}"
 
 
-def build_confirmation_message(tipo_evento: str, agenda_name: str, start_dt: datetime, duration_minutes: int) -> str:
+def build_confirmation_message(nombre_evento: str, agenda_name: str, start_dt: datetime, duration_minutes: int) -> str:
     return (
         "Quedaria asi: "
-        f"'{tipo_evento}' el {format_datetime(start_dt)} en la agenda '{agenda_name}' "
+        f"'{nombre_evento}' el {format_datetime(start_dt)} en la agenda '{agenda_name}' "
         f"con una duracion estimada de {format_duration(duration_minutes)}. "
         "Decime 'si' para confirmarlo, 'no' para cancelarlo o corregime algun dato."
     )
@@ -525,7 +642,21 @@ class ValidateEventoForm(FormValidationAction):
                 text="Dale, ¿qué tipo de evento querés agendar? Por ejemplo: parcial, reunión, dentista o cumpleaños."
             )
             return {"tipo_evento": None}
-        return {"tipo_evento": str(slot_value).strip()}
+
+        clean_value = str(slot_value).strip()
+
+        try:
+            available_types = [et["name"] for et in fetch_event_types()]
+        except Exception:
+            available_types = []
+
+        llm_result = extract_type_and_name(clean_value, available_types)
+        if llm_result:
+            tipo, nombre = llm_result
+            return {"tipo_evento": tipo, "nombre_evento": nombre}
+
+        # Sin LLM: comportamiento original — el texto completo como tipo
+        return {"tipo_evento": clean_value}
 
     def validate_nombre_agenda(
         self,
@@ -667,8 +798,9 @@ class ActionPrepararConfirmacion(Action):
         if duration_minutes is None:
             duration_minutes = infer_default_duration_minutes(tipo_evento)
 
+        nombre_evento = tracker.get_slot("nombre_evento") or tipo_evento
         dispatcher.utter_message(
-            text=build_confirmation_message(tipo_evento, agenda_name, start_dt, duration_minutes)
+            text=build_confirmation_message(nombre_evento, agenda_name, start_dt, duration_minutes)
         )
         return [
             SlotSet("awaiting_confirmation", True),
@@ -719,11 +851,12 @@ class ActionConfirmarCreacionEvento(Action):
             dispatcher.utter_message(text=event_type_error or "No pude resolver el tipo de evento del borrador.")
             return [SlotSet("awaiting_confirmation", False)]
 
+        nombre_evento = tracker.get_slot("nombre_evento") or resolved_event_type
         duration_minutes = int(duration_value) if duration_value else infer_default_duration_minutes(tipo_evento)
         end_dt = start_dt + timedelta(minutes=duration_minutes)
 
         payload = {
-            "title": resolved_event_type,
+            "title": nombre_evento,
             "start_datetime": start_dt.isoformat(),
             "end_datetime": end_dt.isoformat(),
             "agenda_id": agenda_id,
@@ -736,7 +869,7 @@ class ActionConfirmarCreacionEvento(Action):
             response.raise_for_status()
             dispatcher.utter_message(
                 text=(
-                    f"Listo, agende '{resolved_event_type}' para el {format_datetime(start_dt)} "
+                    f"Listo, agende '{nombre_evento}' para el {format_datetime(start_dt)} "
                     f"en la agenda '{agenda_name}' con una duracion de {format_duration(duration_minutes)}."
                 )
             )
@@ -876,3 +1009,103 @@ class ActionConsultarEvento(Action):
             dispatcher.utter_message(text=f"Hubo un error al consultar tu agenda: {exc}")
 
         return finish_query_events()
+
+
+class ActionAskEventoFormTipoEvento(Action):
+    """Reemplaza el utter estático al preguntar tipo_evento: lista los tipos disponibles."""
+
+    def name(self) -> Text:
+        return "action_ask_evento_form_tipo_evento"
+
+    def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> List[Dict[Text, Any]]:
+        try:
+            event_types = fetch_event_types()
+            if event_types:
+                types_list = "\n".join(f"  • {et['name']}" for et in event_types)
+                msg = (
+                    f"¿Qué tipo de evento querés agendar?\n"
+                    f"Tipos disponibles:\n{types_list}\n\n"
+                    "Podés elegir uno de estos o escribir otro tipo."
+                )
+            else:
+                msg = "¿Qué tipo de evento querés agendar? (Ejemplo: parcial, reunión o turno médico)"
+        except Exception:
+            msg = "¿Qué tipo de evento querés agendar? (Ejemplo: parcial, reunión o turno médico)"
+
+        dispatcher.utter_message(text=msg)
+        return []
+
+
+class ActionConsultarTiposEvento(Action):
+    def name(self) -> Text:
+        return "action_consultar_tipos_evento"
+
+    def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> List[Dict[Text, Any]]:
+        try:
+            event_types = fetch_event_types()
+            if not event_types:
+                dispatcher.utter_message(
+                    text="Todavía no tenés tipos de evento registrados. Se crean automáticamente cuando agendás algo nuevo."
+                )
+                return []
+            types_list = "\n".join(f"  • {et['name']}" for et in event_types)
+            dispatcher.utter_message(text=f"Estos son tus tipos de evento:\n{types_list}")
+        except requests.exceptions.ConnectionError:
+            dispatcher.utter_message(text="No pude conectarme con el backend para consultar los tipos de evento.")
+        except requests.RequestException as exc:
+            dispatcher.utter_message(text=f"Hubo un error al consultar los tipos de evento: {exc}")
+        return []
+
+
+class ActionHandleDenialWithCorrection(Action):
+    """Intercepta un 'no' durante la confirmación para detectar correcciones implícitas.
+
+    Si el LLM no está disponible o el mensaje es un rechazo puro, delega
+    a action_cancelar_operacion. Si detecta datos de corrección, actualiza
+    los slots y re-arma el borrador.
+    """
+
+    def name(self) -> Text:
+        return "action_handle_denial_with_correction"
+
+    def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> List[Dict[Text, Any]]:
+        if not tracker.get_slot("awaiting_confirmation"):
+            return [FollowupAction("action_cancelar_operacion")]
+
+        user_text = tracker.latest_message.get("text", "")
+        correction = extract_correction_from_denial(user_text)
+
+        if correction:
+            events: List[Dict[Text, Any]] = [SlotSet("awaiting_confirmation", False)]
+            if correction.get("fecha_evento"):
+                events.append(SlotSet("fecha_evento", correction["fecha_evento"]))
+            if correction.get("tipo_evento"):
+                events.append(SlotSet("tipo_evento", correction["tipo_evento"]))
+            if correction.get("nombre_evento"):
+                events.append(SlotSet("nombre_evento", correction["nombre_evento"]))
+            if correction.get("nombre_agenda"):
+                events.append(SlotSet("nombre_agenda", correction["nombre_agenda"]))
+            if correction.get("duracion_texto"):
+                events.append(SlotSet("duracion_texto", correction["duracion_texto"]))
+                events.append(SlotSet("duracion_minutos", None))
+            if len(events) > 1:
+                events.append(FollowupAction("action_preparar_confirmacion"))
+                return events
+
+        # Rechazo puro o LLM no disponible → cancelar
+        return [FollowupAction("action_cancelar_operacion")]
