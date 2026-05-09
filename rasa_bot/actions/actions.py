@@ -6,14 +6,31 @@ from typing import Any, Dict, List, Optional, Text
 
 import dateparser
 import requests
+from dotenv import load_dotenv
 
-from rasa_sdk import Action, Tracker
-from rasa_sdk.events import SlotSet
+import json
+
+from rasa_sdk import Action, Tracker, FormValidationAction
+from rasa_sdk.events import SlotSet, FollowupAction, ActiveLoop
 from rasa_sdk.executor import CollectingDispatcher
+from rasa_sdk.types import DomainDict
+
+try:
+    import google.generativeai as genai
+except ImportError:
+    genai = None
+
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
 API_BASE_URL = os.getenv("AGENDA_API_URL", "http://localhost:8000")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+MINIMAX_API_KEY = os.getenv("MINIMAX_API_KEY")
+
+if GEMINI_API_KEY and genai:
+    genai.configure(api_key=GEMINI_API_KEY)
+
 
 
 def clear_flow_slots() -> List[SlotSet]:
@@ -23,11 +40,88 @@ def clear_flow_slots() -> List[SlotSet]:
         SlotSet("nombre_agenda", None),
         SlotSet("duracion_texto", None),
         SlotSet("duracion_minutos", None),
-        SlotSet("pending_action", None),
-        SlotSet("requested_slot", None),
         SlotSet("awaiting_confirmation", False),
     ]
 
+
+def fallback_parse_date_with_llm(date_str: str) -> Optional[datetime]:
+    """Usa un LLM (Gemini o Minimax) para parsear fechas coloquiales."""
+    today = datetime.now()
+    prompt = (
+        f"Hoy es {today.strftime('%Y-%m-%d %H:%M:%S')} (Día de la semana: {today.strftime('%A')}). "
+        f"El usuario ingresó esta expresión de tiempo: '{date_str}'. "
+        "Devolvé ÚNICAMENTE la fecha y hora correspondiente en formato ISO 8601 (YYYY-MM-DDTHH:MM:SS). "
+        "No des explicaciones, ni texto adicional, solo el string ISO."
+    )
+
+    try:
+        if GEMINI_API_KEY and genai:
+            model_name = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+            model = genai.GenerativeModel(model_name)
+            response = model.generate_content(prompt)
+            result = response.text.strip()
+            # A veces los LLMs ponen backticks
+            result = result.replace("`", "").strip()
+            return datetime.fromisoformat(result)
+        elif MINIMAX_API_KEY:
+            # Encubriendo Minimax a través de su API REST (OpenAI compatible)
+            headers = {
+                "Authorization": f"Bearer {MINIMAX_API_KEY}",
+                "Content-Type": "application/json"
+            }
+            payload = {
+                "model": "minimax-text-01", # Asumimos un modelo válido de Minimax
+                "messages": [{"role": "user", "content": prompt}],
+                "temperature": 0.1
+            }
+            # Cambiar por la URL real de Minimax según su doc actual
+            resp = requests.post("https://api.minimax.chat/v1/text/chatcompletion_v2", json=payload, headers=headers, timeout=10)
+            if resp.ok:
+                result = resp.json()["choices"][0]["message"]["content"].strip()
+                result = result.replace("`", "").strip()
+                return datetime.fromisoformat(result)
+    except Exception as e:
+        logger.error(f"Fallo el parseo de LLM para la fecha '{date_str}': {e}")
+    
+    return None
+
+def fallback_intent_with_llm(user_text: str) -> Optional[dict]:
+    """Usa el LLM como clasificador de intenciones fallback avanzado."""
+    prompt = (
+        "Sos el asistente virtual de una agenda personal. El NLU tradicional no entendió esto: "
+        f"'{user_text}'.\n\n"
+        "Clasificá la intención y extraé datos. "
+        "Respondé ÚNICAMENTE un JSON válido con esta estructura, sin markdown ni comillas triples:\n"
+        "{\n"
+        '  "intent": "crear_evento" | "consultar_evento" | "chitchat" | "desconocido",\n'
+        '  "entities": {\n'
+        '    "tipo_evento": "...",\n'
+        '    "fecha_evento": "...",\n'
+        '    "nombre_agenda": "..."\n'
+        "  }\n"
+        "}"
+    )
+
+    try:
+        if GEMINI_API_KEY and genai:
+            model_name = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+            model = genai.GenerativeModel(model_name)
+            response = model.generate_content(prompt)
+            result = response.text.strip()
+            result = result.replace("```json", "").replace("```", "").strip()
+            return json.loads(result)
+        elif MINIMAX_API_KEY:
+            headers = {"Authorization": f"Bearer {MINIMAX_API_KEY}", "Content-Type": "application/json"}
+            payload = {"model": "minimax-text-01", "messages": [{"role": "user", "content": prompt}], "temperature": 0.1}
+            resp = requests.post("https://api.minimax.chat/v1/text/chatcompletion_v2", json=payload, headers=headers, timeout=10)
+            if resp.ok:
+                result = resp.json()["choices"][0]["message"]["content"].strip()
+                result = result.replace("```json", "").replace("```", "").strip()
+                return json.loads(result)
+    except Exception as e:
+        logger.error(f"Fallo el intent classification LLM para '{user_text}': {e}")
+    
+    return None
 
 def parse_date(date_str: Optional[str]) -> Optional[datetime]:
     if not date_str:
@@ -35,11 +129,16 @@ def parse_date(date_str: Optional[str]) -> Optional[datetime]:
 
     text = date_str.lower().replace("pasado mañana", "en 2 dias").replace("pasado manana", "en 2 dias")
 
-    return dateparser.parse(
+    parsed_date = dateparser.parse(
         text,
         languages=["es"],
         settings={"PREFER_DATES_FROM": "future"},
     )
+    
+    if not parsed_date:
+        parsed_date = fallback_parse_date_with_llm(date_str)
+        
+    return parsed_date
 
 
 def parse_duration_minutes(duration_text: Optional[str]) -> Optional[int]:
@@ -280,6 +379,40 @@ class ActionHandleFallback(Action):
                 text="No entendi la duracion. Podes decirme algo como '30 minutos' o '2 horas'."
             )
         else:
+            user_text = tracker.latest_message.get('text', '')
+            llm_result = fallback_intent_with_llm(user_text)
+
+            if llm_result:
+                intent = llm_result.get("intent")
+                
+                if intent == "chitchat":
+                    return [FollowupAction("action_handle_chitchat")]
+                
+                elif intent == "crear_evento":
+                    slots = [SlotSet("pending_action", "create")]
+                    for k, v in llm_result.get("entities", {}).items():
+                        if v and v != "...":
+                            slots.append(SlotSet(k, v))
+                    slots.append(FollowupAction("action_validar_y_crear_evento"))
+                    return slots
+                
+                elif intent == "consultar_evento":
+                    slots = [SlotSet("pending_action", "query")]
+                    for k, v in llm_result.get("entities", {}).items():
+                        if v and v != "...":
+                            slots.append(SlotSet(k, v))
+                    slots.append(FollowupAction("action_consultar_evento"))
+                    return slots
+                
+                    return slots
+                
+                elif intent == "desconocido":
+                    dispatcher.utter_message(
+                        text="No termine de entenderte. Podes pedirme que cree un evento o consulte tu agenda."
+                    )
+                    return [SlotSet("chitchat_count", 0.0)]
+
+            # Fallback final si falla el LLM o no devuelve algo útil
             dispatcher.utter_message(
                 text="No termine de entenderte. Podes pedirme que cree un evento, consulte tu agenda o corregir el borrador que venimos armando."
             )
@@ -287,9 +420,48 @@ class ActionHandleFallback(Action):
         return [SlotSet("chitchat_count", 0.0)]
 
 
-class ActionValidarYCrearEvento(Action):
+class ValidateEventoForm(FormValidationAction):
     def name(self) -> Text:
-        return "action_validar_y_crear_evento"
+        return "validate_evento_form"
+
+    async def required_slots(
+        self,
+        domain_slots: List[Text],
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict,
+    ) -> List[Text]:
+        slots = ["tipo_evento", "fecha_evento"]
+        
+        # Si no nos dieron agenda, nos fijamos si hay más de una disponible
+        nombre_agenda = tracker.get_slot("nombre_agenda")
+        if not nombre_agenda:
+            try:
+                agendas = fetch_agendas()
+                if len(agendas) > 1:
+                    slots.append("nombre_agenda")
+            except Exception:
+                pass
+                
+        return slots
+
+    def validate_fecha_evento(
+        self,
+        slot_value: Any,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict,
+    ) -> Dict[Text, Any]:
+        dt = parse_date(slot_value)
+        if not dt:
+            dispatcher.utter_message(text="No pude entender bien la fecha. Decímela de otra forma, por ejemplo 'mañana a las 18'.")
+            return {"fecha_evento": None}
+        return {"fecha_evento": slot_value}
+
+
+class ActionPrepararConfirmacion(Action):
+    def name(self) -> Text:
+        return "action_preparar_confirmacion"
 
     def run(
         self,
@@ -302,67 +474,18 @@ class ActionValidarYCrearEvento(Action):
         nombre_agenda = tracker.get_slot("nombre_agenda")
         duracion_texto = tracker.get_slot("duracion_texto")
 
-        if not tipo_evento:
-            dispatcher.utter_message(text="Que tipo de evento queres agendar? Ejemplo: parcial, reunion o turno medico.")
-            return [
-                SlotSet("pending_action", "create"),
-                SlotSet("requested_slot", "tipo_evento"),
-                SlotSet("awaiting_confirmation", False),
-            ]
-
-        if not fecha_evento:
-            dispatcher.utter_message(text="Para cuando lo queres agendar?")
-            return [
-                SlotSet("pending_action", "create"),
-                SlotSet("requested_slot", "fecha_evento"),
-                SlotSet("awaiting_confirmation", False),
-            ]
-
         start_dt = parse_date(fecha_evento)
-        if not start_dt:
-            dispatcher.utter_message(
-                text="No pude entender bien la fecha. Decimela de otra forma, por ejemplo 'manana a las 18' o 'el viernes a las 9'."
-            )
-            return [
-                SlotSet("pending_action", "create"),
-                SlotSet("requested_slot", "fecha_evento"),
-                SlotSet("awaiting_confirmation", False),
-            ]
 
-        agenda_id, agenda_name, agenda_options, agenda_error = resolve_agenda_for_create(nombre_agenda)
+        agenda_id, agenda_name, _, agenda_error = resolve_agenda_for_create(nombre_agenda)
         if agenda_error:
             dispatcher.utter_message(text=agenda_error)
-            return [
-                SlotSet("pending_action", "create"),
-                SlotSet("requested_slot", "nombre_agenda" if not nombre_agenda else None),
-                SlotSet("awaiting_confirmation", False),
-            ]
-
-        if agenda_options:
-            dispatcher.utter_message(
-                text=(
-                    "Tenes varias agendas guardadas: "
-                    f"{', '.join(agenda_options)}. Decime en cual queres que lo anote."
-                )
-            )
-            return [
-                SlotSet("pending_action", "create"),
-                SlotSet("requested_slot", "nombre_agenda"),
-                SlotSet("awaiting_confirmation", False),
-            ]
+            return [SlotSet("awaiting_confirmation", False)]
 
         duration_minutes = None
         if duracion_texto:
             duration_minutes = parse_duration_minutes(duracion_texto)
             if duration_minutes is None:
-                dispatcher.utter_message(
-                    text="No pude interpretar la duracion. Decimela como '30 minutos' o '2 horas'."
-                )
-                return [
-                    SlotSet("pending_action", "create"),
-                    SlotSet("requested_slot", "duracion_texto"),
-                    SlotSet("awaiting_confirmation", False),
-                ]
+                dispatcher.utter_message(text="No pude interpretar la duración. Asumiré la duración por defecto.")
 
         if duration_minutes is None:
             duration_minutes = infer_default_duration_minutes(tipo_evento)
@@ -371,8 +494,6 @@ class ActionValidarYCrearEvento(Action):
             text=build_confirmation_message(tipo_evento, agenda_name, start_dt, duration_minutes)
         )
         return [
-            SlotSet("pending_action", "create"),
-            SlotSet("requested_slot", None),
             SlotSet("awaiting_confirmation", True),
             SlotSet("nombre_agenda", agenda_name),
             SlotSet("duracion_minutos", float(duration_minutes)),
@@ -389,7 +510,7 @@ class ActionConfirmarCreacionEvento(Action):
         tracker: Tracker,
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
-        if tracker.get_slot("pending_action") != "create" or not tracker.get_slot("awaiting_confirmation"):
+        if not tracker.get_slot("awaiting_confirmation"):
             dispatcher.utter_message(text="No tengo una creacion pendiente para confirmar.")
             return []
 
@@ -467,9 +588,9 @@ class ActionCancelarOperacion(Action):
         tracker: Tracker,
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
-        if tracker.get_slot("pending_action") or tracker.get_slot("awaiting_confirmation"):
+        if tracker.active_loop or tracker.get_slot("awaiting_confirmation"):
             dispatcher.utter_message(text="Perfecto, cancele el borrador actual. Cuando quieras arrancamos de nuevo.")
-            return clear_flow_slots()
+            return clear_flow_slots() + [ActiveLoop(None)]
 
         dispatcher.utter_message(text="No habia ninguna operacion en curso para cancelar.")
         return []
@@ -485,9 +606,18 @@ class ActionConsultarEvento(Action):
         tracker: Tracker,
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
-        fecha_evento = tracker.get_slot("fecha_evento")
-        tipo_evento = tracker.get_slot("tipo_evento")
-        nombre_agenda = tracker.get_slot("nombre_agenda")
+        # Si hay un form activo (se rompió/canceló implícitamente al pedir otra cosa),
+        # priorizamos el mensaje actual.
+        current_entities = {e['entity']: e['value'] for e in tracker.latest_message.get('entities', [])}
+        
+        if tracker.active_loop.get("name") == "evento_form":
+            fecha_evento = current_entities.get("fecha")
+            tipo_evento = current_entities.get("tipo_evento")
+            nombre_agenda = current_entities.get("nombre_agenda")
+        else:
+            fecha_evento = tracker.get_slot("fecha_evento")
+            tipo_evento = tracker.get_slot("tipo_evento")
+            nombre_agenda = tracker.get_slot("nombre_agenda")
 
         if not any([fecha_evento, tipo_evento, nombre_agenda]):
             dispatcher.utter_message(

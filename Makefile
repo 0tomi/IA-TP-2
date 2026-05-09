@@ -4,7 +4,7 @@ RASABOT_DIR  := rasa_bot
 
 .PHONY: help install install-backend install-frontend install-rasa \
          dev dev-backend dev-frontend dev-rasa dev-rasa-actions \
-         build test test-rasa lint lint-fix lint-frontend seed-dev
+         build test test-rasa train-rasa lint lint-fix lint-frontend seed-dev
 
 help:
 	@echo "Comandos disponibles:"
@@ -26,6 +26,7 @@ help:
 	@echo "    make build            Compila el frontend para producción"
 	@echo "    make test             Corre los tests del backend"
 	@echo "    make test-rasa        Corre los tests de Rasa (core + NLU)"
+	@echo "    make train-rasa       Entrena el modelo de Rasa"
 	@echo "    make lint             Valida el código del backend con Ruff"
 	@echo "    make lint-fix         Corrige errores automáticos con Ruff"
 	@echo "    make lint-frontend   Valida el código del frontend con ESLint"
@@ -83,6 +84,9 @@ test:
 test-rasa:
 	cd $(RASABOT_DIR) && poetry run rasa test core --stories tests/test_stories.yml
 	cd $(RASABOT_DIR) && poetry run rasa test nlu --nlu data/nlu.yml
+
+train-rasa:
+	cd $(RASABOT_DIR) && poetry run rasa train
 
 lint:
 	cd $(BACKEND_DIR) && poetry run ruff check .

@@ -11,30 +11,29 @@ rules:
       - intent: chitchat
       - action: action_handle_chitchat
 
-  - rule: Crear nuevo evento
+  - rule: Activar formulario de creación de evento
     steps:
       - intent: crear_evento
-      - action: action_validar_y_crear_evento
+      - action: evento_form
+      - active_loop: evento_form
 
-  - rule: Continuar creando evento al informar agenda
+  - rule: Submit exitoso del formulario de evento
+    condition:
+      - active_loop: evento_form
     steps:
-      - intent: informar_agenda
-      - action: action_validar_y_crear_evento
+      - action: evento_form
+      - active_loop: null
+      - slot_was_set:
+          - requested_slot: null
+      - action: action_preparar_confirmacion
 
-  - rule: Continuar creando evento al informar detalle faltante
-    steps:
-      - intent: informar_detalle_evento
-      - action: action_validar_y_crear_evento
-
-  - rule: Continuar creando evento al informar duracion
-    steps:
-      - intent: informar_duracion
-      - action: action_validar_y_crear_evento
-
-  - rule: Recalcular borrador cuando corrigen datos
+  - rule: Recalcular borrador cuando corrigen datos en form
+    condition:
+      - active_loop: evento_form
     steps:
       - intent: corregir_evento
-      - action: action_validar_y_crear_evento
+      - action: evento_form
+      - active_loop: evento_form
 
   - rule: Confirmar creacion de evento
     steps:

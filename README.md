@@ -44,6 +44,24 @@ Este proyecto implementa un asistente conversacional que permite al usuario gest
 
 ---
 
+## Configuración (.env)
+
+El proyecto soporta el uso de un LLM como fallback para la interpretación de fechas complejas. Para esto, debés configurar tus API keys en el archivo `.env` dentro de la carpeta `rasa_bot/`.
+
+Creá un archivo `.env` tomando como base `rasa_bot/.env.example`:
+
+```bash
+# En rasa_bot/.env
+GEMINI_API_KEY="tu_api_key_de_gemini"
+GEMINI_MODEL="gemini-1.5-flash" # Modelos soportados: gemini-1.5-flash, gemini-2.5-flash, gemini-1.5-pro, etc.
+
+# Opcional: Minimax
+# MINIMAX_API_KEY="tu_api_key_de_minimax"
+```
+> **Nota:** El archivo `.env` está ignorado en `.gitignore` por seguridad. No lo comitees.
+
+---
+
 ## Comandos
 
 > Todos los comandos se ejecutan desde la raíz del proyecto.
@@ -75,6 +93,7 @@ make lint-fix           # Corrige errores automáticos con Ruff
 make lint-frontend      # Valida el frontend con ESLint
 make test               # Corre los tests del backend con pytest
 make test-rasa          # Corre los tests de Rasa (core + NLU)
+make train-rasa         # Entrena el modelo de Rasa
 ```
 
 ### Base de datos

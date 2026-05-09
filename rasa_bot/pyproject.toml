@@ -9,7 +9,9 @@ requires-python = ">=3.10,<3.11"
 dependencies = [
     "rasa (>=3.6.21,<4.0.0)",
     "requests",
-    "dateparser==1.1.8"
+    "dateparser==1.1.8",
+    "google-generativeai (>=0.8.6,<0.9.0)",
+    "python-dotenv (>=1.2.2,<2.0.0)"
 ]
 [tool.poetry]
 package-mode = false

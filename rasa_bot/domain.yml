@@ -24,6 +24,10 @@ slots:
     mappings:
       - type: from_entity
         entity: tipo_evento
+      - type: from_text
+        conditions:
+          - active_loop: evento_form
+            requested_slot: tipo_evento
 
   nombre_agenda:
     type: text
@@ -36,6 +40,10 @@ slots:
     mappings:
       - type: from_entity
         entity: fecha
+      - type: from_text
+        conditions:
+          - active_loop: evento_form
+            requested_slot: fecha_evento
 
   duracion_texto:
     type: text
@@ -45,11 +53,6 @@ slots:
 
   duracion_minutos:
     type: float
-    mappings:
-      - type: custom
-
-  pending_action:
-    type: text
     mappings:
       - type: custom
 
@@ -71,12 +74,27 @@ slots:
       - type: custom
 
 actions:
-  - action_validar_y_crear_evento
+  - validate_evento_form
+  - action_preparar_confirmacion
   - action_confirmar_creacion_evento
   - action_consultar_evento
   - action_handle_chitchat
   - action_handle_fallback
   - action_cancelar_operacion
+
+forms:
+  evento_form:
+    required_slots:
+      - tipo_evento
+      - fecha_evento
+
+responses:
+  utter_ask_tipo_evento:
+    - text: "¿Qué tipo de evento querés agendar? (Ejemplo: parcial, reunión o turno médico)"
+  utter_ask_fecha_evento:
+    - text: "¿Para cuándo lo querés agendar? (Ejemplo: mañana a las 18, o el viernes a la mañana)"
+  utter_ask_nombre_agenda:
+    - text: "Tenés varias agendas guardadas. ¿En cuál querés que lo anote?"
 
 session_config:
   session_expiration_time: 10
