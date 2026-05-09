@@ -23,8 +23,6 @@ rules:
     steps:
       - action: evento_form
       - active_loop: null
-      - slot_was_set:
-          - requested_slot: null
       - action: action_preparar_confirmacion
 
   - rule: Recalcular borrador cuando corrigen datos en form

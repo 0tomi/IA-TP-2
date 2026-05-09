@@ -7,8 +7,6 @@ stories:
       - action: evento_form
       - active_loop: evento_form
       - active_loop: null
-      - slot_was_set:
-          - requested_slot: null
       - action: action_preparar_confirmacion
       - intent: affirm
       - action: action_confirmar_creacion_evento
@@ -21,8 +19,6 @@ stories:
       - intent: informar_agenda
       - action: evento_form
       - active_loop: null
-      - slot_was_set:
-          - requested_slot: null
       - action: action_preparar_confirmacion
       - intent: affirm
       - action: action_confirmar_creacion_evento
@@ -35,8 +31,6 @@ stories:
       - intent: corregir_evento
       - action: evento_form
       - active_loop: null
-      - slot_was_set:
-          - requested_slot: null
       - action: action_preparar_confirmacion
       - intent: affirm
       - action: action_confirmar_creacion_evento
