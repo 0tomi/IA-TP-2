@@ -238,6 +238,8 @@ def _normalize_date_input(text: str) -> str:
     # 'el (próximo) viernes' → 'viernes'  (dateparser resuelve mejor sin artículo)
     text = re.sub(r"\bel\s+(?:pr[oó]ximo\s+)?(" + _DAYS_ES + r")\b", r"\1", text)
     text = re.sub(r"\bpr[oó]ximo\s+(" + _DAYS_ES + r")\b", r"\1", text)
+    # 'el 15/05' o 'el 15-05' → '15/05'  (artículo antes de DD/MM confunde dateparser)
+    text = re.sub(r"\bel\s+(\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?)\b", r"\1", text)
     return text
 
 
@@ -419,10 +421,34 @@ def resolve_event_type(name: str, create_if_missing: bool) -> tuple[Optional[int
         return None, None, f"Hubo un problema al resolver el tipo de evento: {exc}"
 
 
-def build_confirmation_message(nombre_evento: str, agenda_name: str, start_dt: datetime, duration_minutes: int) -> str:
+def build_full_event_name(tipo_evento: Optional[str], nombre_evento: Optional[str]) -> str:
+    """Construye el título completo del evento.
+
+    Si DIET extrajo nombre_evento como el sufijo específico ('de algoritmos 2',
+    'con el cliente'), lo combina con el tipo. Si nombre_evento ya contiene
+    el tipo como prefijo, lo usa directamente.
+    """
+    tipo = (tipo_evento or "").strip()
+    nombre = (nombre_evento or "").strip()
+
+    if not nombre:
+        return tipo.capitalize()
+    if not tipo or nombre.lower().startswith(tipo.lower()):
+        return nombre.capitalize()
+    return f"{tipo.capitalize()} {nombre}"
+
+
+def build_confirmation_message(
+    nombre_evento: str,
+    tipo_evento: str,
+    agenda_name: str,
+    start_dt: datetime,
+    duration_minutes: int,
+) -> str:
+    tipo_suffix = f" (tipo: {tipo_evento})" if tipo_evento.lower() != nombre_evento.lower() else ""
     return (
-        "Quedaria asi: "
-        f"'{nombre_evento}' el {format_datetime(start_dt)} en la agenda '{agenda_name}' "
+        f"Quedaria asi: '{nombre_evento}'{tipo_suffix} "
+        f"el {format_datetime(start_dt)} en la agenda '{agenda_name}' "
         f"con una duracion estimada de {format_duration(duration_minutes)}. "
         "Decime 'si' para confirmarlo, 'no' para cancelarlo o corregime algun dato."
     )
@@ -611,8 +637,14 @@ class ValidateEventoForm(FormValidationAction):
         domain: DomainDict,
     ) -> List[Text]:
         slots = ["tipo_evento", "fecha_evento"]
-        
-        # Si no nos dieron agenda, nos fijamos si hay más de una disponible
+
+        # Pedir nombre solo si el LLM no lo diferenció del tipo
+        tipo_evento = tracker.get_slot("tipo_evento")
+        nombre_evento = tracker.get_slot("nombre_evento")
+        if tipo_evento and (not nombre_evento or nombre_evento.lower() == tipo_evento.lower()):
+            slots.append("nombre_evento")
+
+        # Pedir agenda solo si hay más de una disponible
         nombre_agenda = tracker.get_slot("nombre_agenda")
         if not nombre_agenda:
             try:
@@ -621,7 +653,7 @@ class ValidateEventoForm(FormValidationAction):
                     slots.append("nombre_agenda")
             except Exception:
                 pass
-                
+
         return slots
 
     def validate_tipo_evento(
@@ -645,6 +677,10 @@ class ValidateEventoForm(FormValidationAction):
 
         clean_value = str(slot_value).strip()
 
+        # Si DIET ya extrajo nombre_evento vía entidad, no llamamos al LLM
+        if tracker.get_slot("nombre_evento"):
+            return {"tipo_evento": clean_value}
+
         try:
             available_types = [et["name"] for et in fetch_event_types()]
         except Exception:
@@ -655,8 +691,25 @@ class ValidateEventoForm(FormValidationAction):
             tipo, nombre = llm_result
             return {"tipo_evento": tipo, "nombre_evento": nombre}
 
-        # Sin LLM: comportamiento original — el texto completo como tipo
+        # Sin LLM: el texto completo como tipo (nombre se pedirá por form)
         return {"tipo_evento": clean_value}
+
+    def validate_nombre_evento(
+        self,
+        slot_value: Any,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict,
+    ) -> Dict[Text, Any]:
+        tipo = tracker.get_slot("tipo_evento") or ""
+        intent = latest_intent_name(tracker)
+        # '.' o ruido → usar el tipo como nombre por defecto
+        if intent in {"chitchat", "cancelar", "consultar_evento"} or is_empty_or_noise(slot_value):
+            return {"nombre_evento": tipo.capitalize()}
+        clean = str(slot_value).strip()
+        if clean == ".":
+            return {"nombre_evento": tipo.capitalize()}
+        return {"nombre_evento": clean}
 
     def validate_nombre_agenda(
         self,
@@ -798,9 +851,10 @@ class ActionPrepararConfirmacion(Action):
         if duration_minutes is None:
             duration_minutes = infer_default_duration_minutes(tipo_evento)
 
-        nombre_evento = tracker.get_slot("nombre_evento") or tipo_evento
+        nombre_evento = tracker.get_slot("nombre_evento")
+        full_name = build_full_event_name(tipo_evento, nombre_evento)
         dispatcher.utter_message(
-            text=build_confirmation_message(nombre_evento, agenda_name, start_dt, duration_minutes)
+            text=build_confirmation_message(full_name, tipo_evento, agenda_name, start_dt, duration_minutes)
         )
         return [
             SlotSet("awaiting_confirmation", True),
@@ -851,7 +905,8 @@ class ActionConfirmarCreacionEvento(Action):
             dispatcher.utter_message(text=event_type_error or "No pude resolver el tipo de evento del borrador.")
             return [SlotSet("awaiting_confirmation", False)]
 
-        nombre_evento = tracker.get_slot("nombre_evento") or resolved_event_type
+        nombre_evento_slot = tracker.get_slot("nombre_evento")
+        nombre_evento = build_full_event_name(tipo_evento, nombre_evento_slot) if nombre_evento_slot else resolved_event_type
         duration_minutes = int(duration_value) if duration_value else infer_default_duration_minutes(tipo_evento)
         end_dt = start_dt + timedelta(minutes=duration_minutes)
 
@@ -959,7 +1014,7 @@ class ActionConsultarEvento(Action):
                 return [SlotSet("fecha_evento", None), SlotSet("pending_action", "query"), FollowupAction("consulta_form")]
 
             start_dt = dt.replace(hour=0, minute=0, second=0, microsecond=0)
-            end_dt = dt.replace(hour=23, minute=59, second=59, microsecond=0)
+            end_dt = dt.replace(hour=23, minute=59, second=59, microsecond=999999)
             params["from_dt"] = start_dt.isoformat()
             params["to_dt"] = end_dt.isoformat()
             filters.append(f"el {dt.strftime('%d/%m')}")
@@ -1038,6 +1093,29 @@ class ActionAskEventoFormTipoEvento(Action):
             msg = "¿Qué tipo de evento querés agendar? (Ejemplo: parcial, reunión o turno médico)"
 
         dispatcher.utter_message(text=msg)
+        return []
+
+
+class ActionAskEventoFormNombreEvento(Action):
+    """Pregunta el nombre específico del evento de forma clara."""
+
+    def name(self) -> Text:
+        return "action_ask_evento_form_nombre_evento"
+
+    def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> List[Dict[Text, Any]]:
+        tipo = tracker.get_slot("tipo_evento") or "evento"
+        dispatcher.utter_message(
+            text=(
+                f"¿Cómo se llama este {tipo}?\n"
+                f"Formato: <nombre del evento> (Ej: 'Parcial de Algoritmos 2', 'Reunión con el cliente')\n"
+                f"Si no tiene un nombre especial, mandame solo un punto '.' y uso '{tipo.capitalize()}' como nombre."
+            )
+        )
         return []
 
 

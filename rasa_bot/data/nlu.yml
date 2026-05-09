@@ -35,19 +35,76 @@ nlu:
       - necesito agendar un [dentista](tipo_evento) para [manana](fecha)
       - programame un [recordatorio](tipo_evento) a las [16](fecha)
       - queria saber si puedo poner un [reunion](tipo_evento) el [viernes](fecha)
-      - hay alguna forma de agendar un [turno](tipo_evento) para [pasado manana](fecha)?
+      - hay alguna forma de agendar un [turno](tipo_evento) para [pasado manana](fecha)
       - agregame a la agenda un [trabajo practico](tipo_evento) para el [15 de junio](fecha)
       - quiero programar un [bloqueo](tipo_evento) de [2 horas](duracion) [manana](fecha)
-      - reservame un [espacio](tipo_evento) para [el sabado a la manana](fecha)
-      - tengo que coordinar un [almuerzo](tipo_evento) con [juan](nombre_agenda) el [domingo](fecha)
-      - anotame un [coffee break](tipo_evento) para [la tarde del viernes](fecha)
-      - necesito bloquear [3 horas](duracion) el [lunes](fecha) para [estudios](nombre_agenda)
+      - reservame un espacio para [el sabado a la manana](fecha)
       - colocame un [meeting con clientes](tipo_evento) para [manana a las 10](fecha) en [trabajo](nombre_agenda)
       - guarda un [checkup](tipo_evento) para el [proximo miercoles](fecha) en [salud](nombre_agenda)
-      - creame un evento que dure [1 hora](duracion) para [hoy a la tarde](fecha)
-      - tengo un [chico](tipo_evento) [manana](fecha)
-      - bloquear un [hueco](tipo_evento) para [el viernes](fecha)
-      - programame un [consultorio](tipo_evento) [manana](fecha)
+      - agendame un [parcial](tipo_evento) [de algoritmos 2](nombre_evento) para [manana a las 18](fecha)
+      - anotame la [reunion](tipo_evento) [con el cliente de Google](nombre_evento) para [el viernes a las 10](fecha)
+      - meteme el [turno medico](tipo_evento) [con el doctor Garcia](nombre_evento) para [el martes](fecha)
+      - guardame el [cumpleanos](tipo_evento) [de mama](nombre_evento) para [el sabado](fecha)
+      - agendame la [juntada](tipo_evento) [con los pibes del trabajo](nombre_evento) para [el domingo a las 20](fecha)
+      - agendame la [clase](tipo_evento) [de programacion](nombre_evento) para [el lunes a las 19](fecha)
+      - poneme el [entrenamiento](tipo_evento) [de natacion](nombre_evento) para [el miercoles](fecha)
+      - creame una [presentacion](tipo_evento) [del proyecto final](nombre_evento) para [el 25 de junio](fecha)
+      - registrame el [examen](tipo_evento) [de matematica discreta](nombre_evento) [el jueves a las 14](fecha)
+      - agendame la [reunion](tipo_evento) [con recursos humanos](nombre_evento) [el martes a las 11](fecha) en [trabajo](nombre_agenda)
+      - anotame el [final](tipo_evento) [de fisica 2](nombre_evento) para [el viernes a las 8](fecha)
+      - meteme el [almuerzo](tipo_evento) [con el equipo de diseño](nombre_evento) [manana al mediodia](fecha)
+      - guardame la [llamada](tipo_evento) [con el proveedor](nombre_evento) para [el lunes a las 16](fecha)
+      - poneme la [revision](tipo_evento) [del codigo](nombre_evento) [manana a las 15](fecha)
+      - agendame el [parcial](tipo_evento) [de base de datos](nombre_evento) [el proximo martes a las 10](fecha)
+      - bloqueame tiempo para el [entrenamiento](tipo_evento) [de crossfit](nombre_evento) [el sabado a las 8](fecha)
+      - acordate de la [cena](tipo_evento) [con los suegros](nombre_evento) [el viernes a la noche](fecha)
+      - agendame la [consulta](tipo_evento) [con el nutricionista](nombre_evento) [el miercoles a las 17](fecha)
+      - poneme el [ensayo](tipo_evento) [de la banda](nombre_evento) para [el sabado a las 16](fecha)
+      - meteme la [reunion](tipo_evento) [del consorcio](nombre_evento) [el primer martes del mes](fecha)
+      - agendame la [clase](tipo_evento) [de yoga](nombre_evento) [los miercoles a las 19](fecha)
+      - agendame un evento para [manana a las 20hs](fecha)
+      - poneme algo para [el viernes a las 15hs](fecha)
+      - agendame un [parcial](tipo_evento) para [manana a las 20hs](fecha)
+      - anotame el [dentista](tipo_evento) para [el jueves a las 9hs](fecha)
+      - agendame la [reunion](tipo_evento) para [el lunes a las 17:30hs](fecha)
+      - poneme un [recordatorio](tipo_evento) para [hoy a las 20hs](fecha)
+      - necesito cargar un [final](tipo_evento) para [el sabado a las 8hs](fecha)
+      - creame un [turno](tipo_evento) para [manana a las 11hs](fecha) en [salud](nombre_agenda)
+      - agendame un [cumpleanos](tipo_evento) para [este finde](fecha)
+      - meteme un [parcial](tipo_evento) para [la semana que viene](fecha)
+      - poneme algo el [proximo lunes](fecha)
+      - agendame la [reunion](tipo_evento) para [la tardecita del viernes](fecha)
+      - anotame el [dentista](tipo_evento) para [el finde que viene](fecha)
+      - meteme un [recordatorio](tipo_evento) para [fin de mes](fecha)
+      - poneme la [clase](tipo_evento) para [a la manana del martes](fecha)
+      - agendame el [examen](tipo_evento) para [el dia que viene](fecha)
+      - cargame una [reunion](tipo_evento) en [trabajo](nombre_agenda) para [el primer dia del mes](fecha)
+      - me agendas un evento para [manana](fecha)
+      - me agendas un [parcial](tipo_evento) para [el viernes](fecha)
+      - me anotas el [turno del medico](tipo_evento) para [el martes](fecha)
+      - me guardas la [reunion](tipo_evento) del [lunes](fecha)
+      - me cargas un [recordatorio](tipo_evento) para [manana](fecha)
+      - me marcas en la agenda la [juntada](tipo_evento) del [sabado](fecha)
+      - me pones el [examen](tipo_evento) el [jueves](fecha)
+      - me reservas un espacio para [el viernes](fecha)
+      - podrias agendarme algo para [el miercoles](fecha)
+      - me metes en la agenda el [parcial](tipo_evento) del [viernes](fecha)
+      - quiero que me anotes una [reunion](tipo_evento) para [el martes](fecha)
+      - podes anotarme un [turno](tipo_evento) para [el martes](fecha)
+      - me anotas que tengo [dentista](tipo_evento) [manana a las 10](fecha)
+      - me recordas que tengo [reunion](tipo_evento) el [lunes](fecha)
+      - me podes cargar un [final](tipo_evento) para [el jueves a las 14](fecha)
+      - te pido que me anotes el [dentista](tipo_evento) para [el viernes](fecha)
+      - me haces acordar del [parcial](tipo_evento) el [miercoles](fecha)
+      - me anotas una [juntada](tipo_evento) para [el domingo a las 20](fecha)
+      - me pones algo para [manana a la tarde](fecha)
+      - me podes guardar un [turno](tipo_evento) para [pasado manana](fecha)
+      - me ayudas a cargar un [evento](tipo_evento) para [el proximo lunes](fecha)
+      - me agendas el [cumpleanos](tipo_evento) [de papa](nombre_evento) para [el 15 de junio](fecha)
+      - me anotas la [reunion](tipo_evento) [con el equipo](nombre_evento) para [el lunes a las 9](fecha)
+      - me cargas el [parcial](tipo_evento) [de estructuras](nombre_evento) para [el martes a las 10](fecha)
+      - me guardas la [juntada](tipo_evento) [con los de la facu](nombre_evento) para [el viernes](fecha)
+
   - intent: consultar_evento
     examples: |
       - que tengo el [lunes](fecha)
@@ -73,51 +130,81 @@ nlu:
       - buscame mis [recordatorios](tipo_evento) en [personal](nombre_agenda)
       - que eventos tengo en [familia](nombre_agenda)
       - mostrame mis [reuniones](tipo_evento) del [viernes](fecha) en [oficina](nombre_agenda)
-      - que tengo pendiente para [esta semana](fecha)?
+      - que tengo pendiente para [esta semana](fecha)
       - revisame la agenda del [lunes](fecha)
-      - tengo algo agendado para [manana](fecha)?
-      - que se viene en [estudios](nombre_agenda)?
+      - tengo algo agendado para [manana](fecha)
+      - que se viene en [estudios](nombre_agenda)
       - mostrame todo lo que tengo en [trabajo](nombre_agenda)
-      - hay algun evento para [hoy](fecha)?
-      - cuando es mi proximo [recordatorio](tipo_evento)?
-      - que tengo en la agenda [personal](nombre_agenda) para [esta semana](fecha)?
+      - hay algun evento para [hoy](fecha)
+      - cuando es mi proximo [recordatorio](tipo_evento)
+      - que tengo en la agenda [personal](nombre_agenda) para [esta semana](fecha)
       - buscame un [parcial](tipo_evento) en [facultad](nombre_agenda)
-      - cuentos eventos tengo para [manana](fecha)?
+      - cuantos eventos tengo para [manana](fecha)
       - necesito ver mi calendario del [mes que viene](fecha)
       - revisame los [cumples](tipo_evento) en [familia](nombre_agenda)
-      - tengo algo para [la tarde](fecha)?
-      - decime que hay el [viernes](fecha) a la [noche](fecha)
+      - tengo algo para [la tarde](fecha)
+      - decime que hay el [viernes](fecha) a la noche
       - que tengo
       - que hay en mi agenda
       - mostrame mis eventos
       - revisame el calendario
-      - tengo algo pendiente?
-      - que se viene?
+      - tengo algo pendiente
+      - que se viene
       - consulta mi agenda
       - quiero ver mis proximos eventos
+      - que tengo el [15/05](fecha)
+      - que hay para el [3/5](fecha)
+      - que tengo el [15/05/2026](fecha)
+      - revisar agenda del [10-05](fecha)
+      - fijame que tengo el [22/05](fecha)
+      - que eventos hay el [1/6](fecha)
+      - que tengo agendado para el [30/05](fecha)
+      - mostrame los eventos del [14/06](fecha)
+      - que hay el [7/5](fecha)
+      - hay algo el [20/05](fecha)
+      - que tengo [manana a la manana](fecha)
+      - que hay [esta tarde](fecha)
+      - que tengo [este finde](fecha)
+      - mostrame lo del [finde que viene](fecha)
+      - que cosas tengo [la semana que viene](fecha)
+      - hay algo para [hoy a la noche](fecha)
+      - que tengo [al mediodia](fecha)
+      - que tengo para [manana a la tardecita](fecha)
+      - hay algo importante [esta semana](fecha)
+      - que se me viene [el mes que viene](fecha)
+      - que tengo de [reuniones](tipo_evento) [esta semana](fecha)
+      - cuantos [parciales](tipo_evento) tengo
+      - hay algun [turno medico](tipo_evento) agendado
+      - que [entrenamientos](tipo_evento) tengo [esta semana](fecha)
+      - mostrame los [cumpleanos](tipo_evento) de [este mes](fecha)
+      - cuando son los [finales](tipo_evento) en [facultad](nombre_agenda)
+      - que [recordatorios](tipo_evento) tengo [hoy](fecha)
+      - buscame reuniones para [manana](fecha) en [trabajo](nombre_agenda)
+      - hay algo en [personal](nombre_agenda) para [el finde](fecha)
+      - que pasa [manana](fecha) en [facultad](nombre_agenda)
 
   - intent: consultar_tipos_evento
     examples: |
-      - que tipos de evento tengo?
-      - que tipos de eventos hay?
-      - cuales son los tipos de evento?
+      - que tipos de evento tengo
+      - que tipos de eventos hay
+      - cuales son los tipos de evento
       - mostrame los tipos de eventos
-      - que categorias de evento existen?
-      - cuales son los tipos disponibles?
-      - que tipos de evento puedo usar?
-      - hay que tipos de evento registrados?
+      - que categorias de evento existen
+      - cuales son los tipos disponibles
+      - que tipos de evento puedo usar
+      - hay que tipos de evento registrados
       - mostrame que tipos de eventos tenes cargados
-      - que tipos de eventos me ofreces?
+      - que tipos de eventos me ofreces
       - listame los tipos de eventos que hay
-      - que eventos puedo crear?
-      - cuales son las categorias disponibles?
-      - que tipos de cosas puedo agendar?
+      - que eventos puedo crear
+      - cuales son las categorias disponibles
+      - que tipos de cosas puedo agendar
       - mostrame todos los tipos de evento
-      - que opciones de tipo de evento hay?
-      - tenes tipos de eventos guardados?
+      - que opciones de tipo de evento hay
+      - tenes tipos de eventos guardados
       - quiero saber los tipos de evento
       - dame la lista de tipos de evento
-      - que tipos de evento estan disponibles?
+      - que tipos de evento estan disponibles
 
   - intent: chitchat
     examples: |
@@ -143,18 +230,45 @@ nlu:
       - estas ahi
       - holis
       - buenas buenas
-      - buen dia, como estas?
-      - que tal, todo ok?
+      - buen dia, como estas
+      - que tal, todo ok
       - hola! todo bien por aca
       - como va
       - buen dia! saludos
       - estoy aqui
-      - a donde puedo ir con vos?
-      - necesito ayuda
-      - hay alguien ahi?
-      - me podes ayudar?
-      - que haces?
+      - me podes ayudar
+      - que haces
       - parlame un poco
+      - sos inteligente
+      - que lindo que sos
+      - re copado el bot
+      - piola el asistente
+      - gracias
+      - muchas gracias
+      - te lo agradezco
+      - grax
+      - muy bueno
+      - barbaros
+      - muy bien hecho
+      - perfecto, gracias
+      - aguante el bot
+      - todo piola
+      - que bueno
+      - sos muy util
+      - me salvaste
+      - re util esto
+      - que mas podes hacer
+      - explicame que podes hacer
+      - como te llamas
+      - tenes nombre
+      - sos una persona o un bot
+      - me podrias ayudar con otra cosa
+      - que onda con vos
+      - ahi andamos
+      - todo tranquilo
+      - bien y vos
+      - mas o menos
+      - todo joya
 
   - intent: informar_agenda
     examples: |
@@ -171,6 +285,18 @@ nlu:
       - guarda en [proyectos](nombre_agenda)
       - en la agenda de [familia](nombre_agenda)
       - cargalo en [oficina](nombre_agenda)
+      - que vaya en [salud](nombre_agenda)
+      - ponelo en la de [universidad](nombre_agenda)
+      - en [personal](nombre_agenda) por favor
+      - anda en la agenda de [deportes](nombre_agenda)
+      - metelo en [trabajo](nombre_agenda)
+      - en la agenda [compartida](nombre_agenda)
+      - que quede en [proyectos personales](nombre_agenda)
+      - lo pongo en [familia](nombre_agenda)
+      - en la [secundaria](nombre_agenda)
+      - guardalo en la agenda de [amigos](nombre_agenda)
+      - en [salud mental](nombre_agenda)
+      - usa [personal](nombre_agenda)
 
   - intent: informar_detalle_evento
     examples: |
@@ -186,6 +312,42 @@ nlu:
       - un [final](tipo_evento) el [jueves](fecha)
       - [pasado mañana](fecha)
       - [pasado mañana a las 11](fecha)
+      - [manana a las 20hs](fecha)
+      - [el viernes a las 15hs](fecha)
+      - [entrenamiento](tipo_evento) el [sabado](fecha)
+      - [dentista](tipo_evento)
+      - [hoy a las 17hs](fecha)
+      - [el lunes a las 9:30hs](fecha)
+      - [este finde](fecha)
+      - [la semana que viene](fecha)
+      - [juntada](tipo_evento) el [domingo](fecha)
+      - [recordatorio](tipo_evento)
+      - [hoy al mediodia](fecha)
+      - [manana a la manana](fecha)
+      - [el proximo martes](fecha)
+      - [el sabado por la tarde](fecha)
+      - [esta tarde](fecha)
+      - [finales](tipo_evento) en [facultad](nombre_agenda)
+      - [clase](tipo_evento) [de yoga](nombre_evento)
+      - [parcial](tipo_evento) [de quimica](nombre_evento)
+      - [Reunion](tipo_evento). El nombre que quiero es [junta directiva](nombre_evento)
+      - una [reunion](tipo_evento) que se llama [junta directiva](nombre_evento)
+      - [parcial](tipo_evento), el nombre es [de algoritmos](nombre_evento)
+      - [turno medico](tipo_evento) con [el doctor Garcia](nombre_evento)
+      - es un [final](tipo_evento) [de fisica 2](nombre_evento)
+      - [reunion](tipo_evento), titulamela [estrategia Q2](nombre_evento)
+      - el tipo es [reunion](tipo_evento) y el nombre [con el proveedor](nombre_evento)
+      - [juntada](tipo_evento) [con los pibes del trabajo](nombre_evento) el [sabado](fecha)
+      - [entrenamiento](tipo_evento) [de natacion](nombre_evento) el [miercoles](fecha)
+      - [turno](tipo_evento) [con el psicologo](nombre_evento) para [el lunes](fecha)
+      - [cumpleanos](tipo_evento) [de mama](nombre_evento) el [proximo sabado](fecha)
+      - pone [reunion](tipo_evento) con nombre [equipo de diseno](nombre_evento)
+      - [reunion](tipo_evento) y titulala [con los de marketing](nombre_evento)
+      - que sea un [parcial](tipo_evento) y se llame [algebra lineal](nombre_evento)
+      - [recordatorio](tipo_evento) [pago de expensas](nombre_evento)
+      - una [clase](tipo_evento) que se llame [de programacion](nombre_evento) para [el lunes](fecha)
+      - [turno](tipo_evento), el nombre es [con el cardiologo](nombre_evento)
+      - [reunion](tipo_evento) [reunion de directorio](nombre_evento) para [el martes](fecha)
 
   - intent: informar_duracion
     examples: |
@@ -199,11 +361,24 @@ nlu:
       - es algo cortito, [15 minutos](duracion)
       - [todo el dia](duracion) aprox
       - [3 horas](duracion) maximo
-      - va a ser un [rato largo](duracion) digamos [2 horas](duracion)
       - [media hora](duracion) estaria bien
       - ponele que sea [90 minutos](duracion)
       - [mitad de hora](duracion)
       - alrededor de [1 hora](duracion)
+      - son [2 horas](duracion) mas o menos
+      - calculo que [45 minutos](duracion)
+      - no mas de [30 minutos](duracion)
+      - que sea de [1 hora](duracion) y media
+      - unas [2 horas](duracion) calculando bien
+      - ponele [20 minutos](duracion) nomas
+      - va a ser largo, como [4 horas](duracion)
+      - [un par de horas](duracion)
+      - [hora y media](duracion) aprox
+      - dejalo en [2hs](duracion)
+      - que dure [1hs](duracion)
+      - ponele [30min](duracion)
+      - son como [3hs](duracion)
+      - unos [45min](duracion)
 
   - intent: corregir_evento
     examples: |
@@ -227,7 +402,7 @@ nlu:
       - en vez de [30 minutos](duracion) que sea [1 hora](duracion)
       - no es un [parcial](tipo_evento), es un [final](tipo_evento)
       - mejor [2 horas](duracion), no [1 hora](duracion)
-      - la [fecha](fecha) no, [el sabado](fecha)
+      - la fecha no, [el sabado](fecha)
       - no, [personal](nombre_agenda) no [trabajo](nombre_agenda)
       - mejor a las [11](fecha)
       - mejor [mañana a las 11](fecha)
@@ -236,6 +411,44 @@ nlu:
       - dejalo en [facultad](nombre_agenda)
       - que sea por [45 minutos](duracion)
       - no, que dure [2 horas](duracion)
+      - en realidad es a las [20hs](fecha) no a las 18
+      - mejor a las [15hs](fecha)
+      - cambiale la hora, que sea a las [19hs](fecha)
+      - no fue a las [10hs](fecha), fue a las [11hs](fecha)
+      - mejor el [lunes](fecha) que el viernes
+      - no, [la semana que viene](fecha)
+      - cambiale el nombre, es [de fisica](nombre_evento)
+      - en realidad se llama [reunion de directorio](nombre_evento)
+      - no es con juan, es [con el equipo de marketing](nombre_evento)
+      - el nombre es [parcial de algebra lineal](nombre_evento)
+      - que sea un [turno](tipo_evento) y no una reunion
+      - mejor clasificalo como [juntada](tipo_evento)
+      - cambia el tipo a [entrenamiento](tipo_evento)
+      - que dure [3hs](duracion) no [2hs](duracion)
+      - ponele [1 hora y media](duracion)
+      - reducilo a [30 minutos](duracion)
+      - no, [el finde](fecha) no entre semana
+      - mejor para [esta tarde](fecha)
+      - cambialo para [el proximo jueves](fecha) a las [18hs](fecha)
+      - no, [el martes](fecha) a las [9hs](fecha) en [facultad](nombre_agenda)
+      - ponele de nombre [junta directiva](nombre_evento)
+      - el nombre es [junta directiva](nombre_evento)
+      - cambia el nombre a [reunion de directorio](nombre_evento)
+      - llamalo [parcial de algebra lineal](nombre_evento)
+      - el titulo que quiero es [meeting con clientes](nombre_evento)
+      - que se llame [cena de egresados](nombre_evento)
+      - el nombre correcto es [final de estadistica](nombre_evento)
+      - titulalo [revision del codigo](nombre_evento)
+      - ponele [turno con el cardiologo](nombre_evento)
+      - quiero que el nombre sea [clase de pilates](nombre_evento)
+      - el evento se llama [asamblea de socios](nombre_evento)
+      - no, el nombre es [juntada con los pibes](nombre_evento)
+      - mejor llamalo [reunion de equipo](nombre_evento)
+      - cambia el titulo a [practica de futbol](nombre_evento)
+      - el nombre que quiero es [examen final de redes](nombre_evento)
+      - dale el nombre [consulta con el nutricionista](nombre_evento)
+      - no, ponerle [parcial de base de datos](nombre_evento)
+      - renombralo a [almuerzo con el cliente](nombre_evento)
 
   - intent: affirm
     examples: |
@@ -248,7 +461,24 @@ nlu:
       - correcto
       - exacto
       - ok
-      - buenisimo
+      - si, esta bien
+      - copado
+      - va
+      - obvio
+      - claro que si
+      - si señor
+      - seguro
+      - adelante
+      - listo
+      - si, hacelo
+      - confirmo
+      - eso es
+      - tal cual
+      - exactamente
+      - correcto si
+      - asi es
+      - si porfavor
+      - si, confirmalo ya
 
   - intent: deny
     examples: |
@@ -258,6 +488,20 @@ nlu:
       - negativo
       - no lo hagas
       - no, cancelalo
+      - para
+      - ni
+      - para nada
+      - cero
+      - ni loco
+      - no gracias
+      - no quiero
+      - no me parece
+      - mejor cancela
+      - no dale
+      - no, no
+      - mejor no lo crees
+      - no, dejalo
+      - no es lo que queria
 
   - intent: cancelar
     examples: |
@@ -267,3 +511,16 @@ nlu:
       - dejalo ahi
       - aborta la carga
       - mejor salgo de esto
+      - cancela todo
+      - salir
+      - quiero salir
+      - paro todo
+      - dejame salir
+      - cancela la operacion
+      - no quiero seguir
+      - frena todo
+      - borra lo que venias haciendo
+
+  - regex: fecha
+    examples: |
+      - \d{1,2}[/-]\d{1,2}([/-]\d{2,4})?

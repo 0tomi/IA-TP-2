@@ -22,6 +22,103 @@ Este proyecto implementa un asistente conversacional que permite al usuario gest
 
 ---
 
+## Capacidades del bot
+
+### Crear un evento
+
+El bot guía al usuario paso a paso para registrar un evento. Los datos que puede capturar son:
+
+| Dato | Ejemplos |
+|------|---------|
+| Tipo de evento | parcial, reunión, turno médico, entrenamiento, cumpleaños… |
+| Nombre específico | "junta directiva", "parcial de algoritmos 2", "con el doctor García" |
+| Fecha y hora | mañana a las 18, el viernes a las 9hs, el 15/05, pasado mañana |
+| Agenda destino | trabajo, personal, facultad, salud… |
+| Duración | 30 minutos, 2 horas, 1h 30m |
+
+El bot muestra un **borrador de confirmación** antes de guardar. El usuario puede corregir cualquier dato respondiendo en lenguaje natural ("no, mejor el martes", "ponele de nombre junta directiva") y el bot rearmará el borrador.
+
+**Frases de ejemplo:**
+```
+Agendame un parcial para el jueves a las 10
+Me anotás una reunión mañana a las 9 en trabajo
+Guardame el turno del médico con el doctor García para el martes
+Crea una juntada con los pibes para el sábado a las 20
+```
+
+---
+
+### Consultar eventos
+
+El bot consulta la agenda y devuelve los eventos que coincidan con los filtros indicados.
+
+| Filtro | Ejemplos |
+|--------|---------|
+| Fecha | hoy, mañana, el viernes, el 15/05, esta semana |
+| Tipo de evento | reuniones, parciales, cumpleaños… |
+| Agenda | trabajo, personal, facultad… |
+| Combinaciones | reuniones del viernes en trabajo |
+
+**Frases de ejemplo:**
+```
+Qué tengo mañana
+Qué hay para el 15/05
+Tengo algo el viernes
+Qué reuniones tengo esta semana en trabajo
+Hay algún turno médico agendado
+```
+
+---
+
+### Consultar tipos de evento disponibles
+
+Lista todos los tipos de evento que existen en el sistema.
+
+```
+Qué tipos de evento tengo
+Cuáles son las categorías disponibles
+```
+
+---
+
+### Corregir un borrador
+
+Durante la confirmación de un evento, el usuario puede corregir cualquier campo respondiendo directamente:
+
+```
+No, mejor el martes a las 11
+Ponele de nombre junta directiva
+Cambialo a la agenda de trabajo
+Que dure 2 horas
+```
+
+---
+
+### Cancelar una operación
+
+En cualquier momento durante la carga de un evento:
+
+```
+Cancelar
+Dejalo, no importa
+Para todo
+```
+
+---
+
+### Fallback con LLM *(opcional)*
+
+Si se configura una API key de Gemini o Minimax en el `.env`, el bot activa capacidades adicionales:
+
+- **Parseo de fechas complejas** que dateparser no resuelve ("el primer martes del mes que viene")
+- **Clasificación de intenciones** cuando el NLU no llega al umbral de confianza
+- **Separación automática de tipo y nombre** cuando el usuario los da juntos ("una reunión llamada junta directiva")
+- **Correcciones implícitas** en el deny ("no, mejor el jueves a las 14 en trabajo")
+
+Sin LLM configurado, el bot opera con DIET + dateparser y cubre la mayoría de los casos del lenguaje cotidiano.
+
+---
+
 ## Stack tecnológico
 
 | Componente | Tecnología | Descripción |
