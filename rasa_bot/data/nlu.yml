@@ -48,6 +48,20 @@ nlu:
       - tengo un [chico](tipo_evento) [manana](fecha)
       - bloquear un [hueco](tipo_evento) para [el viernes](fecha)
       - programame un [consultorio](tipo_evento) [manana](fecha)
+      - agendame para el [10/5 a las 10](fecha) [gimnasio](tipo_evento)
+      - agendame [gimnasio](tipo_evento) para el [10/5 a las 10](fecha)
+      - quiero anotar [bloque de foco](tipo_evento) [mañana a la mañana](fecha)
+      - programame un [bloque de foco](tipo_evento) para [mañana a las 9](fecha)
+      - anotame una [reunión con producto](tipo_evento) para [el viernes a la tarde](fecha)
+      - guardame [dentista](tipo_evento) para [el 12/5 a las 16](fecha)
+      - agendame [gimnasio](tipo_evento) [mañana a la tarde](fecha)
+      - poneme [parcial de álgebra](tipo_evento) para [el lunes a las 8](fecha)
+      - organizame un [bloque de estudio](tipo_evento) para [hoy a la noche](fecha)
+      - crea [reunión de seguimiento](tipo_evento) para [pasado mañana a las 11](fecha)
+      - meteme [psicólogo](tipo_evento) para [el martes a la mañana](fecha)
+      - reservame [almuerzo con juan](tipo_evento) para [el sábado al mediodía](fecha)
+      - agendame [gimnasio](tipo_evento) en [personal](nombre_agenda) para [mañana a las 10](fecha)
+      - quiero guardar [reunión con clientes](tipo_evento) en [trabajo](nombre_agenda) para [10/5 a las 10](fecha)
   - intent: consultar_evento
     examples: |
       - que tengo el [lunes](fecha)
@@ -87,6 +101,21 @@ nlu:
       - revisame los [cumples](tipo_evento) en [familia](nombre_agenda)
       - tengo algo para [la tarde](fecha)?
       - decime que hay el [viernes](fecha) a la [noche](fecha)
+      - qué tengo [mañana](fecha)
+      - qué tengo [mañana a la tarde](fecha)
+      - qué tengo [esta semana](fecha)
+      - qué tengo [la semana que viene](fecha)
+      - qué tengo [este mes](fecha)
+      - qué tengo [el mes que viene](fecha)
+      - qué [reuniones](tipo_evento) tengo [mañana](fecha)
+      - qué [parciales](tipo_evento) tengo [esta semana](fecha)
+      - mostrame mis eventos de [10/5](fecha)
+      - fijate si tengo [gimnasio](tipo_evento) [mañana](fecha)
+      - buscame [dentista](tipo_evento) para [el martes](fecha)
+      - qué tengo en [trabajo](nombre_agenda) [mañana](fecha)
+      - qué tengo en [personal](nombre_agenda) [esta semana](fecha)
+      - a qué hora tengo [reunión](tipo_evento) [mañana](fecha)
+      - hay algo agendado para [hoy a la noche](fecha)
 
   - intent: chitchat
     examples: |
@@ -155,6 +184,12 @@ nlu:
       - un [final](tipo_evento) el [jueves](fecha)
       - [pasado mañana](fecha)
       - [pasado mañana a las 11](fecha)
+      - [10/5 a las 10](fecha)
+      - [mañana a la tarde](fecha)
+      - [el viernes a la noche](fecha)
+      - [bloque de foco](tipo_evento)
+      - [gimnasio](tipo_evento)
+      - [parcial de álgebra](tipo_evento)
 
   - intent: informar_duracion
     examples: |
@@ -198,6 +233,10 @@ nlu:
       - mejor [2 horas](duracion), no [1 hora](duracion)
       - la [fecha](fecha) no, [el sabado](fecha)
       - no, [personal](nombre_agenda) no [trabajo](nombre_agenda)
+      - mejor [10/5 a las 10](fecha)
+      - no, mejor [mañana a la tarde](fecha)
+      - cambialo a [gimnasio](tipo_evento)
+      - mejor que sea [bloque de foco](tipo_evento)
 
   - intent: affirm
     examples: |

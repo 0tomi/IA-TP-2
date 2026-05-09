@@ -14,26 +14,16 @@ rules:
   - rule: Activar formulario de creación de evento
     steps:
       - intent: crear_evento
-      - action: evento_form
-      - active_loop: evento_form
+      - action: action_validar_y_crear_evento
 
-  - rule: Submit exitoso del formulario de evento
-    condition:
-      - active_loop: evento_form
+  - rule: Completar o corregir borrador de evento
     steps:
-      - action: evento_form
-      - active_loop: null
-      - slot_was_set:
-          - requested_slot: null
-      - action: action_preparar_confirmacion
-
-  - rule: Recalcular borrador cuando corrigen datos en form
-    condition:
-      - active_loop: evento_form
-    steps:
-      - intent: corregir_evento
-      - action: evento_form
-      - active_loop: evento_form
+      - or:
+          - intent: informar_agenda
+          - intent: informar_detalle_evento
+          - intent: informar_duracion
+          - intent: corregir_evento
+      - action: action_validar_y_crear_evento
 
   - rule: Confirmar creacion de evento
     steps:

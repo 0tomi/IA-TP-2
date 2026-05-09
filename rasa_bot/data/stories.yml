@@ -1,51 +1,35 @@
 version: "3.1"
 
 stories:
-  - story: crear evento interactivo y confirmar
+  - story: crear evento y confirmar
     steps:
       - intent: crear_evento
-      - action: evento_form
-      - active_loop: evento_form
-      - active_loop: null
-      - slot_was_set:
-          - requested_slot: null
-      - action: action_preparar_confirmacion
+      - action: action_validar_y_crear_evento
       - intent: affirm
       - action: action_confirmar_creacion_evento
 
-  - story: crear evento, elegir agenda o duracion y confirmar
+  - story: completar agenda faltante y confirmar
     steps:
       - intent: crear_evento
-      - action: evento_form
-      - active_loop: evento_form
+      - action: action_validar_y_crear_evento
       - intent: informar_agenda
-      - action: evento_form
-      - active_loop: null
-      - slot_was_set:
-          - requested_slot: null
-      - action: action_preparar_confirmacion
+      - action: action_validar_y_crear_evento
       - intent: affirm
       - action: action_confirmar_creacion_evento
 
-  - story: crear evento con correccion antes de confirmar
+  - story: corregir fecha y confirmar
     steps:
       - intent: crear_evento
-      - action: evento_form
-      - active_loop: evento_form
+      - action: action_validar_y_crear_evento
       - intent: corregir_evento
-      - action: evento_form
-      - active_loop: null
-      - slot_was_set:
-          - requested_slot: null
-      - action: action_preparar_confirmacion
+      - action: action_validar_y_crear_evento
       - intent: affirm
       - action: action_confirmar_creacion_evento
 
   - story: crear evento y cancelar
     steps:
       - intent: crear_evento
-      - action: evento_form
-      - active_loop: evento_form
+      - action: action_validar_y_crear_evento
       - intent: deny
       - action: action_cancelar_operacion
 

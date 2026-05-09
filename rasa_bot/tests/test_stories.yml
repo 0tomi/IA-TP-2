@@ -4,10 +4,10 @@ version: "3.1"
 #### If you want to learn more, please see the docs: https://rasa.com/docs/rasa/testing-your-assistant
 
 stories:
-  - story: crear evento y confirmar
+  - story: crear evento completo y confirmar
     steps:
       - user: |
-          anotame un parcial para manana
+          anotame un parcial para mañana a las 9
         intent: crear_evento
       - action: action_validar_y_crear_evento
       - user: |
@@ -15,16 +15,20 @@ stories:
         intent: affirm
       - action: action_confirmar_creacion_evento
 
-  - story: crear evento y corregir agenda
+  - story: crear evento con agenda faltante y confirmar
     steps:
       - user: |
-          agendame una reunion para manana a las 10
+          agendame una reunión para mañana a las 10
         intent: crear_evento
       - action: action_validar_y_crear_evento
       - user: |
           en trabajo
         intent: informar_agenda
       - action: action_validar_y_crear_evento
+      - user: |
+          si
+        intent: affirm
+      - action: action_confirmar_creacion_evento
 
   - story: cancelar borrador
     steps:
@@ -37,10 +41,17 @@ stories:
         intent: deny
       - action: action_cancelar_operacion
 
-  - story: consultar por filtros
+  - story: consultar por filtros basicos
     steps:
       - user: |
-          que reuniones tengo manana en trabajo
+          qué reuniones tengo mañana en trabajo
+        intent: consultar_evento
+      - action: action_consultar_evento
+
+  - story: consultar esta semana
+    steps:
+      - user: |
+          qué tengo esta semana
         intent: consultar_evento
       - action: action_consultar_evento
 
